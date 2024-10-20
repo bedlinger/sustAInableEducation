@@ -1,0 +1,6 @@
+@sustAInableEducation_backend_HostAddress = http://localhost:5128
+
+GET {{sustAInableEducation_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
