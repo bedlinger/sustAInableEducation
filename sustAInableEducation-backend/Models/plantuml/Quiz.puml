@@ -1,0 +1,9 @@
+@startuml
+class Quiz {
+    + Title : string <<get>> <<set>>
+}
+class "ICollection`1"<T> {
+}
+Quiz --> "Id" Guid
+Quiz --> "Questions<QuizQuestion>" "ICollection`1"
+@enduml

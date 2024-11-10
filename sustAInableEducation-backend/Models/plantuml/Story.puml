@@ -1,0 +1,13 @@
+@startuml
+class Story {
+    + Title : string <<get>> <<set>>
+    + Prompt : string <<get>> <<set>>
+    + Length : int <<get>> <<set>>
+    + Creativity : int <<get>> <<set>>
+}
+class "ICollection`1"<T> {
+}
+Story --> "Id" Guid
+Story --> "Preset" StoryPreset
+Story --> "Parts<StoryPart>" "ICollection`1"
+@enduml

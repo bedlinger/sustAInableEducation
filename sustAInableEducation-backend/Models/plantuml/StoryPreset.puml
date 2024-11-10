@@ -1,0 +1,8 @@
+@startuml
+class StoryPreset {
+    + Title : string <<get>> <<set>>
+}
+StoryPreset --> "Id" Guid
+StoryPreset --> "InitialPartId" Guid
+StoryPreset --> "InitialPart" StoryPresetPart
+@enduml

@@ -1,6 +1,7 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using sustAInableEducation_backend.Models;
 using sustAInableEducation_backend.Repository;
+using sustAInableEducation_backend.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 

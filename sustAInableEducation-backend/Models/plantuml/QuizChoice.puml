@@ -1,0 +1,8 @@
+@startuml
+class QuizChoice {
+    + Number : int <<get>> <<set>>
+    + Text : string <<get>> <<set>>
+    + IsCorrect : bool <<get>> <<set>>
+}
+QuizChoice --> "QuizQuestionId" Guid
+@enduml
