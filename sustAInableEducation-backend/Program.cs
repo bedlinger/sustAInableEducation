@@ -17,6 +17,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -30,6 +32,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapIdentityApi<ApplicationUser>();
+app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
 
 app.Run();

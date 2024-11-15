@@ -6,7 +6,7 @@ namespace sustAInableEducation_backend.Models
     {
         public Guid StoryPartId { get; set; }
         public int Number { get; set; }
-        [MaxLength(2048)]
+        [MaxLength(1024)]
         public string Text { get; set; }
         public bool IsTaken { get; set; }
     }

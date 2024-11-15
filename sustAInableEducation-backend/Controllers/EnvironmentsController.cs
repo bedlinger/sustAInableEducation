@@ -14,16 +14,20 @@ using Environment = sustAInableEducation_backend.Models.Environment;
 
 namespace sustAInableEducation_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class EnvironmentsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private string userId { get; set; }
+        private ApplicationUser user { get; set; }
 
-        public EnvironmentsController(ApplicationDbContext context)
+        public EnvironmentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            user = _context.Users.Find(userId)!;
         }
 
         // GET: api/Environments
@@ -87,8 +91,10 @@ namespace sustAInableEducation_backend.Controllers
             {
                 new EnvironmentParticipant()
                 {
-                    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
-                    EnvironmentId = environment.Id
+                    UserId = userId,
+                    User = user,
+                    EnvironmentId = environment.Id,
+                    IsHost = true
                 }
             };
             _context.Environment.Add(environment);

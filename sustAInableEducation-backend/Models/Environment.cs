@@ -1,8 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.OpenApi;
-using Microsoft.EntityFrameworkCore;
-using sustAInableEducation_backend.Repository;
 
 namespace sustAInableEducation_backend.Models
 {
@@ -15,6 +11,6 @@ namespace sustAInableEducation_backend.Models
 
         [MaxLength(256)]
         public string Title { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }
