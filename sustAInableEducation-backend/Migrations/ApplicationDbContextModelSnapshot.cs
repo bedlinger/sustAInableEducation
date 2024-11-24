@@ -241,7 +241,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasIndex("StoryId");
 
-                    b.ToTable("Environment");
+                    b.ToTable("Environment", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentParticipant", b =>
@@ -259,7 +259,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("EnvironmentParticipant");
+                    b.ToTable("EnvironmentParticipant", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.Quiz", b =>
@@ -283,7 +283,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasIndex("EnvironmentParticipantEnvironmentId", "EnvironmentParticipantUserId");
 
-                    b.ToTable("Quiz");
+                    b.ToTable("Quiz", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.QuizChoice", b =>
@@ -304,7 +304,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasKey("QuizQuestionId", "Number");
 
-                    b.ToTable("QuizChoice");
+                    b.ToTable("QuizChoice", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.QuizQuestion", b =>
@@ -330,7 +330,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("QuizQuestion");
+                    b.ToTable("QuizQuestion", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.QuizResult", b =>
@@ -346,7 +346,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasKey("QuizQuestionId", "TryNumber");
 
-                    b.ToTable("QuizResult");
+                    b.ToTable("QuizResult", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.Story", b =>
@@ -376,7 +376,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasIndex("PresetId");
 
-                    b.ToTable("Story");
+                    b.ToTable("Story", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.StoryChoice", b =>
@@ -397,7 +397,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasKey("StoryPartId", "Number");
 
-                    b.ToTable("StoryChoice");
+                    b.ToTable("StoryChoice", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPart", b =>
@@ -420,7 +420,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasIndex("StoryId");
 
-                    b.ToTable("StoryPart");
+                    b.ToTable("StoryPart", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPreset", b =>
@@ -447,7 +447,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasIndex("InitialPartId");
 
-                    b.ToTable("StoryPreset");
+                    b.ToTable("StoryPreset", (string)null);
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPresetPart", b =>
@@ -478,7 +478,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.HasIndex("StoryPresetPartId");
 
-                    b.ToTable("StoryPresetPart");
+                    b.ToTable("StoryPresetPart", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

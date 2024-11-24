@@ -12,7 +12,10 @@ namespace sustAInableEducation_backend.Models
         public ApplicationUser User { get; set; }
         [JsonIgnore]
         public Environment Environment { get; set; }
+        [JsonIgnore]
         public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
+
+        public string UserName { get => User.UserName; }
         public bool IsHost { get; set; }
     }
 }

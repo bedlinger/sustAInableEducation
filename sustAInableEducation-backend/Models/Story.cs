@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace sustAInableEducation_backend.Models
 {
@@ -7,7 +8,9 @@ namespace sustAInableEducation_backend.Models
         public Guid Id { get; set; }
         public Guid? PresetId { get; set; }
 
+        [JsonIgnore]
         public StoryPreset? Preset { get; set; }
+        [JsonIgnore]
         public ICollection<StoryPart> Parts { get; set; } = new List<StoryPart>();
 
         [MaxLength(256)]

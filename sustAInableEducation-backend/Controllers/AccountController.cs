@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using sustAInableEducation_backend.Models;
 using sustAInableEducation_backend.Repository;
@@ -13,21 +16,27 @@ namespace sustAInableEducation_backend.Controllers
     public class AccountController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private string userId { get; set; }
-        private ApplicationUser user { get; set; }
+        private readonly string _userId;
+        private readonly ApplicationUser _user;
 
         public AccountController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
-            userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            user = _context.Users.Find(userId)!;
+            _userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            _user = _context.Users.Find(_userId)!;
         }
 
         // GET: api/account
         [HttpGet]
         public ActionResult<ApplicationUser> GetAccount()
         {
-            return user;
+            return _user;
+        }
+
+        [HttpPost("logout")]
+        public async Task Logout(SignInManager<ApplicationUser> signInManager)
+        {
+            await signInManager.SignOutAsync().ConfigureAwait(false);
         }
     }
 }

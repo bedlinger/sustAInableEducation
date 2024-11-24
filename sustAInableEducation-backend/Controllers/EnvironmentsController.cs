@@ -20,21 +20,25 @@ namespace sustAInableEducation_backend.Controllers
     public class EnvironmentsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private string userId { get; set; }
-        private ApplicationUser user { get; set; }
+        private readonly string _userId;
+        private readonly ApplicationUser _user;
 
         public EnvironmentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
-            userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            user = _context.Users.Find(userId)!;
+            _userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            _user = _context.Users.Find(_userId)!;
         }
 
         // GET: api/Environments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Environment>>> GetEnvironment()
         {
-            return await _context.Environment.ToListAsync();
+            return await _context.EnvironmentParticipant
+                .Where(p => p.UserId == _userId)
+                .Include(p => p.Environment.Participants)
+                .Select(p => p.Environment)
+                .ToListAsync();
         }
 
         // GET: api/Environments/5
@@ -46,6 +50,10 @@ namespace sustAInableEducation_backend.Controllers
             if (environment == null)
             {
                 return NotFound();
+            }
+            if (!await _context.IsParticipant(_userId, id))
+            {
+                return Unauthorized();
             }
 
             return environment;
@@ -87,12 +95,17 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Environment>> PostEnvironment(Environment environment)
         {
+            if ((environment.Story.PresetId == null || !await _context.StoryPreset.AnyAsync(p => p.Id == environment.Story.PresetId)) && 
+                (environment.Story.Prompt == null || environment.Story.Length == null || environment.Story.Creativity == null))
+            {
+                return BadRequest();
+            }
             environment.Participants = new List<EnvironmentParticipant>()
             {
                 new EnvironmentParticipant()
                 {
-                    UserId = userId,
-                    User = user,
+                    UserId = _userId,
+                    User = _user,
                     EnvironmentId = environment.Id,
                     IsHost = true
                 }
@@ -111,6 +124,10 @@ namespace sustAInableEducation_backend.Controllers
             if (environment == null)
             {
                 return NotFound();
+            }
+            if (!await _context.IsHost(_userId, id))
+            {
+                return Unauthorized();
             }
 
             _context.Environment.Remove(environment);
