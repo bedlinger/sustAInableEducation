@@ -15,7 +15,7 @@ namespace sustAInableEducation_backend.Models
         [JsonIgnore]
         public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
 
-        public string UserName { get => User.AnonUserName; }
+        public string UserName { get => User?.AnonUserName ?? ""; }
         public bool IsHost { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace sustAInableEducation_backend.Models
 {
@@ -8,6 +9,8 @@ namespace sustAInableEducation_backend.Models
 
         public ICollection<EnvironmentParticipant> Participants { get; set; } = new List<EnvironmentParticipant>();
         public Story Story { get; set; }
+        [JsonIgnore]
+        public EnvironmentPIN? PIN { get; set; }
 
         [MaxLength(256)]
         public string Title { get; set; }

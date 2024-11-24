@@ -34,9 +34,10 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task Logout(SignInManager<ApplicationUser> signInManager)
+        public async Task<IActionResult> Logout(SignInManager<ApplicationUser> signInManager)
         {
             await signInManager.SignOutAsync().ConfigureAwait(false);
+            return NoContent();
         }
     }
 }

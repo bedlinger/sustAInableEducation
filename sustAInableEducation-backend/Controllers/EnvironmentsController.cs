@@ -37,6 +37,8 @@ namespace sustAInableEducation_backend.Controllers
             return await _context.EnvironmentParticipant
                 .Where(p => p.UserId == _userId)
                 .Include(p => p.Environment.Participants)
+                .ThenInclude(p => p.User)
+                .Include(p => p.Environment.Story)
                 .Select(p => p.Environment)
                 .ToListAsync();
         }
@@ -45,7 +47,7 @@ namespace sustAInableEducation_backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Environment>> GetEnvironment(Guid id)
         {
-            var environment = await _context.Environment.FindAsync(id);
+            var environment = await _context.EnvironmentHydrated.FirstOrDefaultAsync(e => e.Id == id);
 
             if (environment == null)
             {
@@ -59,43 +61,12 @@ namespace sustAInableEducation_backend.Controllers
             return environment;
         }
 
-        // PUT: api/Environments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEnvironment(Guid id, Environment environment)
-        {
-            if (id != environment.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(environment).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EnvironmentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // POST: api/Environments
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Environment>> PostEnvironment(Environment environment)
         {
-            if ((environment.Story.PresetId == null || !await _context.StoryPreset.AnyAsync(p => p.Id == environment.Story.PresetId)) && 
+            if ((environment.Story.PresetId == null || !await _context.StoryPreset.AnyAsync(p => p.Id == environment.Story.PresetId)) &&
                 (environment.Story.Prompt == null || environment.Story.Length == null || environment.Story.Creativity == null))
             {
                 return BadRequest();
@@ -136,9 +107,79 @@ namespace sustAInableEducation_backend.Controllers
             return NoContent();
         }
 
-        private bool EnvironmentExists(Guid id)
+        [HttpPost("{id}/open")]
+        public async Task<ActionResult<EnvironmentPIN>> OpenEnvironment(Guid id)
         {
-            return _context.Environment.Any(e => e.Id == id);
+            var environment = await _context.Environment.Include(e => e.PIN).FirstOrDefaultAsync(e => e.Id == id);
+            if (environment == null)
+            {
+                return NotFound();
+            }
+            if (!await _context.IsHost(_userId, id))
+            {
+                return Unauthorized();
+            }
+            if (environment.PIN != null)
+            {
+                _context.EnvironmentPIN.Remove(environment.PIN);
+            }
+            string uniquePIN = new Random().Next(0, 1000000).ToString("D6");
+            while (await _context.EnvironmentPIN.AnyAsync(p => p.PIN == uniquePIN))
+            {
+                uniquePIN = new Random().Next(0, 1000000).ToString("D6");
+            }
+            var pin = new EnvironmentPIN()
+            {
+                EnvironmentId = id,
+                PIN = uniquePIN
+            };
+            _context.EnvironmentPIN.Add(pin);
+            await _context.SaveChangesAsync();
+            return pin;
+        }
+
+        [HttpPost("join")]
+        public async Task<ActionResult<Environment>> JoinEnvironment(EnvironmentPINRequest pin)
+        {
+            var environment = await _context.EnvironmentHydrated.Include(e => e.PIN).FirstOrDefaultAsync(e => e.PIN != null && e.PIN.PIN == pin.PIN);
+            if (environment == null || environment.PIN!.ExpiresAt < DateTime.Now)
+            {
+                return NotFound();
+            }
+            if (await _context.IsParticipant(_userId, environment.Id))
+            {
+                return BadRequest();
+            }
+            environment.Participants.Add(new EnvironmentParticipant()
+            {
+                UserId = _userId,
+                User = _user,
+                EnvironmentId = environment.Id
+            });
+            await _context.SaveChangesAsync();
+            return environment;
+        }
+
+        [HttpPost("{id}/leave")]
+        public async Task<IActionResult> LeaveEnvironment(Guid id)
+        {
+            var environment = await _context.Environment.Include(e => e.Participants).FirstOrDefaultAsync(e => e.Id == id);
+            if (environment == null)
+            {
+                return NotFound();
+            }
+            if (!await _context.IsParticipant(_userId, id))
+            {
+                return Unauthorized();
+            }
+            var participant = environment.Participants.FirstOrDefault(p => p.UserId == _userId);
+            if (participant == null)
+            {
+                return NotFound();
+            }
+            environment.Participants.Remove(participant);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

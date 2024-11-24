@@ -17,6 +17,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddTransient<UserNameGenService>();
+
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 var app = builder.Build();

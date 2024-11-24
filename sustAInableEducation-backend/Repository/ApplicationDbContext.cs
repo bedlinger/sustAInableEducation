@@ -16,6 +16,8 @@ namespace sustAInableEducation_backend.Repository
 
             builder.Entity<EnvironmentParticipant>()
                 .HasKey(e => new { e.EnvironmentId, e.UserId });
+            builder.Entity<EnvironmentPIN>()
+                .HasKey(e => e.PIN);
             builder.Entity<StoryChoice>()
                 .HasKey(e => new { e.StoryPartId, e.Number });
             builder.Entity<QuizChoice>()
@@ -26,6 +28,7 @@ namespace sustAInableEducation_backend.Repository
 
         public DbSet<sustAInableEducation_backend.Models.Environment> Environment { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.EnvironmentParticipant> EnvironmentParticipant { get; set; } = default!;
+        public DbSet<sustAInableEducation_backend.Models.EnvironmentPIN> EnvironmentPIN { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.Quiz> Quiz { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.QuizChoice> QuizChoice { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.QuizQuestion> QuizQuestion { get; set; } = default!;
@@ -35,6 +38,11 @@ namespace sustAInableEducation_backend.Repository
         public DbSet<sustAInableEducation_backend.Models.StoryPart> StoryPart { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.StoryPreset> StoryPreset { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.StoryPresetPart> StoryPresetPart { get; set; } = default!;
+
+        public IQueryable<Environment> EnvironmentHydrated => Environment
+                .Include(e => e.Participants)
+                .ThenInclude(e => e.User)
+                .Include(e => e.Story);
 
         public async Task<bool> IsParticipant(string userId, Guid environmentId)
         {
