@@ -26,7 +26,6 @@ namespace sustAInableEducation_backend.Controllers
             _user = _context.Users.Find(_userId)!;
         }
 
-        // GET: api/account
         [HttpGet]
         public ActionResult<ApplicationUser> GetAccount()
         {

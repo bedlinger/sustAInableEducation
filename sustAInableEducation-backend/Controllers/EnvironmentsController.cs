@@ -30,7 +30,6 @@ namespace sustAInableEducation_backend.Controllers
             _user = _context.Users.Find(_userId)!;
         }
 
-        // GET: api/Environments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Environment>>> GetEnvironment()
         {
@@ -43,7 +42,6 @@ namespace sustAInableEducation_backend.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Environments/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Environment>> GetEnvironment(Guid id)
         {
@@ -61,8 +59,6 @@ namespace sustAInableEducation_backend.Controllers
             return environment;
         }
 
-        // POST: api/Environments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Environment>> PostEnvironment(Environment environment)
         {
@@ -87,7 +83,6 @@ namespace sustAInableEducation_backend.Controllers
             return CreatedAtAction("GetEnvironment", new { id = environment.Id }, environment);
         }
 
-        // DELETE: api/Environments/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEnvironment(Guid id)
         {
