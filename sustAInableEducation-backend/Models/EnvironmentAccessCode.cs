@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace sustAInableEducation_backend.Models
 {
-    public class EnvironmentPIN
+    public class EnvironmentAccessCode
     {
         [JsonIgnore]
         public Guid EnvironmentId { get; set; }
@@ -12,12 +12,12 @@ namespace sustAInableEducation_backend.Models
         public Environment Environment { get; set; }
 
         [MaxLength(8)]
-        public string PIN { get; set; }
+        public string Code { get; set; }
         public DateTime ExpiresAt { get; set; } = DateTime.Now.AddMinutes(1);
     }
 
-    public class EnvironmentPINRequest
+    public class EnvironmentAccessCodeRequest
     {
-        public string PIN { get; set; }
+        public string Code { get; set; }
     }
 }

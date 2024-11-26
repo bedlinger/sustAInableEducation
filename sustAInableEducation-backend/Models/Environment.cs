@@ -10,7 +10,7 @@ namespace sustAInableEducation_backend.Models
         public ICollection<EnvironmentParticipant> Participants { get; set; } = new List<EnvironmentParticipant>();
         public Story Story { get; set; }
         [JsonIgnore]
-        public EnvironmentPIN? PIN { get; set; }
+        public EnvironmentAccessCode? AccessCode { get; set; }
 
         [MaxLength(256)]
         public string Title { get; set; }

@@ -6,24 +6,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace sustAInableEducation_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddEnvironmentPIN : Migration
+    public partial class AddEnvironmentAccessCode : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "EnvironmentPIN",
+                name: "EnvironmentAccessCode",
                 columns: table => new
                 {
-                    PIN = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
                     EnvironmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EnvironmentPIN", x => x.PIN);
+                    table.PrimaryKey("PK_EnvironmentAccessCode", x => x.Code);
                     table.ForeignKey(
-                        name: "FK_EnvironmentPIN_Environment_EnvironmentId",
+                        name: "FK_EnvironmentAccessCode_Environment_EnvironmentId",
                         column: x => x.EnvironmentId,
                         principalTable: "Environment",
                         principalColumn: "Id",
@@ -31,8 +31,8 @@ namespace sustAInableEducation_backend.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_EnvironmentPIN_EnvironmentId",
-                table: "EnvironmentPIN",
+                name: "IX_EnvironmentAccessCode_EnvironmentId",
+                table: "EnvironmentAccessCode",
                 column: "EnvironmentId",
                 unique: true);
         }
@@ -41,7 +41,7 @@ namespace sustAInableEducation_backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "EnvironmentPIN");
+                name: "EnvironmentAccessCode");
         }
     }
 }

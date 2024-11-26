@@ -108,9 +108,9 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpPost("{id}/open")]
-        public async Task<ActionResult<EnvironmentPIN>> OpenEnvironment(Guid id)
+        public async Task<ActionResult<EnvironmentAccessCode>> OpenEnvironment(Guid id)
         {
-            var environment = await _context.Environment.Include(e => e.PIN).FirstOrDefaultAsync(e => e.Id == id);
+            var environment = await _context.Environment.Include(e => e.AccessCode).FirstOrDefaultAsync(e => e.Id == id);
             if (environment == null)
             {
                 return NotFound();
@@ -119,36 +119,38 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return Unauthorized();
             }
-            if (environment.PIN != null)
+            if (environment.AccessCode != null)
             {
-                _context.EnvironmentPIN.Remove(environment.PIN);
+                _context.EnvironmentAccessCode.Remove(environment.AccessCode);
             }
-            string uniquePIN = new Random().Next(0, 1000000).ToString("D6");
-            while (await _context.EnvironmentPIN.AnyAsync(p => p.PIN == uniquePIN))
+            string uniqueCode = new Random().Next(0, 1000000).ToString("D6");
+            while (await _context.EnvironmentAccessCode.AnyAsync(p => p.Code == uniqueCode))
             {
-                uniquePIN = new Random().Next(0, 1000000).ToString("D6");
+                uniqueCode = new Random().Next(0, 1000000).ToString("D6");
             }
-            var pin = new EnvironmentPIN()
+            var code = new EnvironmentAccessCode()
             {
                 EnvironmentId = id,
-                PIN = uniquePIN
+                Code = uniqueCode
             };
-            _context.EnvironmentPIN.Add(pin);
+            _context.EnvironmentAccessCode.Add(code);
             await _context.SaveChangesAsync();
-            return pin;
+            return code;
         }
 
         [HttpPost("join")]
-        public async Task<ActionResult<Environment>> JoinEnvironment(EnvironmentPINRequest pin)
+        public async Task<ActionResult<Environment>> JoinEnvironment(EnvironmentAccessCodeRequest accessCode)
         {
-            var environment = await _context.EnvironmentHydrated.Include(e => e.PIN).FirstOrDefaultAsync(e => e.PIN != null && e.PIN.PIN == pin.PIN);
-            if (environment == null || environment.PIN!.ExpiresAt < DateTime.Now)
+            var environment = await _context.EnvironmentHydrated
+                .Include(e => e.AccessCode)
+                .FirstOrDefaultAsync(e => e.AccessCode != null && e.AccessCode.Code == accessCode.Code);
+            if (environment == null || environment.AccessCode!.ExpiresAt < DateTime.Now)
             {
                 return NotFound();
             }
             if (await _context.IsParticipant(_userId, environment.Id))
             {
-                return BadRequest();
+                return Conflict();
             }
             environment.Participants.Add(new EnvironmentParticipant()
             {

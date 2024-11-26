@@ -12,8 +12,8 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241124145107_AddEnvironmentPIN")]
-    partial class AddEnvironmentPIN
+    [Migration("20241126160703_AddEnvironmentAccessCode")]
+    partial class AddEnvironmentAccessCode
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -251,9 +251,9 @@ namespace sustAInableEducation_backend.Migrations
                     b.ToTable("Environment");
                 });
 
-            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentPIN", b =>
+            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentAccessCode", b =>
                 {
-                    b.Property<string>("PIN")
+                    b.Property<string>("Code")
                         .HasMaxLength(8)
                         .HasColumnType("nvarchar(8)");
 
@@ -263,12 +263,12 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("PIN");
+                    b.HasKey("Code");
 
                     b.HasIndex("EnvironmentId")
                         .IsUnique();
 
-                    b.ToTable("EnvironmentPIN");
+                    b.ToTable("EnvironmentAccessCode");
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentParticipant", b =>
@@ -570,11 +570,11 @@ namespace sustAInableEducation_backend.Migrations
                     b.Navigation("Story");
                 });
 
-            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentPIN", b =>
+            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentAccessCode", b =>
                 {
                     b.HasOne("sustAInableEducation_backend.Models.Environment", "Environment")
-                        .WithOne("PIN")
-                        .HasForeignKey("sustAInableEducation_backend.Models.EnvironmentPIN", "EnvironmentId")
+                        .WithOne("AccessCode")
+                        .HasForeignKey("sustAInableEducation_backend.Models.EnvironmentAccessCode", "EnvironmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -684,7 +684,7 @@ namespace sustAInableEducation_backend.Migrations
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.Environment", b =>
                 {
-                    b.Navigation("PIN");
+                    b.Navigation("AccessCode");
 
                     b.Navigation("Participants");
                 });
