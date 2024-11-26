@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using sustAInableEducation_backend.Repository;
 
@@ -11,9 +12,11 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241110181432_ImproveStructure")]
+    partial class ImproveStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,10 +166,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("AnonUserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -233,7 +232,7 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("StoryId")
+                    b.Property<Guid?>("StoryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
@@ -246,26 +245,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.HasIndex("StoryId");
 
                     b.ToTable("Environment");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentAccessCode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
-
-                    b.Property<Guid>("EnvironmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Code");
-
-                    b.HasIndex("EnvironmentId")
-                        .IsUnique();
-
-                    b.ToTable("EnvironmentAccessCode");
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentParticipant", b =>
@@ -560,22 +539,9 @@ namespace sustAInableEducation_backend.Migrations
                 {
                     b.HasOne("sustAInableEducation_backend.Models.Story", "Story")
                         .WithMany()
-                        .HasForeignKey("StoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("StoryId");
 
                     b.Navigation("Story");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentAccessCode", b =>
-                {
-                    b.HasOne("sustAInableEducation_backend.Models.Environment", "Environment")
-                        .WithOne("AccessCode")
-                        .HasForeignKey("sustAInableEducation_backend.Models.EnvironmentAccessCode", "EnvironmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Environment");
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentParticipant", b =>
@@ -681,8 +647,6 @@ namespace sustAInableEducation_backend.Migrations
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.Environment", b =>
                 {
-                    b.Navigation("AccessCode");
-
                     b.Navigation("Participants");
                 });
 

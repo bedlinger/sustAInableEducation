@@ -1,6 +1,7 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using sustAInableEducation_backend.Models;
 using sustAInableEducation_backend.Repository;
+using sustAInableEducation_backend.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddTransient<UserNameGenService>();
+
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,6 +34,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapIdentityApi<ApplicationUser>();
+app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
 
 app.Run();

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using sustAInableEducation_backend.Repository;
 
@@ -11,13 +12,15 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241021182850_AddStructure")]
+    partial class AddStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -163,10 +166,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("AnonUserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -248,26 +247,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.ToTable("Environment");
                 });
 
-            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentAccessCode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
-
-                    b.Property<Guid>("EnvironmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Code");
-
-                    b.HasIndex("EnvironmentId")
-                        .IsUnique();
-
-                    b.ToTable("EnvironmentAccessCode");
-                });
-
             modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentParticipant", b =>
                 {
                     b.Property<Guid>("EnvironmentId")
@@ -275,9 +254,6 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("IsHost")
-                        .HasColumnType("bit");
 
                     b.HasKey("EnvironmentId", "UserId");
 
@@ -348,7 +324,8 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
 
                     b.HasKey("Id");
 
@@ -379,17 +356,19 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("Creativity")
+                    b.Property<int>("Creativity")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Length")
+                    b.Property<int>("Length")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("PresetId")
+                    b.Property<Guid>("PresetId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Prompt")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -416,8 +395,8 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(1024)
-                        .HasColumnType("nvarchar(1024)");
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
 
                     b.HasKey("StoryPartId", "Number");
 
@@ -438,6 +417,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
+                        .HasMaxLength(4096)
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -453,14 +433,8 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("InitialPartId")
+                    b.Property<Guid>("InitialPartId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsPreGenerated")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Prompt")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -485,8 +459,7 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.Property<string>("ChoiceText")
                         .IsRequired()
-                        .HasMaxLength(1024)
-                        .HasColumnType("nvarchar(1024)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PreviousId")
                         .HasColumnType("uniqueidentifier");
@@ -567,17 +540,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.Navigation("Story");
                 });
 
-            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentAccessCode", b =>
-                {
-                    b.HasOne("sustAInableEducation_backend.Models.Environment", "Environment")
-                        .WithOne("AccessCode")
-                        .HasForeignKey("sustAInableEducation_backend.Models.EnvironmentAccessCode", "EnvironmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Environment");
-                });
-
             modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentParticipant", b =>
                 {
                     b.HasOne("sustAInableEducation_backend.Models.Environment", "Environment")
@@ -633,7 +595,9 @@ namespace sustAInableEducation_backend.Migrations
                 {
                     b.HasOne("sustAInableEducation_backend.Models.StoryPreset", "Preset")
                         .WithMany()
-                        .HasForeignKey("PresetId");
+                        .HasForeignKey("PresetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Preset");
                 });
@@ -662,7 +626,9 @@ namespace sustAInableEducation_backend.Migrations
                 {
                     b.HasOne("sustAInableEducation_backend.Models.StoryPresetPart", "InitialPart")
                         .WithMany()
-                        .HasForeignKey("InitialPartId");
+                        .HasForeignKey("InitialPartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("InitialPart");
                 });
@@ -681,8 +647,6 @@ namespace sustAInableEducation_backend.Migrations
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.Environment", b =>
                 {
-                    b.Navigation("AccessCode");
-
                     b.Navigation("Participants");
                 });
 

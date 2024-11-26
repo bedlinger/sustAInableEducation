@@ -1,0 +1,11 @@
+@startuml
+class EnvironmentParticipant {
+    + UserId : string <<get>> <<set>>
+}
+class "ICollection`1"<T> {
+}
+EnvironmentParticipant --> "EnvironmentId" Guid
+EnvironmentParticipant --> "User" ApplicationUser
+EnvironmentParticipant --> "Environment" Environment
+EnvironmentParticipant --> "Quizzes<Quiz>" "ICollection`1"
+@enduml
