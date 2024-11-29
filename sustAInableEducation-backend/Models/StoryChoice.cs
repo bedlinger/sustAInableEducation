@@ -8,6 +8,7 @@ namespace sustAInableEducation_backend.Models
         public int Number { get; set; }
         [MaxLength(1024)]
         public string Text { get; set; }
-        public bool IsTaken { get; set; }
+        public int NumberVotes { get; set; }
+        public bool IsVoted { get; set; }
     }
 }

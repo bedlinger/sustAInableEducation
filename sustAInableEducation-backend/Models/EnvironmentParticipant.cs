@@ -17,5 +17,8 @@ namespace sustAInableEducation_backend.Models
 
         public string UserName { get => User?.AnonUserName ?? ""; }
         public bool IsHost { get; set; }
+        public bool IsOnline { get; set; }
+        [JsonIgnore]
+        public bool HasVoted { get; set; }
     }
 }
