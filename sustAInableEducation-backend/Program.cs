@@ -25,6 +25,8 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkSt
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
+builder.Services.AddTransient<IAIService, AITestService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
