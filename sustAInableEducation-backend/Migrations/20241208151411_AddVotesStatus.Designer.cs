@@ -12,7 +12,7 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241129213728_AddVotesStatus")]
+    [Migration("20241208151411_AddVotesStatus")]
     partial class AddVotesStatus
     {
         /// <inheritdoc />
@@ -244,6 +244,9 @@ namespace sustAInableEducation_backend.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<long>("VotingTimeSeconds")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StoryId");
@@ -388,16 +391,14 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("Creativity")
+                    b.Property<int>("Creativity")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Length")
+                    b.Property<int>("Length")
                         .HasColumnType("int");
-
-                    b.Property<Guid?>("PresetId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Prompt")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -406,8 +407,6 @@ namespace sustAInableEducation_backend.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PresetId");
 
                     b.ToTable("Story");
                 });
@@ -419,9 +418,6 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.Property<int>("Number")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsVoted")
-                        .HasColumnType("bit");
 
                     b.Property<int>("NumberVotes")
                         .HasColumnType("int");
@@ -442,6 +438,9 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<long?>("ChosenNumber")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -452,69 +451,14 @@ namespace sustAInableEducation_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("VotingEndAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StoryId");
 
                     b.ToTable("StoryPart");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPreset", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("InitialPartId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsPreGenerated")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Prompt")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InitialPartId");
-
-                    b.ToTable("StoryPreset");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPresetPart", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("ChoiceNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ChoiceText")
-                        .IsRequired()
-                        .HasMaxLength(1024)
-                        .HasColumnType("nvarchar(1024)");
-
-                    b.Property<Guid>("PreviousId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("StoryPresetPartId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoryPresetPartId");
-
-                    b.ToTable("StoryPresetPart");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -641,15 +585,6 @@ namespace sustAInableEducation_backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("sustAInableEducation_backend.Models.Story", b =>
-                {
-                    b.HasOne("sustAInableEducation_backend.Models.StoryPreset", "Preset")
-                        .WithMany()
-                        .HasForeignKey("PresetId");
-
-                    b.Navigation("Preset");
-                });
-
             modelBuilder.Entity("sustAInableEducation_backend.Models.StoryChoice", b =>
                 {
                     b.HasOne("sustAInableEducation_backend.Models.StoryPart", null)
@@ -664,22 +599,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.HasOne("sustAInableEducation_backend.Models.Story", null)
                         .WithMany("Parts")
                         .HasForeignKey("StoryId");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPreset", b =>
-                {
-                    b.HasOne("sustAInableEducation_backend.Models.StoryPresetPart", "InitialPart")
-                        .WithMany()
-                        .HasForeignKey("InitialPartId");
-
-                    b.Navigation("InitialPart");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPresetPart", b =>
-                {
-                    b.HasOne("sustAInableEducation_backend.Models.StoryPresetPart", null)
-                        .WithMany("NextParts")
-                        .HasForeignKey("StoryPresetPartId");
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.ApplicationUser", b =>
@@ -719,11 +638,6 @@ namespace sustAInableEducation_backend.Migrations
             modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPart", b =>
                 {
                     b.Navigation("Choices");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.StoryPresetPart", b =>
-                {
-                    b.Navigation("NextParts");
                 });
 #pragma warning restore 612, 618
         }
