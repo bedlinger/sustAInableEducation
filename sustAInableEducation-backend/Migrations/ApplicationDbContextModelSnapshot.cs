@@ -315,8 +315,9 @@ namespace sustAInableEducation_backend.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -352,7 +353,7 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsMultipleChoice")
+                    b.Property<bool>("IsMultipleResponse")
                         .HasColumnType("bit");
 
                     b.Property<int>("Number")

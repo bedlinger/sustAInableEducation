@@ -12,8 +12,6 @@ namespace sustAInableEducation_backend.Models
         public ApplicationUser User { get; set; } = null!;
         [JsonIgnore]
         public Environment Environment { get; set; } = null!;
-        [JsonIgnore]
-        public ICollection<Quiz> Quizzes { get; set; } = [];
 
         public string UserName => User?.AnonUserName ?? "";
         public bool IsHost { get; set; }

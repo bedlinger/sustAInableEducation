@@ -9,7 +9,7 @@ namespace sustAInableEducation_backend.Models
         [JsonIgnore]
         public Guid StoryId { get; set; }
 
-        public ICollection<EnvironmentParticipant> Participants { get; set; } = [];
+        public ICollection<EnvironmentParticipant> Participants { get; set; } = new List<EnvironmentParticipant>();
         public Story Story { get; set; } = null!;
         [JsonIgnore]
         public EnvironmentAccessCode? AccessCode { get; set; }

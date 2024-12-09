@@ -12,7 +12,7 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241209173956_ImproveQuizStructure")]
+    [Migration("20241209180220_ImproveQuizStructure")]
     partial class ImproveQuizStructure
     {
         /// <inheritdoc />
@@ -318,8 +318,9 @@ namespace sustAInableEducation_backend.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -355,7 +356,7 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsMultipleChoice")
+                    b.Property<bool>("IsMultipleResponse")
                         .HasColumnType("bit");
 
                     b.Property<int>("Number")

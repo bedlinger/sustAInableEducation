@@ -7,7 +7,7 @@ namespace sustAInableEducation_backend.Models
     {
         public Guid Id { get; set; }
 
-        public ICollection<StoryPart> Parts { get; set; } = [];
+        public ICollection<StoryPart> Parts { get; set; } = new List<StoryPart>();
 
         [MaxLength(256)]
         public string Title { get; set; } = null!;

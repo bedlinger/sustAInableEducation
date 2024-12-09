@@ -11,6 +11,11 @@ namespace sustAInableEducation_backend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.RenameColumn(
+                name: "IsMultipleChoice",
+                table: "QuizQuestion",
+                newName: "IsMultipleResponse");
+
             migrationBuilder.AddColumn<Guid>(
                 name: "EnvironmentId",
                 table: "Quiz",
@@ -18,12 +23,12 @@ namespace sustAInableEducation_backend.Migrations
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
-            migrationBuilder.AddColumn<Guid>(
+            migrationBuilder.AddColumn<string>(
                 name: "UserId",
                 table: "Quiz",
-                type: "uniqueidentifier",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                defaultValue: "");
         }
 
         /// <inheritdoc />
@@ -36,6 +41,11 @@ namespace sustAInableEducation_backend.Migrations
             migrationBuilder.DropColumn(
                 name: "UserId",
                 table: "Quiz");
+
+            migrationBuilder.RenameColumn(
+                name: "IsMultipleResponse",
+                table: "QuizQuestion",
+                newName: "IsMultipleChoice");
         }
     }
 }

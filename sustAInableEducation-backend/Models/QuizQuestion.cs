@@ -6,11 +6,11 @@ namespace sustAInableEducation_backend.Models
     {
         public Guid Id { get; set; }
 
-        public ICollection<QuizChoice> Choices { get; set; } = [];
-        public ICollection<QuizResult> Results { get; set; } = [];
+        public ICollection<QuizChoice> Choices { get; set; } = new List<QuizChoice>();
+        public ICollection<QuizResult> Results { get; set; } = new List<QuizResult>();
 
         public int Number { get; set; }
         public string Text { get; set; } = null!;
-        public bool IsMultipleChoice { get; set; }
+        public bool IsMultipleResponse { get; set; }
     }
 }

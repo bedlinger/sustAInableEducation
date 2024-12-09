@@ -8,7 +8,7 @@ namespace sustAInableEducation_backend.Models
         [JsonIgnore]
         public Guid Id { get; set; }
 
-        public IEnumerable<StoryChoice> Choices { get; set; } = [];
+        public IEnumerable<StoryChoice> Choices { get; set; } = new List<StoryChoice>();
 
         public string Text { get; set; } = null!;
         [JsonIgnore]

@@ -76,5 +76,83 @@ namespace sustAInableEducation_backend.Repository
                 Text = "The end."
             };
         }
+
+        public async Task<Quiz> GenerateQuiz(Story story, ICollection<QuizType> types)
+        {
+            Thread.Sleep(2000);
+            return new Quiz
+            {
+                Title = "Test Quiz",
+                Questions = new List<QuizQuestion>
+                {
+                    new QuizQuestion
+                    {
+                        Text = "What is the answer to life, the universe, and everything?",
+                        Number = 1,
+                        Choices = new List<QuizChoice>
+                        {
+                            new QuizChoice
+                            {
+                                Text = "42",
+                                Number = 1,
+                                IsCorrect = true
+                            },
+                            new QuizChoice
+                            {
+                                Text = "24",
+                                Number = 2,
+                                IsCorrect = false
+                            },
+                            new QuizChoice
+                            {
+                                Text = "12",
+                                Number = 3,
+                                IsCorrect = false
+                            },
+                            new QuizChoice
+                            {
+                                Text = "21",
+                                Number = 4,
+                                IsCorrect = false
+                            }
+                        },
+                        IsMultipleResponse = false
+                    },
+                    new QuizQuestion
+                    {
+                        Text = "What is the answer to life, the universe, and everything?",
+                        Number = 2,
+                        Choices = new List<QuizChoice>
+                        {
+                            new QuizChoice
+                            {
+                                Text = "42",
+                                Number = 1,
+                                IsCorrect = true
+                            },
+                            new QuizChoice
+                            {
+                                Text = "24",
+                                Number = 2,
+                                IsCorrect = false
+                            },
+                            new QuizChoice
+                            {
+                                Text = "12",
+                                Number = 3,
+                                IsCorrect = false
+                            },
+                            new QuizChoice
+                            {
+                                Text = "21",
+                                Number = 4,
+                                IsCorrect = false
+                            }
+                        },
+                        IsMultipleResponse = false
+                    }
+                }
+            };
+        }
     }
 }
