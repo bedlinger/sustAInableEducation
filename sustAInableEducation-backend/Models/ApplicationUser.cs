@@ -8,7 +8,7 @@ namespace sustAInableEducation_backend.Models
     public class ApplicationUser : IdentityUser
     {
         [JsonIgnore]
-        public ICollection<EnvironmentParticipant> Participations { get; set; }
+        public ICollection<EnvironmentParticipant> Participations { get; set; } = [];
 
         public string AnonUserName { get; set; } = UserNameGenService.GenerateUserName();
     }

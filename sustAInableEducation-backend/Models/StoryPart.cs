@@ -8,9 +8,9 @@ namespace sustAInableEducation_backend.Models
         [JsonIgnore]
         public Guid Id { get; set; }
 
-        public IEnumerable<StoryChoice> Choices { get; set; } = new List<StoryChoice>();
+        public IEnumerable<StoryChoice> Choices { get; set; } = [];
 
-        public string Text { get; set; }
+        public string Text { get; set; } = null!;
         [JsonIgnore]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 

@@ -26,7 +26,6 @@ namespace sustAInableEducation_backend.Hubs
     {
         private readonly ApplicationDbContext _context;
         private readonly string _userId;
-        private readonly ApplicationUser _user;
         private readonly Guid _environmentId;
         private readonly IAIService _ai;
 
@@ -34,7 +33,6 @@ namespace sustAInableEducation_backend.Hubs
         {
             _context = context;
             _userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            _user = _context.Users.Find(_userId)!;
 
             Guid.TryParse(httpContextAccessor.HttpContext?.GetRouteValue("id") as string, out _environmentId);
 

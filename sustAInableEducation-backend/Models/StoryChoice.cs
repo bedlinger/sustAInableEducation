@@ -9,7 +9,7 @@ namespace sustAInableEducation_backend.Models
         public Guid StoryPartId { get; set; }
         public int Number { get; set; }
         [MaxLength(1024)]
-        public string Text { get; set; }
+        public string Text { get; set; } = null!;
         public int NumberVotes { get; set; }
     }
 }
