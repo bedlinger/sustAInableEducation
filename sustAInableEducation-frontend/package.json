@@ -10,6 +10,8 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxt/icon": "^1.9.0",
+    "@nuxtjs/google-fonts": "^3.2.0",
     "@primevue/themes": "^4.2.2",
     "nuxt": "^3.14.159",
     "primevue": "^4.2.2",
