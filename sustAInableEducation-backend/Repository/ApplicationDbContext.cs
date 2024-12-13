@@ -36,13 +36,14 @@ namespace sustAInableEducation_backend.Repository
         public DbSet<sustAInableEducation_backend.Models.Story> Story { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.StoryChoice> StoryChoice { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.StoryPart> StoryPart { get; set; } = default!;
-        public DbSet<sustAInableEducation_backend.Models.StoryPreset> StoryPreset { get; set; } = default!;
-        public DbSet<sustAInableEducation_backend.Models.StoryPresetPart> StoryPresetPart { get; set; } = default!;
 
-        public IQueryable<Environment> EnvironmentHydrated => Environment
+        public IQueryable<Environment> EnvironmentWithStory => Environment
+                .Include(e => e.Story)
+                .ThenInclude(s => s.Parts.OrderBy(p => p.CreatedAt))
+                .ThenInclude(p => p.Choices.OrderBy(p => p.Number));
+        public IQueryable<Environment> EnvironmentWithAll => EnvironmentWithStory
                 .Include(e => e.Participants)
-                .ThenInclude(e => e.User)
-                .Include(e => e.Story);
+                .ThenInclude(e => e.User);
 
         public async Task<bool> IsParticipant(string userId, Guid environmentId)
         {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using sustAInableEducation_backend.Repository;
 
@@ -11,9 +12,11 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241210184552_ImproveQuizStructure")]
+    partial class ImproveQuizStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,17 +282,14 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<float>("Impact")
-                        .HasColumnType("real");
+                    b.Property<bool>("HasVoted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsHost")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsOnline")
                         .HasColumnType("bit");
-
-                    b.Property<float?>("VoteImpact")
-                        .HasColumnType("real");
 
                     b.HasKey("EnvironmentId", "UserId");
 
@@ -393,6 +393,9 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Creativity")
+                        .HasColumnType("int");
+
                     b.Property<long>("Length")
                         .HasColumnType("bigint");
 
@@ -400,19 +403,10 @@ namespace sustAInableEducation_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Temperature")
-                        .HasColumnType("real");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<float>("TopP")
-                        .HasColumnType("real");
-
-                    b.Property<float>("TotalImpact")
-                        .HasColumnType("real");
 
                     b.HasKey("Id");
 
@@ -426,9 +420,6 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.Property<int>("Number")
                         .HasColumnType("int");
-
-                    b.Property<float>("Impact")
-                        .HasColumnType("real");
 
                     b.Property<long>("NumberVotes")
                         .HasColumnType("bigint");

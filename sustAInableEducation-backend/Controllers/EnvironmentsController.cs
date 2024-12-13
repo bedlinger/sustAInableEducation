@@ -31,7 +31,7 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Environment>>> GetEnvironment()
+        public async Task<ActionResult<IEnumerable<Environment>>> GetEnvironments()
         {
             return await _context.EnvironmentParticipant
                 .Where(p => p.UserId == _userId)
@@ -45,7 +45,7 @@ namespace sustAInableEducation_backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Environment>> GetEnvironment(Guid id)
         {
-            var environment = await _context.EnvironmentHydrated.FirstOrDefaultAsync(e => e.Id == id);
+            var environment = await _context.EnvironmentWithAll.FirstOrDefaultAsync(e => e.Id == id);
 
             if (environment == null)
             {
@@ -62,11 +62,6 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Environment>> PostEnvironment(Environment environment)
         {
-            if ((environment.Story.PresetId == null || !await _context.StoryPreset.AnyAsync(p => p.Id == environment.Story.PresetId)) &&
-                (environment.Story.Prompt == null || environment.Story.Length == null || environment.Story.Creativity == null))
-            {
-                return BadRequest();
-            }
             environment.Participants = new List<EnvironmentParticipant>()
             {
                 new EnvironmentParticipant()
@@ -136,7 +131,7 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost("join")]
         public async Task<ActionResult<Environment>> JoinEnvironment(EnvironmentAccessCodeRequest accessCode)
         {
-            var environment = await _context.EnvironmentHydrated
+            var environment = await _context.EnvironmentWithAll
                 .Include(e => e.AccessCode)
                 .FirstOrDefaultAsync(e => e.AccessCode != null && e.AccessCode.Code == accessCode.Code);
             if (environment == null || environment.AccessCode!.ExpiresAt < DateTime.Now)

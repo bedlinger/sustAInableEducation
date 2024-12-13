@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using sustAInableEducation_backend.Repository;
 
@@ -11,9 +12,11 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241211145042_AddImpact")]
+    partial class AddImpact
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,6 +282,9 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<bool>("HasVoted")
+                        .HasColumnType("bit");
+
                     b.Property<float>("Impact")
                         .HasColumnType("real");
 
@@ -287,9 +293,6 @@ namespace sustAInableEducation_backend.Migrations
 
                     b.Property<bool>("IsOnline")
                         .HasColumnType("bit");
-
-                    b.Property<float?>("VoteImpact")
-                        .HasColumnType("real");
 
                     b.HasKey("EnvironmentId", "UserId");
 

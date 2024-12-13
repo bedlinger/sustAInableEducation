@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using sustAInableEducation_backend.Repository;
 
@@ -11,13 +12,15 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241208151411_AddVotesStatus")]
+    partial class AddVotesStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -279,17 +282,14 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<float>("Impact")
-                        .HasColumnType("real");
+                    b.Property<bool>("HasVoted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsHost")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsOnline")
                         .HasColumnType("bit");
-
-                    b.Property<float?>("VoteImpact")
-                        .HasColumnType("real");
 
                     b.HasKey("EnvironmentId", "UserId");
 
@@ -304,22 +304,20 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EnvironmentId")
+                    b.Property<Guid?>("EnvironmentParticipantEnvironmentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("NumberQuestions")
-                        .HasColumnType("bigint");
+                    b.Property<string>("EnvironmentParticipantUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("EnvironmentParticipantEnvironmentId", "EnvironmentParticipantUserId");
 
                     b.ToTable("Quiz");
                 });
@@ -351,7 +349,7 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsMultipleResponse")
+                    b.Property<bool>("IsMultipleChoice")
                         .HasColumnType("bit");
 
                     b.Property<int>("Number")
@@ -393,26 +391,20 @@ namespace sustAInableEducation_backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("Length")
-                        .HasColumnType("bigint");
+                    b.Property<int>("Creativity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Length")
+                        .HasColumnType("int");
 
                     b.Property<string>("Prompt")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Temperature")
-                        .HasColumnType("real");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<float>("TopP")
-                        .HasColumnType("real");
-
-                    b.Property<float>("TotalImpact")
-                        .HasColumnType("real");
 
                     b.HasKey("Id");
 
@@ -427,11 +419,8 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
-                    b.Property<float>("Impact")
-                        .HasColumnType("real");
-
-                    b.Property<long>("NumberVotes")
-                        .HasColumnType("bigint");
+                    b.Property<int>("NumberVotes")
+                        .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -564,6 +553,13 @@ namespace sustAInableEducation_backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("sustAInableEducation_backend.Models.Quiz", b =>
+                {
+                    b.HasOne("sustAInableEducation_backend.Models.EnvironmentParticipant", null)
+                        .WithMany("Quizzes")
+                        .HasForeignKey("EnvironmentParticipantEnvironmentId", "EnvironmentParticipantUserId");
+                });
+
             modelBuilder.Entity("sustAInableEducation_backend.Models.QuizChoice", b =>
                 {
                     b.HasOne("sustAInableEducation_backend.Models.QuizQuestion", null)
@@ -615,6 +611,11 @@ namespace sustAInableEducation_backend.Migrations
                     b.Navigation("AccessCode");
 
                     b.Navigation("Participants");
+                });
+
+            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentParticipant", b =>
+                {
+                    b.Navigation("Quizzes");
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.Quiz", b =>
