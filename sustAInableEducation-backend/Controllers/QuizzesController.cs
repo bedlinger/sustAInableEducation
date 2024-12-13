@@ -41,7 +41,9 @@ namespace sustAInableEducation_backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Quiz>> GetQuiz(Guid id)
         {
-            var quiz = await _context.Quiz.FindAsync(id);
+            var quiz = await _context.Quiz.Include(q => q.Questions)
+                .ThenInclude(q => q.Choices)
+                .FirstOrDefaultAsync(q => q.Id == id);
 
             if (quiz == null)
             {
@@ -56,16 +58,16 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Quiz>> PostQuiz(QuizCreate quizCreate)
+        public async Task<ActionResult<Quiz>> PostQuiz(QuizCreate config)
         {
-            if (!await _context.IsParticipant(_userId, quizCreate.EnvironmentId))
+            if (!await _context.IsParticipant(_userId, config.EnvironmentId))
             {
                 return Unauthorized();
             }
-            var story = (await _context.EnvironmentWithStory.FirstOrDefaultAsync(e => e.Id == quizCreate.EnvironmentId))!.Story;
-            var quiz = await _ai.GenerateQuiz(story, quizCreate.Types);
+            var story = (await _context.EnvironmentWithStory.FirstOrDefaultAsync(e => e.Id == config.EnvironmentId))!.Story;
+            var quiz = await _ai.GenerateQuiz(story, config);
             quiz.UserId = _userId;
-            quiz.EnvironmentId = quizCreate.EnvironmentId;
+            quiz.EnvironmentId = config.EnvironmentId;
             _context.Quiz.Add(quiz);
             await _context.SaveChangesAsync();
 
@@ -89,6 +91,42 @@ namespace sustAInableEducation_backend.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("{id}/try")]
+        public async Task<ActionResult<ICollection<QuizResult>>> TryQuiz(Guid id, ICollection<QuizQuestionResponse> responses)
+        {
+            var quiz = await _context.Quiz.Include(q => q.Questions)
+                .ThenInclude(q => q.Choices)
+                .FirstOrDefaultAsync(q => q.Id == id);
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+            if (quiz.UserId != _userId)
+            {
+                return Unauthorized();
+            }
+            int tryNumber = (await _context.QuizResult.Where(r => r.QuizQuestionId == id).MaxAsync(r => (int?)r.TryNumber) ?? -1) + 1;
+            var results = new List<QuizResult>();
+            foreach (var question in quiz.Questions)
+            {
+                var response = responses.FirstOrDefault(r => r.QuestionId == question.Id);
+                if (response == null)
+                {
+                    return BadRequest();
+                }
+                var result = new QuizResult
+                {
+                    QuizQuestionId = question.Id,
+                    TryNumber = tryNumber,
+                    IsCorrect = question.Choices.Any(c => c.IsCorrect && !response.Choices.Contains(c.Number))
+                };
+                results.Add(result);
+                _context.QuizResult.Add(result);
+            }
+            await _context.SaveChangesAsync();
+            return results;
         }
     }
 }
