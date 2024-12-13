@@ -15,22 +15,26 @@ namespace sustAInableEducation_backend.Repository
                     new StoryChoice
                     {
                         Text = "Option 1",
-                        Number = 1
+                        Number = 1,
+                        Impact = 0.6f
                     },
                     new StoryChoice
                     {
                         Text = "Option 2",
-                        Number = 2
+                        Number = 2,
+                        Impact = 0.2f
                     },
                     new StoryChoice
                     {
                         Text = "Option 3",
-                        Number = 3
+                        Number = 3,
+                        Impact = -0.2f
                     },
                     new StoryChoice
                     {
                         Text = "Option 4",
-                        Number = 4
+                        Number = 4,
+                        Impact = -0.6f,
                     }
                 }
             };
@@ -47,22 +51,26 @@ namespace sustAInableEducation_backend.Repository
                     new StoryChoice
                     {
                         Text = "Option 1",
-                        Number = 1
+                        Number = 1,
+                        Impact = 0.4f,
                     },
                     new StoryChoice
                     {
                         Text = "Option 2",
-                        Number = 2
+                        Number = 2,
+                        Impact = 0.1f,
                     },
                     new StoryChoice
                     {
                         Text = "Option 3",
-                        Number = 3
+                        Number = 3,
+                        Impact = -0.1f,
                     },
                     new StoryChoice
                     {
                         Text = "Option 4",
-                        Number = 4
+                        Number = 4,
+                        Impact = -0.4f,
                     }
                 }
             };
@@ -77,82 +85,50 @@ namespace sustAInableEducation_backend.Repository
             };
         }
 
-        public async Task<Quiz> GenerateQuiz(Story story, ICollection<QuizType> types)
+        public async Task<Quiz> GenerateQuiz(Story story, QuizCreate config)
         {
-            Thread.Sleep(2000);
-            return new Quiz
+            Thread.Sleep(4000);
+            var quiz = new Quiz
             {
                 Title = "Test Quiz",
-                Questions = new List<QuizQuestion>
-                {
-                    new QuizQuestion
-                    {
-                        Text = "What is the answer to life, the universe, and everything?",
-                        Number = 1,
-                        Choices = new List<QuizChoice>
-                        {
-                            new QuizChoice
-                            {
-                                Text = "42",
-                                Number = 1,
-                                IsCorrect = true
-                            },
-                            new QuizChoice
-                            {
-                                Text = "24",
-                                Number = 2,
-                                IsCorrect = false
-                            },
-                            new QuizChoice
-                            {
-                                Text = "12",
-                                Number = 3,
-                                IsCorrect = false
-                            },
-                            new QuizChoice
-                            {
-                                Text = "21",
-                                Number = 4,
-                                IsCorrect = false
-                            }
-                        },
-                        IsMultipleResponse = false
-                    },
-                    new QuizQuestion
-                    {
-                        Text = "What is the answer to life, the universe, and everything?",
-                        Number = 2,
-                        Choices = new List<QuizChoice>
-                        {
-                            new QuizChoice
-                            {
-                                Text = "42",
-                                Number = 1,
-                                IsCorrect = true
-                            },
-                            new QuizChoice
-                            {
-                                Text = "24",
-                                Number = 2,
-                                IsCorrect = false
-                            },
-                            new QuizChoice
-                            {
-                                Text = "12",
-                                Number = 3,
-                                IsCorrect = false
-                            },
-                            new QuizChoice
-                            {
-                                Text = "21",
-                                Number = 4,
-                                IsCorrect = false
-                            }
-                        },
-                        IsMultipleResponse = false
-                    }
-                }
+                NumberQuestions = config.NumberQuestions
             };
+            for (var i = 1; i <= config.NumberQuestions; i++)
+            {
+                quiz.Questions.Add(new QuizQuestion
+                {
+                    Text = "Question " + i,
+                    Number = i,
+                    Choices = new List<QuizChoice>
+                    {
+                        new QuizChoice
+                        {
+                            Number = 1,
+                            Text = "Option 1",
+                            IsCorrect = false
+                        },
+                        new QuizChoice
+                        {
+                            Number = 2,
+                            Text = "Option 2",
+                            IsCorrect = false
+                        },
+                        new QuizChoice
+                        {
+                            Number = 3,
+                            Text = "Option 3",
+                            IsCorrect = false
+                        },
+                        new QuizChoice
+                        {
+                            Number = 4,
+                            Text = "Option 4",
+                            IsCorrect = false
+                        }
+                    }
+                });
+            }
+            return quiz;
         }
     }
 }

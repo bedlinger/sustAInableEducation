@@ -12,7 +12,7 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241209180220_ImproveQuizStructure")]
+    [Migration("20241210184552_ImproveQuizStructure")]
     partial class ImproveQuizStructure
     {
         /// <inheritdoc />
@@ -307,11 +307,8 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<Guid>("EnvironmentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("EnvironmentParticipantEnvironmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("EnvironmentParticipantUserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("NumberQuestions")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -323,8 +320,6 @@ namespace sustAInableEducation_backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EnvironmentParticipantEnvironmentId", "EnvironmentParticipantUserId");
 
                     b.ToTable("Quiz");
                 });
@@ -401,8 +396,8 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<int>("Creativity")
                         .HasColumnType("int");
 
-                    b.Property<int>("Length")
-                        .HasColumnType("int");
+                    b.Property<long>("Length")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Prompt")
                         .IsRequired()
@@ -426,8 +421,8 @@ namespace sustAInableEducation_backend.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumberVotes")
-                        .HasColumnType("int");
+                    b.Property<long>("NumberVotes")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -560,13 +555,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("sustAInableEducation_backend.Models.Quiz", b =>
-                {
-                    b.HasOne("sustAInableEducation_backend.Models.EnvironmentParticipant", null)
-                        .WithMany("Quizzes")
-                        .HasForeignKey("EnvironmentParticipantEnvironmentId", "EnvironmentParticipantUserId");
-                });
-
             modelBuilder.Entity("sustAInableEducation_backend.Models.QuizChoice", b =>
                 {
                     b.HasOne("sustAInableEducation_backend.Models.QuizQuestion", null)
@@ -618,11 +606,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.Navigation("AccessCode");
 
                     b.Navigation("Participants");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.EnvironmentParticipant", b =>
-                {
-                    b.Navigation("Quizzes");
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.Quiz", b =>

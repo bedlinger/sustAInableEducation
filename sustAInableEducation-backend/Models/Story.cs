@@ -12,8 +12,10 @@ namespace sustAInableEducation_backend.Models
         [MaxLength(256)]
         public string Title { get; set; } = null!;
         public string Prompt { get; set; } = null!;
-        public int Length { get; set; }
-        public int Creativity { get; set; }
+        public uint Length { get; set; }
+        public float Temperature { get; set; }
+        public float TopP { get; set; }
+        public float TotalImpact { get; set; } = 0;
 
         [JsonIgnore]
         public bool IsComplete => Parts.Count > Length;

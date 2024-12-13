@@ -135,7 +135,8 @@ namespace sustAInableEducation_backend.Hubs
             }
             
             _context.EnvironmentParticipant.Where(p => p.EnvironmentId == _environmentId)
-                .ExecuteUpdate(p => p.SetProperty(x => x.HasVoted, x => false));
+                .ExecuteUpdate(p => p
+                    .SetProperty(x => x.VoteImpact, x => null));
             foreach (var choice in part.Choices)
             {
                 choice.NumberVotes = 0;
@@ -157,12 +158,13 @@ namespace sustAInableEducation_backend.Hubs
                 throw new HubException("Voting is not active");
             }
             var participant = (await _context.EnvironmentParticipant.FindAsync(_environmentId, _userId))!;
-            if (participant.HasVoted)
+            if (participant.VoteImpact != null)
             {
                 throw new HubException("Already voted");
             }
-            part.Choices.First(c => c.Number == number).NumberVotes++;
-            participant.HasVoted = true;
+            var choice = part.Choices.First(c => c.Number == number);
+            choice.NumberVotes++;
+            participant.VoteImpact = choice.Impact;
             await _context.SaveChangesAsync();
             await SendMessage(MessageType.VotingUpdated, part.Choices);
         }
@@ -173,7 +175,8 @@ namespace sustAInableEducation_backend.Hubs
             {
                 throw new HubException("Unauthorized");
             }
-            var part = (await _context.EnvironmentWithStory.FirstOrDefaultAsync(e => e.Id == _environmentId))!.Story.Parts.LastOrDefault();
+            var story = (await _context.EnvironmentWithStory.FirstOrDefaultAsync(e => e.Id == _environmentId))!.Story;
+            var part = story.Parts.LastOrDefault();
             if (part == null)
             {
                 throw new HubException("No part");
@@ -182,11 +185,17 @@ namespace sustAInableEducation_backend.Hubs
             {
                 throw new HubException("Already chosen");
             }
-            if (!part.Choices.Any(c => c.Number == number))
+            var choice = part.Choices.First(c => c.Number == number);
+            if (choice == null)
             {
                 throw new HubException("Invalid choice");
             }
             part.ChosenNumber = number;
+            story.TotalImpact += choice.Impact;
+            _context.EnvironmentParticipant.Where(p => p.EnvironmentId == _environmentId && p.VoteImpact != null)
+                .ExecuteUpdate(p => p
+                    .SetProperty(x => x.Impact, x => x.Impact + x.VoteImpact)
+                    .SetProperty(x => x.VoteImpact, x => null));
             await _context.SaveChangesAsync();
             await SendMessage(MessageType.ChoiceSet, number);
         }

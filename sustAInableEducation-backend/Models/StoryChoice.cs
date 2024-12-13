@@ -10,6 +10,8 @@ namespace sustAInableEducation_backend.Models
         public int Number { get; set; }
         [MaxLength(1024)]
         public string Text { get; set; } = null!;
-        public int NumberVotes { get; set; }
+        public uint NumberVotes { get; set; }
+        [JsonIgnore]
+        public float Impact { get; set; }
     }
 }
