@@ -95,7 +95,7 @@ namespace sustAInableEducation_backend.Controllers
             return NoContent();
         }
 
-        [HttpPost("{id}/tries")]
+        [HttpPost("{id}/try")]
         public async Task<ActionResult<ICollection<QuizResult>>> PostTry(Guid id, ICollection<QuizQuestionResponse> responses)
         {
             var quiz = await _context.QuizWithAll.FirstOrDefaultAsync(q => q.Id == id);

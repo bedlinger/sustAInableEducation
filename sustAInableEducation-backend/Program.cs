@@ -40,7 +40,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGroup("/account").MapIdentityApi<ApplicationUser>();
+app.MapGroup("/account").MapIdentityApi<ApplicationUser>().WithTags("Account");
 
 app.MapHub<EnvironmentHub>("/environmentHub/{id}");
 
