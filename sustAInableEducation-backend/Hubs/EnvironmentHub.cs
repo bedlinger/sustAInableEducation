@@ -39,6 +39,7 @@ namespace sustAInableEducation_backend.Hubs
             _ai = ai;
         }
 
+        [SignalRHidden]
         public override async Task OnConnectedAsync()
         {
             if (!await _context.IsParticipant(_userId, _environmentId))
@@ -54,6 +55,7 @@ namespace sustAInableEducation_backend.Hubs
             await base.OnConnectedAsync();
         }
 
+        [SignalRHidden]
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             _context.EnvironmentParticipant.Find(_environmentId, _userId)!.IsOnline = false;

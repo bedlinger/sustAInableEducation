@@ -15,6 +15,9 @@ namespace sustAInableEducation_backend.Models
 
         [MaxLength(256)]
         public string Title { get; set; } = null!;
+        public uint NumberQuestions { get; set; }
+
+        public IEnumerable<IGrouping<int, QuizResult>> Tries => Questions.Select(q => q.Results).SelectMany(r => r).GroupBy(r => r.TryNumber);
     }
 
     public enum QuizType
@@ -28,5 +31,6 @@ namespace sustAInableEducation_backend.Models
     {
         public Guid EnvironmentId { get; set; }
         public ICollection<QuizType> Types { get; set; } = new List<QuizType>();
+        public uint NumberQuestions { get; set; }
     }
 }
