@@ -19,6 +19,6 @@ namespace sustAInableEducation_backend.Models
     public class QuizQuestionResponse
     {
         public Guid QuestionId { get; set; }
-        public ICollection<int> Choices { get; set; } = new List<int>();
+        public ICollection<int> Response { get; set; } = new List<int>();
     }
 }

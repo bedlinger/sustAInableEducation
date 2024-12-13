@@ -105,7 +105,7 @@ namespace sustAInableEducation_backend.Repository
                         {
                             Number = 1,
                             Text = "Option 1",
-                            IsCorrect = false
+                            IsCorrect = true
                         },
                         new QuizChoice
                         {
@@ -117,7 +117,7 @@ namespace sustAInableEducation_backend.Repository
                         {
                             Number = 3,
                             Text = "Option 3",
-                            IsCorrect = false
+                            IsCorrect = true
                         },
                         new QuizChoice
                         {

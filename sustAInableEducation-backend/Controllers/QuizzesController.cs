@@ -43,6 +43,8 @@ namespace sustAInableEducation_backend.Controllers
         {
             var quiz = await _context.Quiz.Include(q => q.Questions)
                 .ThenInclude(q => q.Choices)
+                .Include(q => q.Questions)
+                .ThenInclude(q => q.Results)
                 .FirstOrDefaultAsync(q => q.Id == id);
 
             if (quiz == null)
@@ -93,12 +95,10 @@ namespace sustAInableEducation_backend.Controllers
             return NoContent();
         }
 
-        [HttpPost("{id}/try")]
-        public async Task<ActionResult<ICollection<QuizResult>>> TryQuiz(Guid id, ICollection<QuizQuestionResponse> responses)
+        [HttpPost("{id}/tries")]
+        public async Task<ActionResult<ICollection<QuizResult>>> PostTry(Guid id, ICollection<QuizQuestionResponse> responses)
         {
-            var quiz = await _context.Quiz.Include(q => q.Questions)
-                .ThenInclude(q => q.Choices)
-                .FirstOrDefaultAsync(q => q.Id == id);
+            var quiz = await _context.QuizWithAll.FirstOrDefaultAsync(q => q.Id == id);
             if (quiz == null)
             {
                 return NotFound();
@@ -107,7 +107,11 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return Unauthorized();
             }
-            int tryNumber = (await _context.QuizResult.Where(r => r.QuizQuestionId == id).MaxAsync(r => (int?)r.TryNumber) ?? -1) + 1;
+            if (responses.Select(r => r.QuestionId).Intersect(quiz.Questions.Select(q => q.Id)).Count() != responses.Count)
+            {
+                return BadRequest();
+            }
+            int tryNumber = quiz.Tries.Count();
             var results = new List<QuizResult>();
             foreach (var question in quiz.Questions)
             {
@@ -120,7 +124,8 @@ namespace sustAInableEducation_backend.Controllers
                 {
                     QuizQuestionId = question.Id,
                     TryNumber = tryNumber,
-                    IsCorrect = question.Choices.Any(c => c.IsCorrect && !response.Choices.Contains(c.Number))
+                    IsCorrect = !question.Choices
+                        .Any(c => c.IsCorrect && !response.Response.Contains(c.Number) || !c.IsCorrect && response.Response.Contains(c.Number))
                 };
                 results.Add(result);
                 _context.QuizResult.Add(result);

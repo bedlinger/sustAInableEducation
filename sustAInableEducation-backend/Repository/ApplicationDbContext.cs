@@ -45,6 +45,12 @@ namespace sustAInableEducation_backend.Repository
                 .Include(e => e.Participants)
                 .ThenInclude(e => e.User);
 
+        public IQueryable<Quiz> QuizWithAll => Quiz
+                .Include(q => q.Questions)
+                .ThenInclude(q => q.Choices)
+                .Include(q => q.Questions)
+                .ThenInclude(q => q.Results);
+
         public async Task<bool> IsParticipant(string userId, Guid environmentId)
         {
             return await EnvironmentParticipant.AnyAsync(p => p.UserId == userId && p.EnvironmentId == environmentId);
