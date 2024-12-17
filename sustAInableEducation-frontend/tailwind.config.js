@@ -28,12 +28,19 @@ export default {
         }
       },
       animation: {
-        'spin-slow': 'spin 3s linear infinite',
+        'anim': 'anim 25s linear infinite',
       },
       keyframes: {
-        spin: {
-          '0%, 100%': { transform: 'rotate(-3deg)' },
-          '50%': { transform: 'rotate(3deg)' },
+        anim: {
+          '0%': { left: '0px', top: '0px' },
+          '12%': { rotate: '45deg' },
+          '25%': { left: '700px', top: '150px', rotate: '90deg' },
+          '38%': { rotate: '135deg' },
+          '50%': { left: '680px', top: '280px', rotate: '180deg' },
+          '62%': { rotate: '225deg' },
+          '75%': { left: '300px', top: '300px', rotate: '270deg' },
+          '88%': { rotate: '315deg' },
+          '100%': { left: '0px', top: '0px', rotate: '360deg' },
         },
       },
     },
