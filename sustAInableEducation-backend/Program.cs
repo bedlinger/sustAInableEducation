@@ -4,6 +4,7 @@ using sustAInableEducation_backend.Repository;
 using sustAInableEducation_backend.Controllers;
 using sustAInableEducation_backend.Hubs;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,17 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ApplicationDatabase")));
 builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
+{
+    options.Password = new PasswordOptions()
+    {
+        RequiredLength = 8,
+        RequireDigit = true,
+        RequireLowercase = true,
+        RequireUppercase = true,
+        RequireNonAlphanumeric = true
+    };
+}).AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
