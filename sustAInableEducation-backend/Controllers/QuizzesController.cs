@@ -60,7 +60,7 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Quiz>> PostQuiz(QuizCreate config)
+        public async Task<ActionResult<Quiz>> PostQuiz(QuizRequest config)
         {
             if (!await _context.IsParticipant(_userId, config.EnvironmentId))
             {

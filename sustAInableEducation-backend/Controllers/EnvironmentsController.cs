@@ -60,8 +60,19 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Environment>> PostEnvironment(Environment environment)
+        public async Task<ActionResult<Environment>> PostEnvironment(EnvironmentRequest environmentRequest)
         {
+            var environment = new Environment
+            {
+                VotingTimeSeconds = environmentRequest.VotingTimeSeconds,
+                Story = new Story
+                {
+                    Prompt = environmentRequest.Story.Prompt,
+                    Length = environmentRequest.Story.Length,
+                    Temperature = environmentRequest.Story.Temperature,
+                    TopP = environmentRequest.Story.TopP
+                }
+            };
             environment.Participants = new List<EnvironmentParticipant>()
             {
                 new EnvironmentParticipant()

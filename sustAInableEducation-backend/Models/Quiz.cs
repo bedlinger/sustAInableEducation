@@ -27,7 +27,7 @@ namespace sustAInableEducation_backend.Models
         TrueFalse
     }
 
-    public class QuizCreate
+    public class QuizRequest
     {
         public Guid EnvironmentId { get; set; }
         public ICollection<QuizType> Types { get; set; } = new List<QuizType>();
