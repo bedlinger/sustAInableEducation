@@ -13,10 +13,13 @@ namespace sustAInableEducation_backend.Models
         public Story Story { get; set; } = null!;
         [JsonIgnore]
         public EnvironmentAccessCode? AccessCode { get; set; }
-
-        [MaxLength(256)]
-        public string Title { get; set; } = null!;
         public uint VotingTimeSeconds { get; set; } = 30;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+    }
+
+    public class EnvironmentRequest
+    {
+        public StoryRequest Story { get; set; }
+        public uint VotingTimeSeconds { get; set; } = 30;
     }
 }

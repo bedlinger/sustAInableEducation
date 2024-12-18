@@ -85,7 +85,7 @@ namespace sustAInableEducation_backend.Repository
             };
         }
 
-        public async Task<Quiz> GenerateQuiz(Story story, QuizCreate config)
+        public async Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
         {
             Thread.Sleep(4000);
             var quiz = new Quiz
