@@ -13,4 +13,15 @@ namespace sustAInableEducation_backend.Models
         public string AnonUserName { get; set; } = UserNameGenService.GenerateUserName();
     }
 
+    public class ChangeEmailRequest
+    {
+        public string NewEmail { get; set; } = null!;
+    }
+
+    public class ChangePasswordRequest
+    {
+        public string OldPassword { get; set; } = null!;
+        public string NewPassword { get; set; } = null!;
+    }
+
 }
