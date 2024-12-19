@@ -4,8 +4,11 @@
 
 body {
     font-family: 'Outfit';
-    overflow: hidden;
-    @apply bg-slate-50;
+    @apply bg-slate-50 overflow-hidden relative;
+}
+
+html {
+    @apply overflow-hidden
 }
 
 .background {
