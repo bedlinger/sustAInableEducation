@@ -29,11 +29,11 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Quiz>>> GetQuizzes(Guid? environmentId)
+        public async Task<ActionResult<IEnumerable<Quiz>>> GetQuizzes(Guid? spaceId)
         {
-            if (environmentId != null)
+            if (spaceId != null)
             {
-                return await _context.Quiz.Where(q => q.UserId == _userId && q.EnvironmentId == environmentId).ToListAsync();
+                return await _context.Quiz.Where(q => q.UserId == _userId && q.SpaceId == spaceId).ToListAsync();
             }
             return await _context.Quiz.Where(q => q.UserId == _userId).ToListAsync();
         }
@@ -62,14 +62,14 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Quiz>> PostQuiz(QuizRequest config)
         {
-            if (!await _context.IsParticipant(_userId, config.EnvironmentId))
+            if (!await _context.IsParticipant(_userId, config.SpaceId))
             {
                 return Unauthorized();
             }
-            var story = (await _context.EnvironmentWithStory.FirstOrDefaultAsync(e => e.Id == config.EnvironmentId))!.Story;
+            var story = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == config.SpaceId))!.Story;
             var quiz = await _ai.GenerateQuiz(story, config);
             quiz.UserId = _userId;
-            quiz.EnvironmentId = config.EnvironmentId;
+            quiz.SpaceId = config.SpaceId;
             _context.Quiz.Add(quiz);
             await _context.SaveChangesAsync();
 

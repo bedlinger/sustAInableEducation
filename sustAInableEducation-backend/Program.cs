@@ -73,6 +73,6 @@ app.MapControllers();
 
 app.MapGroup("/account").MapIdentityApi<ApplicationUser>().WithTags("Account");
 
-app.MapHub<EnvironmentHub>("/environmentHub/{id}");
+app.MapHub<SpaceHub>("/spaceHub/{id}");
 
 app.Run();

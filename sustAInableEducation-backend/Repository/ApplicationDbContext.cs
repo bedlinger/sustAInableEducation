@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using sustAInableEducation_backend.Models;
-using Environment = sustAInableEducation_backend.Models.Environment;
+using Space = sustAInableEducation_backend.Models.Space;
 
 namespace sustAInableEducation_backend.Repository
 {
@@ -14,9 +14,9 @@ namespace sustAInableEducation_backend.Repository
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<EnvironmentParticipant>()
-                .HasKey(e => new { e.EnvironmentId, e.UserId });
-            builder.Entity<EnvironmentAccessCode>()
+            builder.Entity<SpaceParticipant>()
+                .HasKey(e => new { e.SpaceId, e.UserId });
+            builder.Entity<SpaceAccessCode>()
                 .HasKey(e => e.Code);
             builder.Entity<StoryChoice>()
                 .HasKey(e => new { e.StoryPartId, e.Number });
@@ -26,9 +26,9 @@ namespace sustAInableEducation_backend.Repository
                 .HasKey(e => new { e.QuizQuestionId, e.TryNumber });
         }
 
-        public DbSet<sustAInableEducation_backend.Models.Environment> Environment { get; set; } = default!;
-        public DbSet<sustAInableEducation_backend.Models.EnvironmentParticipant> EnvironmentParticipant { get; set; } = default!;
-        public DbSet<sustAInableEducation_backend.Models.EnvironmentAccessCode> EnvironmentAccessCode { get; set; } = default!;
+        public DbSet<sustAInableEducation_backend.Models.Space> Space { get; set; } = default!;
+        public DbSet<sustAInableEducation_backend.Models.SpaceParticipant> SpaceParticipant { get; set; } = default!;
+        public DbSet<sustAInableEducation_backend.Models.SpaceAccessCode> SpaceAccessCode { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.Quiz> Quiz { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.QuizChoice> QuizChoice { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.QuizQuestion> QuizQuestion { get; set; } = default!;
@@ -37,11 +37,11 @@ namespace sustAInableEducation_backend.Repository
         public DbSet<sustAInableEducation_backend.Models.StoryChoice> StoryChoice { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.StoryPart> StoryPart { get; set; } = default!;
 
-        public IQueryable<Environment> EnvironmentWithStory => Environment
+        public IQueryable<Space> SpaceWithStory => Space
                 .Include(e => e.Story)
                 .ThenInclude(s => s.Parts.OrderBy(p => p.CreatedAt))
                 .ThenInclude(p => p.Choices.OrderBy(p => p.Number));
-        public IQueryable<Environment> EnvironmentWithAll => EnvironmentWithStory
+        public IQueryable<Space> SpaceWithAll => SpaceWithStory
                 .Include(e => e.Participants)
                 .ThenInclude(e => e.User);
 
@@ -51,14 +51,14 @@ namespace sustAInableEducation_backend.Repository
                 .Include(q => q.Questions)
                 .ThenInclude(q => q.Results);
 
-        public async Task<bool> IsParticipant(string userId, Guid environmentId)
+        public async Task<bool> IsParticipant(string userId, Guid spaceId)
         {
-            return await EnvironmentParticipant.AnyAsync(p => p.UserId == userId && p.EnvironmentId == environmentId);
+            return await SpaceParticipant.AnyAsync(p => p.UserId == userId && p.SpaceId == spaceId);
         }
         
-        public async Task<bool> IsHost(string userId, Guid environmentId)
+        public async Task<bool> IsHost(string userId, Guid spaceId)
         {
-            return await EnvironmentParticipant.AnyAsync(p => p.UserId == userId && p.EnvironmentId == environmentId && p.IsHost);
+            return await SpaceParticipant.AnyAsync(p => p.UserId == userId && p.SpaceId == spaceId && p.IsHost);
         }
     }
 }
