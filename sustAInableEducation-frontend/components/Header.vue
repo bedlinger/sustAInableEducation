@@ -6,7 +6,10 @@
         <div class="flex justify-center items-center">
             <NuxtLink to="/ecospaces" class="text-white mx-4 text-xl">EcoSpaces</NuxtLink>
             <NuxtLink to="/quizzes" class="text-white mx-4 text-xl">Quizzes</NuxtLink>
-            <Icon name="system-uicons:user-male-circle" class="bg-white mx-4 size-10"/>
+            <NuxtLink to="/login" class="text-white mx-4 text-xl flex justify-center items-center">
+                <Icon name="system-uicons:user-male-circle" class="bg-white mx-4 size-10"/>
+            </NuxtLink>
+            
         </div>
     </div>
 </template>
