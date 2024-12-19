@@ -9,7 +9,7 @@ namespace sustAInableEducation_backend.Models
         [JsonIgnore]
         public string UserId { get; set; } = null!;
         [JsonIgnore]
-        public Guid EnvironmentId { get; set; }
+        public Guid SpaceId { get; set; }
 
         public ICollection<QuizQuestion> Questions { get; set; } = new List<QuizQuestion>();
 
@@ -29,7 +29,7 @@ namespace sustAInableEducation_backend.Models
 
     public class QuizRequest
     {
-        public Guid EnvironmentId { get; set; }
+        public Guid SpaceId { get; set; }
         public ICollection<QuizType> Types { get; set; } = new List<QuizType>();
         public uint NumberQuestions { get; set; }
     }
