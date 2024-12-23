@@ -24,7 +24,7 @@
                                 </Panel>
                                 <Divider />
                                 <div class="bg-slate-50 flex justify-end">
-                                    <Button label="Next" @click="activateCallback('2')"/>
+                                    <Button label="Next" v-tooltip.bottom="{value: (selectedSdg === -1) ? 'Es muss eine Auswahl getroffen werden': null}" :disabled="selectedSdg === -1" @click="activateCallback('2')"/>
                                 </div>
                             </StepPanel>
                             <StepPanel v-slot="{ activateCallback }" value="2">
