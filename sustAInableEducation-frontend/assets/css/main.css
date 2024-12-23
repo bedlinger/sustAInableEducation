@@ -14,3 +14,15 @@ html {
 .background {
     @apply absolute inset-x-0 top-0 h-screen bg-gradient-to-br bg-no-repeat bg-cover from-slate-50 via-20% via-primary-200 to-50% -z-50 blur-3xl;
 }
+
+.p-step-title {
+    @apply text-xl;
+}
+
+.p-panel-header {
+    @apply !pt-1;
+}
+
+.p-divider-content {
+    @apply !bg-slate-50
+}
