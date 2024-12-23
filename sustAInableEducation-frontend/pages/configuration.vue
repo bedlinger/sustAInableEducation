@@ -23,7 +23,8 @@
                                     </div>
                                 </Panel>
                                 <Divider />
-                                <div class="bg-slate-50 flex justify-end">
+                                <div class="bg-slate-50 flex items-center justify-end" :class="{ 'justify-between': selectedSdg != -1 }">
+                                    <p v-if="selectedSdg != -1"> Ausgewählt: {{ getSdgAsset(selectedSdg)?.name }}</p>
                                     <Button label="Next" v-tooltip.bottom="{value: (selectedSdg === -1) ? 'Es muss eine Auswahl getroffen werden': null}" :disabled="selectedSdg === -1" @click="activateCallback('2')"/>
                                 </div>
                             </StepPanel>
@@ -91,10 +92,14 @@ const sdgAssets = ref(Object.fromEntries(
     ])
 ))
 
+function getSdgAsset(id: number) {
+    return Object.values(sdgAssets.value).find(sdg => sdg.id === id)
+}
+
 function selectSdg(newSdg: number) {
     console.log(selectedSdg.value)
     if (selectedSdg.value != -1) {
-        let prev = Object.values(sdgAssets.value).find(sdg => sdg.id === selectedSdg.value)
+        let prev = getSdgAsset(selectedSdg.value)
         console.log(prev)
         prev!.asset_path = Object.values(SdgAsset.sdgs).find(sdg => sdg.id === selectedSdg.value)!.iconPath
     }
@@ -102,7 +107,7 @@ function selectSdg(newSdg: number) {
         selectedSdg.value = -1
         return
     } else {
-        let next = Object.values(sdgAssets.value).find(sdg => sdg.id === newSdg)
+        let next = getSdgAsset(newSdg)
         next!.asset_path = Object.values(SdgAsset.sdgs).find(sdg => sdg.id === newSdg)!.gifPath
         selectedSdg.value = newSdg
     }
