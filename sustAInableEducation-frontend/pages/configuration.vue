@@ -19,7 +19,7 @@
                                 <Panel class="max-h-[400px] overflow-y-scroll">
                                     <div class="w-full flex flex-wrap justify-center">
                                         <img v-for="sdg in sdgAssets" :src="sdg.asset_path" :alt="sdg.name"
-                                            class="w-40 h-40 m-2 cursor-pointer" :class="{ 'box-border border-4 3border-white' : (sdg.id === selectedSdg) }" @click="selectSdg(sdg.id)" />
+                                            class="w-40 h-40 m-2 cursor-pointer" :class="{ 'box-border border-4 border-white' : (sdg.id === selectedSdg) }" @click="selectSdg(sdg.id)" />
                                     </div>
                                 </Panel>
                                 <Divider />
