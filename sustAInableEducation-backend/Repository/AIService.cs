@@ -4,13 +4,20 @@ namespace sustAInableEducation_backend.Repository
 {
     public class AIService : IAIService
     {
+        private readonly IConfiguration _config;
         private ICollection<Message> _messages { get; set; } = new List<Message>();
+
+        public AIService(IConfiguration config)
+        {
+            _config = config;
+        }
 
         /**
          * Benjamin Edlinger
          */
         public Task<StoryPart> StartStory(Story story)
         {
+            Console.WriteLine(_config["deepinfra:url"]);
             throw new NotImplementedException();
         }
 
