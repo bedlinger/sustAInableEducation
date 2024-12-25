@@ -4,7 +4,28 @@ namespace sustAInableEducation_backend.Repository
 {
     public class AIService : IAIService
     {
+        private ICollection<Message> _messages { get; set; } = new List<Message>();
+
+        /**
+         * Benjamin Edlinger
+         */
+        public Task<StoryPart> StartStory(Story story)
+        {
+            throw new NotImplementedException();
+        }
+
+        /**
+         * Benjamin Edlinger
+         */
         public Task<StoryPart> GenerateNextPart(Story story)
+        {
+            throw new NotImplementedException();
+        }
+
+        /**
+         * Benjamin Edlinger
+         */
+        public Task<StoryPart> GenerateResult(Story story)
         {
             throw new NotImplementedException();
         }
@@ -13,15 +34,29 @@ namespace sustAInableEducation_backend.Repository
         {
             throw new NotImplementedException();
         }
+    }
 
-        public Task<StoryPart> GenerateResult(Story story)
+    /**
+     * Benjamin Edlinger
+     */
+    public class Message
+    {
+        private static readonly string[] ValidRoles = { "system", "user", "assitant" };
+
+        private string _role = null!;
+        public string role
         {
-            throw new NotImplementedException();
+            get => _role;
+            set
+            {
+                if (!ValidRoles.Contains(value))
+                {
+                    throw new ArgumentException($"Invalid role: {value}. Valid roles are: {string.Join(", ", ValidRoles)}");
+                }
+                _role = value;
+            }
         }
 
-        public Task<StoryPart> StartStory(Story story)
-        {
-            throw new NotImplementedException();
-        }
+        public string content { get; set; } = null!;
     }
 }
