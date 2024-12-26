@@ -26,3 +26,7 @@ html {
 .p-divider-content {
     @apply !bg-slate-50
 }
+
+.p-tablist-tab-list {
+    @apply !bg-slate-50;
+}

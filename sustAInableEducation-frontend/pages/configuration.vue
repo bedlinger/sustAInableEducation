@@ -3,7 +3,7 @@
         <div class="background animate-anim" />
         <div class="w-screen flex flex-col items-center justify-center h-full">
             <div
-                class="bg-slate-50 shadow-xl rounded-xl flex flex-col p-8 items-center w-full max-w-[1000px] h-full max-h-[650px] ">
+                class="bg-slate-50 shadow-xl rounded-xl flex flex-col p-4 items-center w-full max-w-[1000px] h-full max-h-[650px] ">
                 <div class="max-h-full flex flex-col items-center w-full">
                     <h1 class="text-3xl font-bold mb-8 h-5">EcoSpace erstellen</h1>
                     <Stepper value="1" class="flex-1">
@@ -14,19 +14,44 @@
                             <Step value="2">Einstellungen</Step>
                             <Divider />
                         </Steplist>
-                        <StepPanels class="">
-                            <StepPanel v-slot="{ activateCallback }" value="1" class="w-full !bg-slate-50">
-                                <Panel class="max-h-[400px] overflow-y-scroll">
-                                    <div class="w-full flex flex-wrap justify-center">
-                                        <img v-for="sdg in sdgAssets" :src="sdg.asset_path" :alt="sdg.name"
-                                            class="w-40 h-40 m-2 cursor-pointer" :class="{ 'box-border border-4 border-white' : (sdg.id === selectedSdg) }" @click="selectSdg(sdg.id)" />
-                                    </div>
-                                </Panel>
-                                <Divider />
-                                <div class="bg-slate-50 flex items-center justify-end" :class="{ 'justify-between': selectedSdg != -1 }">
-                                    <p v-if="selectedSdg != -1"> Ausgewählt: {{ getSdgAsset(selectedSdg)?.name }}</p>
-                                    <Button label="Next" v-tooltip.bottom="{value: (selectedSdg === -1) ? 'Es muss eine Auswahl getroffen werden': null}" :disabled="selectedSdg === -1" @click="activateCallback('2')"/>
-                                </div>
+                        <StepPanels class="!p-0">
+                            <StepPanel v-slot="{ activateCallback }" value="1" class="w-full">
+                                <Tabs value="0" class="!bg-slate-50">
+                                    <TabList class="flex">
+                                        <Tab value="0" as="div"
+                                            class="h-10 flex-1 flex justify-center items-center !bg-white !rounded-tl-xl">
+                                            <span>SDGs</span>
+                                        </Tab>
+                                        <Tab value="1" as="div"
+                                            class="h-10 flex-1 flex justify-center items-center !bg-white !rounded-tr-xl">
+                                            <span>Eigenes Thema</span>
+                                        </Tab>
+                                    </TabList>
+                                    <TabPanels class="!p-0 !pt-2 !px-4">
+                                        <TabPanel value="0" class="">
+                                            <Panel class="max-h-[400px] overflow-y-scroll">
+                                                <div class="w-full flex flex-wrap justify-center">
+                                                    <img v-for="sdg in sdgAssets" :src="sdg.asset_path" :alt="sdg.name"
+                                                        class="w-40 h-40 m-2 cursor-pointer"
+                                                        :class="{ 'box-border border-4 border-white': (sdg.id === selectedSdg) }"
+                                                        @click="selectSdg(sdg.id)" />
+                                                </div>
+                                            </Panel>
+                                            <div class="w-full">
+                                                <Divider />
+                                                <div class="flex items-center justify-end "
+                                                    :class="{ 'justify-between': selectedSdg != -1 }">
+                                                    <p v-if="selectedSdg != -1"> Ausgewählt: {{
+                                                        getSdgAsset(selectedSdg)?.name }}</p>
+                                                    <Button label="Next"
+                                                        v-tooltip.bottom="{ value: (selectedSdg === -1) ? 'Es muss eine Auswahl getroffen werden' : null }"
+                                                        :disabled="selectedSdg === -1" @click="activateCallback('2')" />
+                                                </div>
+                                            </div>
+                                        </TabPanel>
+                                    </TabPanels>
+                                </Tabs>
+
                             </StepPanel>
                             <StepPanel v-slot="{ activateCallback }" value="2">
                                 <div class="flex flex-col h-48">
