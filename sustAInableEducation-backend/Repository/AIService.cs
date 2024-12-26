@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using sustAInableEducation_backend.Models;
 
@@ -8,8 +7,8 @@ namespace sustAInableEducation_backend.Repository
     public class AIService : IAIService
     {
         private readonly IConfiguration _config;
-        private List<ChatMessage> _messages { get; set; } = new List<ChatMessage>();
-        private static HttpClient _client;
+        private List<ChatMessage> _chatMessages { get; set; } = new List<ChatMessage>();
+        private static HttpClient? _client;
 
         /**
          * Benjamin Edlinger
@@ -32,12 +31,12 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> StartStory(Story story)
         {
-            _messages.Add(new ChatMessage
+            _chatMessages.Add(new ChatMessage
             {
                 Role = ValidRoles.System,
                 Content = story.Prompt
             });
-            _messages.Add(new ChatMessage
+            _chatMessages.Add(new ChatMessage
             {
                 Role = ValidRoles.User,
                 Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte."
@@ -67,7 +66,7 @@ namespace sustAInableEducation_backend.Repository
          */
         private async Task<(StoryPart, string)> PostAsync(float temprature, float topP)
         {
-            if (_messages.Count == 0)
+            if (_chatMessages.Count == 0)
             {
                 throw new ArgumentException("No messages to send");
             }
@@ -83,7 +82,7 @@ namespace sustAInableEducation_backend.Repository
                 JsonSerializer.Serialize(new
                 {
                     model = "meta-llama/Llama-3.3-70B-Instruct",
-                    messages = _messages,
+                    messages = _chatMessages,
                     response_format = new
                     {
                         type = "json_object"
@@ -137,6 +136,11 @@ namespace sustAInableEducation_backend.Repository
                     }
                 }
             };
+            _chatMessages.Add(new ChatMessage
+            {
+                Role = ValidRoles.Assistant,
+                Content = responseObject?.Data?.Choices[0]?.Message?.ToString() ?? string.Empty
+            });
             return (storyPart, title);
         }
 
