@@ -35,7 +35,7 @@ namespace sustAInableEducation_backend.Repository
         {
             _chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = story.Prompt });
             _chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." });
-            var response = await PostAsync(story.Temperature, story.TopP);
+            var response = await FetchStoryPartAsync(story.Temperature, story.TopP);
             return response.Item1;
         }
 
@@ -49,7 +49,7 @@ namespace sustAInableEducation_backend.Repository
                 : $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt.";
 
             _chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
-            var response = await PostAsync(story.Temperature, story.TopP);
+            var response = await FetchStoryPartAsync(story.Temperature, story.TopP);
             return response.Item1;
         }
 
@@ -64,7 +64,7 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private async Task<(StoryPart, string)> PostAsync(float temperature, float topP)
+        private async Task<(StoryPart, string)> FetchStoryPartAsync(float temperature, float topP)
         {
             if (_client == null) throw new InvalidOperationException("Client is null");
             if (_chatMessages.Count == 0) throw new ArgumentException("No messages to send");
