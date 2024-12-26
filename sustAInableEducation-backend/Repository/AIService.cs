@@ -1,13 +1,18 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using sustAInableEducation_backend.Models;
 
 namespace sustAInableEducation_backend.Repository
 {
     public class AIService : IAIService
     {
+        /**
+         * Benjamin Edlinger
+         */
         private readonly IConfiguration _config;
-        private List<ChatMessage> _chatMessages { get; set; } = new List<ChatMessage>();
+        private readonly List<ChatMessage> _chatMessages = new();
         private static HttpClient? _client;
 
         /**
@@ -16,14 +21,11 @@ namespace sustAInableEducation_backend.Repository
         public AIService(IConfiguration config)
         {
             _config = config;
-            var baseUrl = _config["deepinfra:url"] ?? throw new ArgumentNullException("deepinfra:url configuration is missing");
-            var apiKey = _config["deepinfra:api_key"] ?? throw new ArgumentNullException("deepinfra:api_key configuration is missing");
             _client = new()
             {
-                BaseAddress = new Uri(baseUrl)
+                BaseAddress = new Uri(_config["deepinfra:url"] ?? throw new ArgumentNullException("deepinfra:url configuration is missing"))
             };
-            _client.DefaultRequestHeaders.Add("Content-Type", "application/json");
-            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["deepinfra:api_key"] ?? throw new ArgumentNullException("deepinfra:api_key configuration is missing")}");
         }
 
         /**
@@ -31,16 +33,8 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> StartStory(Story story)
         {
-            _chatMessages.Add(new ChatMessage
-            {
-                Role = ValidRoles.System,
-                Content = story.Prompt
-            });
-            _chatMessages.Add(new ChatMessage
-            {
-                Role = ValidRoles.User,
-                Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte."
-            });
+            _chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = story.Prompt });
+            _chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." });
             var response = await PostAsync(story.Temperature, story.TopP);
             return response.Item1;
         }
@@ -50,20 +44,11 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> GenerateNextPart(Story story)
         {
-            string userPrompt;
-            if (story.Parts.Count == story.Length)
-            {
-                userPrompt = $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, nachdem es der letzte Entscheidungspunkt war, kommt nun der Schluss der Geschichte.";
-            }
-            else
-            {
-                userPrompt = $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt.";
-            }
-            _chatMessages.Add(new ChatMessage
-            {
-                Role = ValidRoles.User,
-                Content = userPrompt
-            });
+            var userPrompt = story.Parts.Count == story.Length
+                ? $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, nachdem es der letzte Entscheidungspunkt war, kommt nun der Schluss der Geschichte."
+                : $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt.";
+
+            _chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
             var response = await PostAsync(story.Temperature, story.TopP);
             return response.Item1;
         }
@@ -79,140 +64,53 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private async Task<(StoryPart, string)> PostAsync(float temprature, float topP)
+        private async Task<(StoryPart, string)> PostAsync(float temperature, float topP)
         {
-            if (_client == null)
+            if (_client == null) throw new InvalidOperationException("Client is null");
+            if (_chatMessages.Count == 0) throw new ArgumentException("No messages to send");
+            if (temperature < 0 || temperature > 1) throw new ArgumentException("Invalid temperature");
+            if (topP < 0 || topP > 1) throw new ArgumentException("Invalid topP");
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "/v1/openai/chat/completions")
             {
-                throw new InvalidOperationException("Client is not initialized");
-            }
-            if (_chatMessages.Count == 0)
-            {
-                throw new ArgumentException("No messages to send");
-            }
-            if (temprature < 0 || temprature > 1)
-            {
-                throw new ArgumentException("Invalid temperature");
-            }
-            if (topP < 0 || topP > 1)
-            {
-                throw new ArgumentException("Invalid topP");
-            }
-            using StringContent jsonData = new(
-                JsonSerializer.Serialize(new
+                Content = new StringContent(JsonSerializer.Serialize(new
                 {
                     model = "meta-llama/Llama-3.3-70B-Instruct",
                     messages = _chatMessages,
-                    response_format = new
-                    {
-                        type = "json_object"
-                    },
-                    temprature,
+                    response_format = new { type = "json_object" },
+                    temperature,
                     top_p = topP
-                }),
-                    Encoding.UTF8,
-                    "application/json"
-                    );
+                }), Encoding.UTF8, "application/json")
+            };
 
-            var response = await _client.PostAsync("v1/openai/chat/completions", jsonData);
+            var response = await _client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var responseContent = await response.Content.ReadAsStringAsync();
-            var responseObject = JsonSerializer.Deserialize<Response>(responseContent);
 
-            if (responseObject?.Data?.Choices == null || responseObject.Data.Choices.Count == 0)
-            {
-                throw new InvalidOperationException("Invalid response from the server");
-            }
+            var responseObject = JsonSerializer.Deserialize<Response>(responseContent) ?? throw new InvalidOperationException("Response is null");
+            var assistantContent = responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
+            var messageContent = JsonSerializer.Deserialize<Content>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
 
-            var title = responseObject.Data.Choices[0].Message.Content.Title;
+            _chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = assistantContent });
+
             var storyPart = new StoryPart
             {
-                Text = responseObject.Data.Choices[0].Message.Content.Story,
-                Choices = new List<StoryChoice>()
+                Text = messageContent.Story,
+                Choices = messageContent.Options.Select((option, index) => new StoryChoice
                 {
-                    new StoryChoice
-                    {
-                        Text = responseObject.Data.Choices[0].Message.Content.Options[0].Text,
-                        Number = 1,
-                        Impact = responseObject.Data.Choices[0].Message.Content.Options[0].Impact
-                    },
-                    new StoryChoice
-                    {
-                        Text = responseObject.Data.Choices[0].Message.Content.Options[1].Text,
-                        Number = 2,
-                        Impact = responseObject.Data.Choices[0].Message.Content.Options[1].Impact
-                    },
-                    new StoryChoice
-                    {
-                        Text = responseObject.Data.Choices[0].Message.Content.Options[2].Text,
-                        Number = 3,
-                        Impact = responseObject.Data.Choices[0].Message.Content.Options[2].Impact
-                    },
-                    new StoryChoice
-                    {
-                        Text = responseObject.Data.Choices[0].Message.Content.Options[3].Text,
-                        Number = 4,
-                        Impact = responseObject.Data.Choices[0].Message.Content.Options[3].Impact
-                    }
-                }
+                    Text = option.Text,
+                    Number = index + 1,
+                    Impact = option.Impact
+                }).ToList()
             };
-            _chatMessages.Add(new ChatMessage
-            {
-                Role = ValidRoles.Assistant,
-                Content = responseObject?.Data?.Choices[0]?.Message?.ToString() ?? string.Empty
-            });
-            return (storyPart, title);
+
+            return (storyPart, messageContent.Title);
         }
 
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
         {
             throw new NotImplementedException();
         }
-    }
-
-    /**
-     * Benjamin Edlinger
-     */
-    public class ChatMessage
-    {
-        private string _role = null!;
-        public string Role
-        {
-            get => _role;
-            set
-            {
-                if (value != ValidRoles.System && value != ValidRoles.User && value != ValidRoles.Assistant)
-                {
-                    throw new ArgumentException("Invalid role");
-                }
-                _role = value;
-            }
-        }
-        public string Content { get; set; } = null!;
-    }
-
-    /**
-     * Benjamin Edlinger
-     */
-    public class Response
-    {
-        public Data Data { get; set; } = null!;
-    }
-
-    /**
-     * Benjamin Edlinger
-     */
-    public class Data
-    {
-        public List<Choice> Choices { get; set; } = null!;
-    }
-
-    /**
-     * Benjamin Edlinger
-     */
-    public class Choice
-    {
-        public int Index { get; set; }
-        public Message Message { get; set; } = null!;
     }
 
     /**
@@ -228,9 +126,11 @@ namespace sustAInableEducation_backend.Repository
     /**
      * Benjamin Edlinger
      */
-    public class Message
+    public class ChatMessage
     {
         private string _role = null!;
+
+        [JsonPropertyName("role")]
         public string Role
         {
             get => _role;
@@ -243,7 +143,73 @@ namespace sustAInableEducation_backend.Repository
                 _role = value;
             }
         }
-        public Content Content { get; set; } = null!;
+
+        [JsonPropertyName("content")]
+        public string Content { get; set; } = null!;
+    }
+
+    /**
+     * Benjamin Edlinger
+     */
+    public class Response
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = null!;
+
+        [JsonPropertyName("object")]
+        public string Object { get; set; } = null!;
+
+        [JsonPropertyName("created")]
+        public long Created { get; set; }
+
+        [JsonPropertyName("model")]
+        public string Model { get; set; } = null!;
+
+        [JsonPropertyName("choices")]
+        public List<Choice> Choices { get; set; } = null!;
+
+        [JsonPropertyName("usage")]
+        public Usage Usage { get; set; } = null!;
+    }
+
+    /**
+     * Benjamin Edlinger
+     */
+    public class Choice
+    {
+        [JsonPropertyName("index")]
+        public int Index { get; set; }
+
+        [JsonPropertyName("message")]
+        public Message Message { get; set; } = null!;
+
+        [JsonPropertyName("finish_reason")]
+        public string FinishReason { get; set; } = null!;
+    }
+
+    /**
+     * Benjamin Edlinger
+     */
+    public class Message
+    {
+        private string _role = null!;
+
+        [JsonPropertyName("role")]
+        public string Role
+        {
+            get => _role;
+            set
+            {
+                if (value != ValidRoles.System && value != ValidRoles.User && value != ValidRoles.Assistant)
+                {
+                    throw new ArgumentException("Invalid role");
+                }
+                _role = value;
+            }
+        }
+
+        [JsonPropertyName("content")]
+        public string Content { get; set; } = null!;
     }
 
     /**
@@ -251,11 +217,17 @@ namespace sustAInableEducation_backend.Repository
      */
     public class Content
     {
+        [JsonPropertyName("title")]
         public string Title { get; set; } = null!;
-        public string Intertitle { get; set; } = null!;
-        public string Story { get; set; } = null!;
-        public List<Option> Options { get; set; } = null!;
 
+        [JsonPropertyName("intertitle")]
+        public string Intertitle { get; set; } = null!;
+
+        [JsonPropertyName("story")]
+        public string Story { get; set; } = null!;
+
+        [JsonPropertyName("options")]
+        public List<Option> Options { get; set; } = null!;
     }
 
     /**
@@ -263,7 +235,31 @@ namespace sustAInableEducation_backend.Repository
      */
     public class Option
     {
-        public float Impact { get; set; }
+        [JsonPropertyName("impact")]
+        public string ImpactString { get; set; } = null!;
+
+        [JsonIgnore]
+        public float Impact => float.Parse(ImpactString, CultureInfo.InvariantCulture);
+
+        [JsonPropertyName("text")]
         public string Text { get; set; } = null!;
+    }
+
+    /**
+     * Benjamin Edlinger
+     */
+    public class Usage
+    {
+        [JsonPropertyName("prompt_tokens")]
+        public int PromptTokens { get; set; }
+
+        [JsonPropertyName("completion_tokens")]
+        public int CompletionTokens { get; set; }
+
+        [JsonPropertyName("total_tokens")]
+        public int TotalTokens { get; set; }
+
+        [JsonPropertyName("estimated_cost")]
+        public double EstimatedCost { get; set; }
     }
 }
