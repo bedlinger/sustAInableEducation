@@ -48,9 +48,24 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        public Task<StoryPart> GenerateNextPart(Story story)
+        public async Task<StoryPart> GenerateNextPart(Story story)
         {
-            throw new NotImplementedException();
+            string userPrompt;
+            if (story.Parts.Count == story.Length)
+            {
+                userPrompt = $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, nachdem es der letzte Entscheidungspunkt war, kommt nun der Schluss der Geschichte.";
+            }
+            else
+            {
+                userPrompt = $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt.";
+            }
+            _chatMessages.Add(new ChatMessage
+            {
+                Role = ValidRoles.User,
+                Content = userPrompt
+            });
+            var response = await PostAsync(story.Temperature, story.TopP);
+            return response.Item1;
         }
 
         /**
