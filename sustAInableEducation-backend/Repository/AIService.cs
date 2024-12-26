@@ -81,6 +81,10 @@ namespace sustAInableEducation_backend.Repository
          */
         private async Task<(StoryPart, string)> PostAsync(float temprature, float topP)
         {
+            if (_client == null)
+            {
+                throw new InvalidOperationException("Client is not initialized");
+            }
             if (_chatMessages.Count == 0)
             {
                 throw new ArgumentException("No messages to send");
