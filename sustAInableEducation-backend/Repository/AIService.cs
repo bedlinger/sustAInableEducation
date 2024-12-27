@@ -33,6 +33,10 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> StartStory(Story story)
         {
+            if (story.Parts.Count != 0) throw new ArgumentException("Story already has parts");
+            if (story.Length == 0) throw new ArgumentException("Story has set no length");
+            if (story.Prompt == null) throw new ArgumentException("Story has no prompt");
+
             _chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = story.Prompt });
             _chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." });
             var response = await FetchStoryPartAsync(story.Temperature, story.TopP);
@@ -44,6 +48,11 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> GenerateNextPart(Story story)
         {
+            if (story.Parts.Count == 0) throw new ArgumentException("Story has no parts");
+            if (story.Parts.Count >= story.Length) throw new ArgumentException("Story is complete");
+            if (story.Parts.Last().ChosenNumber == null) throw new ArgumentException("Last part has no choice");
+            if (story.Parts.Last().ChosenNumber < 1 || story.Parts.Last().ChosenNumber > 4) throw new ArgumentException("Invalid choice number");
+
             var userPrompt = story.Parts.Count == story.Length
                 ? $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, nachdem es der letzte Entscheidungspunkt war, kommt nun der Schluss der Geschichte."
                 : $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt.";
@@ -58,6 +67,11 @@ namespace sustAInableEducation_backend.Repository
          */
         public Task<StoryPart> GenerateResult(Story story)
         {
+            if (story.Parts.Count == 0) throw new ArgumentException("Story has no parts");
+            if (story.Parts.Count < story.Length) throw new ArgumentException("Story is not complete");
+            if (story.Parts.Last().ChosenNumber == null) throw new ArgumentException("Last part has no choice");
+            if (story.Parts.Last().ChosenNumber < 1 || story.Parts.Last().ChosenNumber > 4) throw new ArgumentException("Invalid choice number");
+
             throw new NotImplementedException();
         }
 
