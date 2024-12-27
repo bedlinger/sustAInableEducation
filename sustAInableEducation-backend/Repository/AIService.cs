@@ -12,7 +12,6 @@ namespace sustAInableEducation_backend.Repository
          * Benjamin Edlinger
          */
         private readonly IConfiguration _config;
-        private readonly List<ChatMessage> _chatMessages = new();
         private static HttpClient? _client;
 
         /**
@@ -33,13 +32,10 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> StartStory(Story story)
         {
-            if (story.Parts.Count != 0) throw new ArgumentException("Story already has parts");
-            if (story.Length == 0) throw new ArgumentException("Story has set no length");
-            if (story.Prompt == null) throw new ArgumentException("Story has no prompt");
+            if (story == null) throw new ArgumentNullException("Story is null");
 
-            _chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = story.Prompt });
-            _chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." });
-            var response = await FetchStoryPartAsync(story.Temperature, story.TopP);
+            var chatMessages = RebuildChatMessages(story);
+            var response = await FetchStoryPartAsync(chatMessages, story.Temperature, story.TopP);
             return response.Item1;
         }
 
@@ -48,17 +44,10 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> GenerateNextPart(Story story)
         {
-            if (story.Parts.Count == 0) throw new ArgumentException("Story has no parts");
-            if (story.Parts.Count >= story.Length) throw new ArgumentException("Story is complete");
-            if (story.Parts.Last().ChosenNumber == null) throw new ArgumentException("Last part has no choice");
-            if (story.Parts.Last().ChosenNumber < 1 || story.Parts.Last().ChosenNumber > 4) throw new ArgumentException("Invalid choice number");
+            if (story == null) throw new ArgumentNullException("Story is null");
 
-            var userPrompt = story.Parts.Count == story.Length
-                ? $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, nachdem es der letzte Entscheidungspunkt war, kommt nun der Schluss der Geschichte."
-                : $"Die Option {story.Parts.Last().ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt.";
-
-            _chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
-            var response = await FetchStoryPartAsync(story.Temperature, story.TopP);
+            var chatMessages = RebuildChatMessages(story);
+            var response = await FetchStoryPartAsync(chatMessages, story.Temperature, story.TopP);
             return response.Item1;
         }
 
@@ -67,10 +56,11 @@ namespace sustAInableEducation_backend.Repository
          */
         public Task<StoryPart> GenerateResult(Story story)
         {
-            if (story.Parts.Count == 0) throw new ArgumentException("Story has no parts");
-            if (story.Parts.Count < story.Length) throw new ArgumentException("Story is not complete");
-            if (story.Parts.Last().ChosenNumber == null) throw new ArgumentException("Last part has no choice");
-            if (story.Parts.Last().ChosenNumber < 1 || story.Parts.Last().ChosenNumber > 4) throw new ArgumentException("Invalid choice number");
+            if (story == null) throw new ArgumentNullException("Story is null");
+
+            Thread.Sleep(2000);
+            Console.WriteLine("Story is complete --> Generating Result...");
+            Thread.Sleep(2000);
 
             throw new NotImplementedException();
         }
@@ -78,10 +68,59 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private async Task<(StoryPart, string)> FetchStoryPartAsync(float temperature, float topP)
+        private List<ChatMessage> RebuildChatMessages(Story story)
+        {
+            if (story == null) throw new ArgumentNullException("Story is null");
+            if (story.Length == 0) throw new ArgumentException("Story has set no length");
+            if (story.Prompt == null) throw new ArgumentException("Story has no prompt");
+
+            var chatMessages = new List<ChatMessage>
+            {
+                new ChatMessage { Role = ValidRoles.System, Content = story.Prompt },
+                new ChatMessage { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
+            };
+
+            foreach (var part in story.Parts)
+            {
+                var assitentContent = new StoryContent
+                {
+                    // Title = story.Title ?? throw new ArgumentNullException("Story has no title"),
+                    Title = "Title", // #TODO: Title in StoryPart.cs hinzufügen
+                    // Intertitle = part.Intertitle ?? throw new ArgumentNullException("Part has no intertitle"),
+                    Intertitle = "Intertitle", // #TODO: Intertitle in StoryPart.cs hinzufügen
+                    Story = part.Text,
+                    Options = part.Choices.Select(choice => new Option
+                    {
+                        ImpactString = choice.Impact.ToString(CultureInfo.InvariantCulture),
+                        Text = choice.Text
+                    }).ToList()
+                };
+                chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assitentContent) });
+
+                if (!part.ChosenNumber.HasValue || part.ChosenNumber < 1 || part.ChosenNumber > 4)
+                {
+                    throw new ArgumentException("Story part has invalid choice number");
+                }
+                else if (story.Parts.Count >= story.Length)
+                {
+                    throw new NotImplementedException("Prompts for generating a result is not implemented");
+                }
+                else
+                {
+                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = $"Die Option {part.ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt." });
+                }
+            }
+
+            return chatMessages;
+        }
+
+        /**
+         * Benjamin Edlinger
+         */
+        private async Task<(StoryPart, string)> FetchStoryPartAsync(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             if (_client == null) throw new InvalidOperationException("Client is null");
-            if (_chatMessages.Count == 0) throw new ArgumentException("No messages to send");
+            if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
             if (temperature < 0 || temperature > 1) throw new ArgumentException("Invalid temperature");
             if (topP < 0 || topP > 1) throw new ArgumentException("Invalid topP");
 
@@ -90,7 +129,7 @@ namespace sustAInableEducation_backend.Repository
                 Content = new StringContent(JsonSerializer.Serialize(new
                 {
                     model = "meta-llama/Llama-3.3-70B-Instruct",
-                    messages = _chatMessages,
+                    messages = chatMessages,
                     response_format = new { type = "json_object" },
                     temperature,
                     top_p = topP
@@ -105,11 +144,10 @@ namespace sustAInableEducation_backend.Repository
             var assistantContent = responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
             var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
 
-            _chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = assistantContent });
-
             var storyPart = new StoryPart
             {
                 Text = messageContent.Story,
+                // Intertitle = messageContent.Intertitle, #TODO: Intertitle in StoryPart.cs hinzufügen
                 Choices = messageContent.Options.Select((option, index) => new StoryChoice
                 {
                     Text = option.Text,
