@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>sustAInableEducation_backend</RootNamespace>
+    <UserSecretsId>0306d13a-d8a2-40a7-9f81-607fa36c74eb</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
