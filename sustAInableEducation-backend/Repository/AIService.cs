@@ -89,7 +89,7 @@ namespace sustAInableEducation_backend.Repository
 
             var responseObject = JsonSerializer.Deserialize<Response>(responseContent) ?? throw new InvalidOperationException("Response is null");
             var assistantContent = responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
-            var messageContent = JsonSerializer.Deserialize<Content>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
 
             _chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = assistantContent });
 
@@ -215,7 +215,7 @@ namespace sustAInableEducation_backend.Repository
     /**
      * Benjamin Edlinger
      */
-    public class Content
+    public class StoryContent
     {
         [JsonPropertyName("title")]
         public string Title { get; set; } = null!;
