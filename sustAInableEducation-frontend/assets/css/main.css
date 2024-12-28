@@ -30,3 +30,7 @@ html {
 .p-tablist-tab-list {
     @apply !bg-slate-50;
 }
+
+.p-textarea {
+    @apply !px-2 !py-1;
+}

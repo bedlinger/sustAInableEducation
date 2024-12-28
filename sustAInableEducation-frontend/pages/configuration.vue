@@ -4,20 +4,20 @@
         <div class="w-screen flex flex-col items-center justify-center h-full">
             <div
                 class="bg-slate-50 shadow-xl rounded-xl flex flex-col p-4 items-center w-full max-w-[1000px] h-full max-h-[650px] ">
-                <div class="max-h-full flex flex-col items-center w-full">
+                <div class="h-full max-h-[570px] flex flex-col items-center w-full">
                     <h1 class="text-3xl font-bold mb-8 h-5">EcoSpace erstellen</h1>
-                    <Stepper value="1" class="flex-1">
-                        <Steplist class="">
+                    <Stepper value="1" class="flex-1 w-full h-full" linear>
+                        <Steplist>
                             <Divider />
                             <Step value="1">Thema</Step>
                             <Divider />
                             <Step value="2">Einstellungen</Step>
                             <Divider />
                         </Steplist>
-                        <StepPanels class="!p-0">
-                            <StepPanel v-slot="{ activateCallback }" value="1" class="w-full">
-                                <Tabs value="0" class="!bg-slate-50">
-                                    <TabList class="flex">
+                        <StepPanels class="!p-0 w-full h-full">
+                            <StepPanel v-slot="{ activateCallback }" value="1" class="w-full h-full">
+                                <Tabs value="0" class="w-full h-full flex">
+                                    <TabList class="flex flex-none">
                                         <Tab value="0" as="div"
                                             class="h-10 flex-1 flex justify-center items-center !bg-white !rounded-tl-xl">
                                             <span>SDGs</span>
@@ -27,9 +27,9 @@
                                             <span>Eigenes Thema</span>
                                         </Tab>
                                     </TabList>
-                                    <TabPanels class="!p-0 !pt-2 !px-4">
-                                        <TabPanel value="0" class="">
-                                            <Panel class="max-h-[400px] overflow-y-scroll">
+                                    <TabPanels class="!p-0 !pt-2 !px-4 w-full flex-1">
+                                        <TabPanel value="0" class="flex flex-wrap flex-col h-full w-full">
+                                            <Panel class="h-full max-h-[395px] w-full overflow-y-scroll">
                                                 <div class="w-full flex flex-wrap justify-center">
                                                     <img v-for="sdg in sdgAssets" :src="sdg.asset_path" :alt="sdg.name"
                                                         class="w-40 h-40 m-2 cursor-pointer"
@@ -46,6 +46,61 @@
                                                     <Button label="Next"
                                                         v-tooltip.bottom="{ value: (selectedSdg === -1) ? 'Es muss eine Auswahl getroffen werden' : null }"
                                                         :disabled="selectedSdg === -1" @click="activateCallback('2')" />
+                                                </div>
+                                            </div>
+                                        </TabPanel>
+                                        <TabPanel value="1" class="flex flex-wrap flex-col h-full w-full">
+                                            <Panel class="h-full max-h-[395px] w-full">
+                                                <div class="text-xl flex flex-col w-full">
+                                                    <div>
+                                                        <div class="flex items-center">
+                                                            <div class="flex items-center">
+                                                                <span>
+                                                                    Das Thema, welches die Geschichte behandeln soll, ist
+                                                                    das
+                                                                </span>
+                                                                
+                                                                <div class="flex ml-1 items-center">
+                                                                    <Button class="!text-xl !p-0" @click="focusTextarea"
+                                                                        label="Thema" variant="link" />
+                                                                    <Textarea id="description" class="ml-2 resize-none" v-model="topicInput"
+                                                                        rows="1" cols="20" autoResize />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <span>
+                                                            und dieses Thema soll folgende Punkte
+                                                            thematisieren:
+                                                        </span>
+                                                    </div>
+                                                    <ul class="list-decimal ml-10 flex flex-col max-w-96 mt-2">
+                                                        <li v-for="ref, index in bulletPoints" class="mb-2">
+                                                            <div class="flex items-center justify-between">
+                                                                <Textarea class="w-fit" v-model="ref.value" rows="1"
+                                                                    cols="50" autoResize />
+                                                                <div v-if="bulletPoints.length != 1"
+                                                                    @click="removeBulletPoint(index)"
+                                                                    class="ml-2 rounded-full border-2 border-solid border-red-500 size-fit flex justify-center cursor-pointer">
+                                                                    <Icon name="ic:baseline-minus"
+                                                                        class="bg-red-500 size-5" />
+                                                                </div>
+
+                                                            </div>
+                                                        </li>
+                                                        <Button class="!p-0" rounded @click="addBulletPoint()"
+                                                            v-if="bulletPoints.length < 3">
+                                                            <Icon name="ic:baseline-plus"
+                                                                class="bg-white mx-4 size-6" />
+                                                        </Button>
+                                                    </ul>
+                                                </div>
+                                            </Panel>
+                                            <div class="w-full">
+                                                <Divider />
+                                                <div class="flex items-center justify-end">
+                                                    <Button label="Next"
+                                                        v-tooltip.bottom="{ value: topicTooltip }"
+                                                        :disabled="!topicFilledOut" @click="activateCallback('2')" />
                                                 </div>
                                             </div>
                                         </TabPanel>
@@ -68,34 +123,6 @@
                             </StepPanel>
                         </StepPanels>
                     </Stepper>
-
-
-
-
-                    <!-- 
-                    <div class="flex flex-col justify-between h-full bg-blue-500">
-                        <Tabs value="0" class="w-full max-h-full">
-                            <TabList>
-                                <Tab value="0" class="w-1/2">SDGs</Tab>
-                                <Tab value="1" class="w-1/2">Eigenes Thema</Tab>
-                            </TabList>
-                            <TabPanels class="max-h-[400px] w-full">
-                                <TabPanel value="0"
-                                    class="flex flex-wrap justify-center overflow-x-scroll max-h-full">
-                                    <img v-for="sdg in SdgAsset.sdgs" :src="sdg.iconPath" :alt="sdg.name"
-                                        class="w-48 h-48 m-2" />
-                                </TabPanel>
-                                <TabPanel value="1"
-                                    class="flex flex-wrap justify-center h-full w-full">
-                                    <p>Eigenes Thema</p>
-                                </TabPanel>
-                            </TabPanels>
-                        </Tabs>
-                        <div class="flex justify-end w-full mt-2 ">
-                            <Button label="Weiter" />
-                        </div>
-                    </div>
-                    -->
                 </div>
             </div>
         </div>
@@ -117,6 +144,25 @@ const sdgAssets = ref(Object.fromEntries(
     ])
 ))
 
+const bulletPoints = ref([ref('')])
+
+const topicInput = ref('')
+
+const topicFilledOut = computed(() => {
+    return topicInput.value.length > 0 && bulletPoints.value.every(ref => ref.value.length > 0)
+})
+
+const topicTooltip = computed(() => {
+    if(topicInput.value.length === 0) {
+        return 'Das Thema muss ausgefüllt werden'
+    }
+    if(bulletPoints.value.some(ref => ref.value.length === 0)) {
+        return 'Alle Punkte müssen ausgefüllt werden'
+    }
+    return null
+})
+
+
 function getSdgAsset(id: number) {
     return Object.values(sdgAssets.value).find(sdg => sdg.id === id)
 }
@@ -136,6 +182,20 @@ function selectSdg(newSdg: number) {
         next!.asset_path = Object.values(SdgAsset.sdgs).find(sdg => sdg.id === newSdg)!.gifPath
         selectedSdg.value = newSdg
     }
+}
+
+function focusTextarea() {
+    const textarea = document.getElementById('description') as HTMLTextAreaElement
+    textarea.focus()
+}
+
+function addBulletPoint() {
+    bulletPoints.value.push(ref(''))
+    console.log(bulletPoints)
+}
+
+function removeBulletPoint(index: number) {
+    bulletPoints.value.splice(index, 1)
 }
 
 
