@@ -45,7 +45,7 @@
                                                         getSdgAsset(selectedSdg)?.name }}</p>
                                                     <Button label="Next"
                                                         v-tooltip.bottom="{ value: (selectedSdg === -1) ? 'Es muss eine Auswahl getroffen werden' : null }"
-                                                        :disabled="selectedSdg === -1" @click="activateCallback('2')" />
+                                                        :disabled="selectedSdg === -1" @click="goToNextStep(activateCallback, 'sdg')" />
                                                 </div>
                                             </div>
                                         </TabPanel>
@@ -56,15 +56,17 @@
                                                         <div class="flex items-center">
                                                             <div class="flex items-center">
                                                                 <span>
-                                                                    Das Thema, welches die Geschichte behandeln soll, ist
+                                                                    Das Thema, welches die Geschichte behandeln soll,
+                                                                    ist
                                                                     das
                                                                 </span>
-                                                                
+
                                                                 <div class="flex ml-1 items-center">
                                                                     <Button class="!text-xl !p-0" @click="focusTextarea"
                                                                         label="Thema" variant="link" />
-                                                                    <Textarea id="description" class="ml-2 resize-none" v-model="topicInput"
-                                                                        rows="1" cols="20" autoResize />
+                                                                    <Textarea id="description" class="ml-2 resize-none"
+                                                                        v-model="topicInput" rows="1" cols="20"
+                                                                        autoResize />
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -98,9 +100,8 @@
                                             <div class="w-full">
                                                 <Divider />
                                                 <div class="flex items-center justify-end">
-                                                    <Button label="Next"
-                                                        v-tooltip.bottom="{ value: topicTooltip }"
-                                                        :disabled="!topicFilledOut" @click="activateCallback('2')" />
+                                                    <Button label="Next" v-tooltip.bottom="{ value: topicTooltip }"
+                                                        :disabled="!topicFilledOut" @click="goToNextStep(activateCallback, 'custom')" />
                                                 </div>
                                             </div>
                                         </TabPanel>
@@ -108,17 +109,19 @@
                                 </Tabs>
 
                             </StepPanel>
-                            <StepPanel v-slot="{ activateCallback }" value="2">
+                            <StepPanel v-slot="{ activateCallback }" value="2" class="w-full h-full">
                                 <div class="flex flex-col h-48">
                                     <div
                                         class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">
                                         Content II</div>
                                 </div>
-                                <div class="flex pt-6 justify-between">
-                                    <Button label="Back" severity="secondary" icon="pi pi-arrow-left"
-                                        @click="activateCallback('1')" />
-                                    <Button label="Next" icon="pi pi-arrow-right" iconPos="right"
-                                        @click="activateCallback('3')" />
+                                <div class="w-full">
+                                    <Divider />
+                                    <div class="flex items-center justify-between">
+                                        <Button label="Back" severity="secondary" @click="activateCallback('1')"/>
+                                        <Button label="Next" v-tooltip.bottom="{ value: topicTooltip }"
+                                            :disabled="!topicFilledOut" @click="activateCallback('2')" />
+                                    </div>
                                 </div>
                             </StepPanel>
                         </StepPanels>
@@ -144,6 +147,8 @@ const sdgAssets = ref(Object.fromEntries(
     ])
 ))
 
+const topicType = ref('sdg')
+
 const bulletPoints = ref([ref('')])
 
 const topicInput = ref('')
@@ -153,14 +158,19 @@ const topicFilledOut = computed(() => {
 })
 
 const topicTooltip = computed(() => {
-    if(topicInput.value.length === 0) {
+    if (topicInput.value.length === 0) {
         return 'Das Thema muss ausgefüllt werden'
     }
-    if(bulletPoints.value.some(ref => ref.value.length === 0)) {
+    if (bulletPoints.value.some(ref => ref.value.length === 0)) {
         return 'Alle Punkte müssen ausgefüllt werden'
     }
     return null
 })
+
+function goToNextStep(activateCallback: (step: string) => void, topic: string) {
+    topicType.value = topic
+    activateCallback('2')
+}
 
 
 function getSdgAsset(id: number) {
