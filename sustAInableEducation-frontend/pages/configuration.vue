@@ -45,7 +45,8 @@
                                                         getSdgAsset(selectedSdg)?.name }}</p>
                                                     <Button label="Next"
                                                         v-tooltip.bottom="{ value: (selectedSdg === -1) ? 'Es muss eine Auswahl getroffen werden' : null }"
-                                                        :disabled="selectedSdg === -1" @click="goToNextStep(activateCallback, 'sdg')" />
+                                                        :disabled="selectedSdg === -1"
+                                                        @click="goToNextStep(activateCallback, 'sdg')" />
                                                 </div>
                                             </div>
                                         </TabPanel>
@@ -57,8 +58,7 @@
                                                             <div class="flex items-center">
                                                                 <span>
                                                                     Das Thema, welches die Geschichte behandeln soll,
-                                                                    ist
-                                                                    das
+                                                                    ist das
                                                                 </span>
 
                                                                 <div class="flex ml-1 items-center">
@@ -101,7 +101,8 @@
                                                 <Divider />
                                                 <div class="flex items-center justify-end">
                                                     <Button label="Next" v-tooltip.bottom="{ value: topicTooltip }"
-                                                        :disabled="!topicFilledOut" @click="goToNextStep(activateCallback, 'custom')" />
+                                                        :disabled="!topicFilledOut"
+                                                        @click="goToNextStep(activateCallback, 'custom')" />
                                                 </div>
                                             </div>
                                         </TabPanel>
@@ -109,20 +110,47 @@
                                 </Tabs>
 
                             </StepPanel>
-                            <StepPanel v-slot="{ activateCallback }" value="2" class="w-full h-full">
-                                <div class="flex flex-col h-48">
-                                    <div
-                                        class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">
-                                        Content II</div>
-                                </div>
-                                <div class="w-full">
-                                    <Divider />
-                                    <div class="flex items-center justify-between">
-                                        <Button label="Back" severity="secondary" @click="activateCallback('1')"/>
-                                        <Button label="Next" v-tooltip.bottom="{ value: topicTooltip }"
-                                            :disabled="!topicFilledOut" @click="activateCallback('2')" />
+                            <StepPanel v-slot="{ activateCallback }" value="2" class="w-full h-full max-h-[520px]">
+                                <div class="flex flex-col justify-between h-full  max-h-[520px] p-4 bg-slate-50">
+                                    <Panel header="Weitere Konfiguration" class="">
+                                        <div class="flex flex-col justify-between h-full">
+                                            <Form class="flex flex-col h-full">
+                                                <div class="flex flex-col mt-4">
+                                                    <label for="entscheidungspunkte" class="mb-1 text-lg">Entscheidungspunkte</label>
+                                                    <InputNumber id="entscheidungspunkte" v-model="decisionPoints" :min="3" :max="10" showButtons />
+                                                </div>
+                                                <div class="flex flex-col mt-4">
+                                                    <label for="zielgruppe" class="mb-1 text-lg">Zielgruppe</label>
+                                                    <Select id="zielgruppe" :options="zielgruppen" v-model="selectedZielgruppe"
+                                                        placeholder="Wählen Sie eine Zielgruppe" />
+                                                </div>
+                                                <div class="flex flex-col mt-4">
+                                                    <label for="voteTime" class="mb-1 text-lg">Abstimmungszeit</label>
+                                                    <InputNumber id="voteTime" v-model="voteTime" :min="10" suffix=" Sekunden" :max="30" showButtons />
+                                                </div>
+                                            </Form>
+                                            <Message severity="info" class="justify-between mt-6">
+                                                <div class="flex justify-between items-center">
+                                                    <div>
+                                                        <span class="font-bold">Zeitschätzung: </span>
+                                                        <span>{{ estimatedTime }}</span>
+                                                    </div>
+                                                    <Icon name="ic:twotone-info" class="size-6 cursor-pointer" v-tooltip.top="{value: 'Die Zeitschätzung wird anhand der ausgewählten Einstellungen berechnet.'}" />
+                                                </div>
+                                                
+                                            </Message>
+                                        </div>
+                                    </Panel>
+                                    <div class="w-full">
+                                        <Divider />
+                                        <div class="flex items-center justify-between">
+                                            <Button label="Back" severity="secondary" @click="activateCallback('1')" />
+                                            <Button label="Next" v-tooltip.bottom="{ value: topicTooltip }"
+                                                :disabled="!topicFilledOut" @click="" />
+                                        </div>
                                     </div>
                                 </div>
+
                             </StepPanel>
                         </StepPanels>
                     </Stepper>
@@ -155,6 +183,17 @@ const topicInput = ref('')
 
 const topicFilledOut = computed(() => {
     return topicInput.value.length > 0 && bulletPoints.value.every(ref => ref.value.length > 0)
+})
+
+const decisionPoints = ref(3)
+
+const zielgruppen = ['Volksschule (6-10 Jahre)', 'Sekundarstufe I (11-14 Jahre)', 'Sekundarstufe II (15-19 Jahre)',]
+const selectedZielgruppe = ref('')
+
+const voteTime = ref(10)
+const estimatedTime = computed(() => {
+    let minutes = 0
+    return `${minutes} Minuten`
 })
 
 const topicTooltip = computed(() => {

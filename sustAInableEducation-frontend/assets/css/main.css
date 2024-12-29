@@ -20,7 +20,23 @@ html {
 }
 
 .p-panel-header {
-    @apply !pt-1;
+    @apply text-2xl !pb-0;
+}
+
+.p-panel-content-container {
+    @apply !h-[calc(100%-4rem)];
+}
+
+.p-panel-content {
+    @apply !h-[100%];
+}
+
+.p-message-text {
+    @apply !w-full;
+}
+
+.p-message-text {
+    @apply !w-full;
 }
 
 .p-divider-content {
