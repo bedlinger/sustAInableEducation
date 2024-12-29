@@ -43,7 +43,7 @@
                                                     :class="{ 'justify-between': selectedSdg != -1 }">
                                                     <p v-if="selectedSdg != -1"> Ausgewählt: {{
                                                         getSdgAsset(selectedSdg)?.name }}</p>
-                                                    <Button label="Next"
+                                                    <Button label="Weiter"
                                                         v-tooltip.bottom="{ value: (selectedSdg === -1) ? 'Es muss eine Auswahl getroffen werden' : null }"
                                                         :disabled="selectedSdg === -1"
                                                         @click="goToNextStep(activateCallback, 'sdg')" />
@@ -100,7 +100,7 @@
                                             <div class="w-full">
                                                 <Divider />
                                                 <div class="flex items-center justify-end">
-                                                    <Button label="Next" v-tooltip.bottom="{ value: topicTooltip }"
+                                                    <Button label="Weiter" v-tooltip.bottom="{ value: topicTooltip }"
                                                         :disabled="!topicFilledOut"
                                                         @click="goToNextStep(activateCallback, 'custom')" />
                                                 </div>
@@ -144,8 +144,8 @@
                                     <div class="w-full">
                                         <Divider />
                                         <div class="flex items-center justify-between">
-                                            <Button label="Back" severity="secondary" @click="activateCallback('1')" />
-                                            <Button label="Next" v-tooltip.bottom="{ value: topicTooltip }"
+                                            <Button label="Zurück" severity="secondary" @click="activateCallback('1')" />
+                                            <Button label="EcoSpace erstellen" v-tooltip.bottom="{ value: topicTooltip }"
                                                 :disabled="!topicFilledOut" @click="" />
                                         </div>
                                     </div>
