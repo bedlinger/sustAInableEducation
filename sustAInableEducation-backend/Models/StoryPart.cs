@@ -10,6 +10,7 @@ namespace sustAInableEducation_backend.Models
 
         public IEnumerable<StoryChoice> Choices { get; set; } = new List<StoryChoice>();
 
+        public string Intertitle { get; set; } = null!;
         public string Text { get; set; } = null!;
         [JsonIgnore]
         public DateTime CreatedAt { get; set; } = DateTime.Now;

@@ -92,7 +92,9 @@ namespace sustAInableEducation_backend.Hubs
             StoryPart part;
             if (story.Parts.Count == 0)
             {
-                part = await _ai.StartStory(story);
+                var storyStart = await _ai.StartStory(story);
+                part = storyStart.Item1;
+                story.Title = storyStart.Item2;
             }
             else if (story.Parts.Count >= story.Length)
             {

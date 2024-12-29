@@ -4,10 +4,10 @@ namespace sustAInableEducation_backend.Repository
 {
     public class AITestService : IAIService
     {
-        public async Task<StoryPart> StartStory(Story story)
+        public async Task<(StoryPart, string)> StartStory(Story story)
         {
             Thread.Sleep(2000);
-            return new StoryPart
+            return (new StoryPart
             {
                 Text = "Once upon a time...",
                 Choices = new List<StoryChoice>
@@ -37,7 +37,7 @@ namespace sustAInableEducation_backend.Repository
                         Impact = -0.6f,
                     }
                 }
-            };
+            }, "Test title");
         }
 
         public async Task<StoryPart> GenerateNextPart(Story story)

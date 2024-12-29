@@ -30,13 +30,13 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        public async Task<StoryPart> StartStory(Story story)
+        public async Task<(StoryPart, string)> StartStory(Story story)
         {
             if (story == null) throw new ArgumentNullException("Story is null");
 
             var chatMessages = RebuildChatMessages(story);
             var response = await FetchStoryPartAsync(chatMessages, story.Temperature, story.TopP);
-            return response.Item1;
+            return response;
         }
 
         /**
