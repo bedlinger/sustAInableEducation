@@ -137,7 +137,6 @@
                                                     </div>
                                                     <Icon name="ic:twotone-info" class="size-6 cursor-pointer" v-tooltip.top="{value: 'Die Zeitschätzung wird anhand der ausgewählten Einstellungen berechnet.'}" />
                                                 </div>
-                                                
                                             </Message>
                                         </div>
                                     </Panel>
@@ -145,8 +144,8 @@
                                         <Divider />
                                         <div class="flex items-center justify-between">
                                             <Button label="Zurück" severity="secondary" @click="activateCallback('1')" />
-                                            <Button label="EcoSpace erstellen" v-tooltip.bottom="{ value: topicTooltip }"
-                                                :disabled="!topicFilledOut" @click="" />
+                                            <Button label="EcoSpace erstellen" v-tooltip.bottom="{ value: configurationTooltip }"
+                                                :disabled="!configFilledOut" @click="" />
                                         </div>
                                     </div>
                                 </div>
@@ -185,12 +184,17 @@ const topicFilledOut = computed(() => {
     return topicInput.value.length > 0 && bulletPoints.value.every(ref => ref.value.length > 0)
 })
 
+const configFilledOut = computed(() => {
+    return decisionPoints.value >= 3 && decisionPoints.value <= 10 && selectedZielgruppe.value.length > 0 && voteTime.value >= 10 && voteTime.value <= 30
+})
+
 const decisionPoints = ref(3)
 
 const zielgruppen = ['Volksschule (6-10 Jahre)', 'Sekundarstufe I (11-14 Jahre)', 'Sekundarstufe II (15-19 Jahre)',]
 const selectedZielgruppe = ref('')
 
 const voteTime = ref(10)
+
 const estimatedTime = computed(() => {
     let minutes = 0
     return `${minutes} Minuten`
@@ -202,6 +206,25 @@ const topicTooltip = computed(() => {
     }
     if (bulletPoints.value.some(ref => ref.value.length === 0)) {
         return 'Alle Punkte müssen ausgefüllt werden'
+    }
+    return null
+})
+
+const configurationTooltip = computed(() => {
+    if (decisionPoints.value < 3) {
+        return 'Es müssen mindestens 3 Entscheidungspunkte ausgewählt werden'
+    }
+    if (decisionPoints.value > 10) {
+        return 'Es können maximal 10 Entscheidungspunkte ausgewählt werden'
+    }
+    if (selectedZielgruppe.value.length === 0) {
+        return 'Die Zielgruppe muss ausgewählt werden'
+    }
+    if (voteTime.value < 10) {
+        return 'Die Abstimmungszeit muss mindestens 10 Sekunden betragen'
+    }
+    if (voteTime.value > 30) {
+        return 'Die Abstimmungszeit kann maximal 30 Sekunden betragen'
     }
     return null
 })
