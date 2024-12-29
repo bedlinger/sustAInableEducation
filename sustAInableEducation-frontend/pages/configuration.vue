@@ -67,7 +67,7 @@
                                                                     <Button class="!text-xl !p-0" @click="focusTextarea"
                                                                         label="Thema" variant="link" />
                                                                     <Textarea id="description" class="ml-2 resize-none"
-                                                                        v-model="topicInput" rows="1" cols="20"
+                                                                        v-model="customTopic" rows="1" cols="20"
                                                                         autoResize />
                                                                 </div>
                                                             </div>
@@ -178,9 +178,16 @@
 <script setup lang="ts">
 import { SdgAsset } from '~/types/sdgs';
 
-const showEstimatedTimeDialog = ref(false)
-
+// Refs
+const topicType = ref('sdg')
 const selectedSdg = ref(-1)
+const customTopic = ref('')
+const bulletPoints = ref([ref('')])
+const decisionPoints = ref(3)
+const selectedZielgruppe = ref('')
+const voteTime = ref(10)
+
+const showEstimatedTimeDialog = ref(false)
 
 const sdgAssets = ref(Object.fromEntries(
     Object.entries(SdgAsset.sdgs).map(([key, { iconPath, gifPath, ...rest }]) => [
@@ -192,26 +199,19 @@ const sdgAssets = ref(Object.fromEntries(
     ])
 ))
 
-const topicType = ref('sdg')
 
-const bulletPoints = ref([ref('')])
+// Other Variables
+const zielgruppen = ['Volksschule (6-10 Jahre)', 'Sekundarstufe I (11-14 Jahre)', 'Sekundarstufe II (15-19 Jahre)',]
 
-const topicInput = ref('')
 
+// Computed Properties
 const topicFilledOut = computed(() => {
-    return topicInput.value.length > 0 && bulletPoints.value.every(ref => ref.value.length > 0)
+    return customTopic.value.length > 0 && bulletPoints.value.every(ref => ref.value.length > 0)
 })
 
 const configFilledOut = computed(() => {
     return decisionPoints.value >= 3 && decisionPoints.value <= 10 && selectedZielgruppe.value.length > 0 && voteTime.value >= 10 && voteTime.value <= 30
 })
-
-const decisionPoints = ref(3)
-
-const zielgruppen = ['Volksschule (6-10 Jahre)', 'Sekundarstufe I (11-14 Jahre)', 'Sekundarstufe II (15-19 Jahre)',]
-const selectedZielgruppe = ref('')
-
-const voteTime = ref(10)
 
 const estimatedTime = computed(() => {
     let minutes = 0
@@ -219,7 +219,7 @@ const estimatedTime = computed(() => {
 })
 
 const topicTooltip = computed(() => {
-    if (topicInput.value.length === 0) {
+    if (customTopic.value.length === 0) {
         return 'Das Thema muss ausgefüllt werden'
     }
     if (bulletPoints.value.some(ref => ref.value.length === 0)) {
@@ -247,6 +247,8 @@ const configurationTooltip = computed(() => {
     return null
 })
 
+
+// Functions
 function goToNextStep(activateCallback: (step: string) => void, topic: string) {
     topicType.value = topic
     activateCallback('2')
@@ -258,7 +260,6 @@ function getSdgAsset(id: number) {
 }
 
 function selectSdg(newSdg: number) {
-    console.log(selectedSdg.value)
     if (selectedSdg.value != -1) {
         let prev = getSdgAsset(selectedSdg.value)
         console.log(prev)
@@ -281,12 +282,9 @@ function focusTextarea() {
 
 function addBulletPoint() {
     bulletPoints.value.push(ref(''))
-    console.log(bulletPoints)
 }
 
 function removeBulletPoint(index: number) {
     bulletPoints.value.splice(index, 1)
 }
-
-
 </script>
