@@ -165,7 +165,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </StepPanel>
                         </StepPanels>
                     </Stepper>
@@ -214,8 +213,8 @@ const configFilledOut = computed(() => {
 })
 
 const estimatedTime = computed(() => {
-    let minutes = 0
-    return `${minutes} Minuten`
+    let seconds = (decisionPoints.value-1) * voteTime.value + decisionPoints.value * 90
+    return `${Math.trunc(seconds/60)} Minuten` + (seconds % 60 !== 0 ? ` ${seconds % 60} Sekunden` : '')
 })
 
 const topicTooltip = computed(() => {
