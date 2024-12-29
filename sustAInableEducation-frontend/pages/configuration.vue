@@ -28,7 +28,8 @@
                                         </Tab>
                                     </TabList>
                                     <TabPanels class="!p-4 w-full flex-1 h-full rounded-xl">
-                                        <TabPanel value="0" class="flex flex-wrap flex-col justify-between h-full w-full">
+                                        <TabPanel value="0"
+                                            class="flex flex-wrap flex-col justify-between h-full w-full">
                                             <Panel class="h-full max-h-[375px] w-full overflow-y-scroll">
                                                 <div class="w-full flex flex-wrap justify-center">
                                                     <img v-for="sdg in sdgAssets" :src="sdg.asset_path" :alt="sdg.name"
@@ -50,7 +51,8 @@
                                                 </div>
                                             </div>
                                         </TabPanel>
-                                        <TabPanel value="1" class="flex flex-wrap flex-col justify-between h-full w-full">
+                                        <TabPanel value="1"
+                                            class="flex flex-wrap flex-col justify-between h-full w-full">
                                             <Panel class="w-full h-full max-h-[240px]">
                                                 <div class="text-xl flex flex-col w-full">
                                                     <div>
@@ -116,17 +118,21 @@
                                         <div class="flex flex-col justify-between h-full">
                                             <Form class="flex flex-col h-full">
                                                 <div class="flex flex-col mt-4">
-                                                    <label for="entscheidungspunkte" class="mb-1 text-lg">Entscheidungspunkte</label>
-                                                    <InputNumber id="entscheidungspunkte" v-model="decisionPoints" :min="3" :max="10" showButtons />
+                                                    <label for="entscheidungspunkte"
+                                                        class="mb-1 text-lg">Entscheidungspunkte</label>
+                                                    <InputNumber id="entscheidungspunkte" v-model="decisionPoints"
+                                                        :min="3" :max="10" showButtons />
                                                 </div>
                                                 <div class="flex flex-col mt-4">
                                                     <label for="zielgruppe" class="mb-1 text-lg">Zielgruppe</label>
-                                                    <Select id="zielgruppe" :options="zielgruppen" v-model="selectedZielgruppe"
+                                                    <Select id="zielgruppe" :options="zielgruppen"
+                                                        v-model="selectedZielgruppe"
                                                         placeholder="Wählen Sie eine Zielgruppe" />
                                                 </div>
                                                 <div class="flex flex-col mt-4">
                                                     <label for="voteTime" class="mb-1 text-lg">Abstimmungszeit</label>
-                                                    <InputNumber id="voteTime" v-model="voteTime" :min="10" suffix=" Sekunden" :max="30" showButtons />
+                                                    <InputNumber id="voteTime" v-model="voteTime" :min="10"
+                                                        suffix=" Sekunden" :max="30" showButtons />
                                                 </div>
                                             </Form>
                                             <Message severity="info" class="justify-between mt-6">
@@ -135,16 +141,26 @@
                                                         <span class="font-bold">Zeitschätzung: </span>
                                                         <span>{{ estimatedTime }}</span>
                                                     </div>
-                                                    <Icon name="ic:twotone-info" class="size-6 cursor-pointer" v-tooltip.top="{value: 'Die Zeitschätzung wird anhand der ausgewählten Einstellungen berechnet.'}" />
+                                                    <Icon name="ic:twotone-info" class="size-6 cursor-pointer"
+                                                        @click="showEstimatedTimeDialog = true" />
                                                 </div>
                                             </Message>
+                                            <Dialog v-model:visible="showEstimatedTimeDialog" modal
+                                                header="Berechnung der Zeitschätzung" class="w-full max-w-[400px]">
+                                                <div class="flex flex-col">
+                                                    <p>Die Zeitschätzung wird anhand der ausgewählten Einstellungen
+                                                        (Anzahl der Entschiedungspunkte, Abstimmungszeit) berechnet.</p>
+                                                </div>
+                                            </Dialog>
                                         </div>
                                     </Panel>
                                     <div class="w-full">
                                         <Divider />
                                         <div class="flex items-center justify-between">
-                                            <Button label="Zurück" severity="secondary" @click="activateCallback('1')" />
-                                            <Button label="EcoSpace erstellen" v-tooltip.bottom="{ value: configurationTooltip }"
+                                            <Button label="Zurück" severity="secondary"
+                                                @click="activateCallback('1')" />
+                                            <Button label="EcoSpace erstellen"
+                                                v-tooltip.bottom="{ value: configurationTooltip }"
                                                 :disabled="!configFilledOut" @click="" />
                                         </div>
                                     </div>
@@ -161,6 +177,8 @@
 
 <script setup lang="ts">
 import { SdgAsset } from '~/types/sdgs';
+
+const showEstimatedTimeDialog = ref(false)
 
 const selectedSdg = ref(-1)
 
