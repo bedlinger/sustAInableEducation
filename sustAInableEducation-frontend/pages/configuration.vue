@@ -146,10 +146,15 @@
                                                 </div>
                                             </Message>
                                             <Dialog v-model:visible="showEstimatedTimeDialog" modal
-                                                header="Berechnung der Zeitschätzung" class="w-full max-w-[400px]">
+                                                header="Berechnung der Zeitschätzung" class="w-full max-w-[45 0px]">
                                                 <div class="flex flex-col">
-                                                    <p>Die Zeitschätzung wird anhand der ausgewählten Einstellungen
-                                                        (Anzahl der Entschiedungspunkte, Abstimmungszeit) berechnet.</p>
+                                                    <p>Die Zeitschätzung gibt einen groben Richtwert für die Dauer eines
+                                                        EcoSpaces an.
+                                                    </p>
+                                                    <p>
+                                                        Sie wird anhand der ausgewählten Einstellungen
+                                                        (Anzahl der Entschiedungspunkte, Abstimmungszeit) berechnet.
+                                                    </p>
                                                 </div>
                                             </Dialog>
                                         </div>
@@ -213,8 +218,8 @@ const configFilledOut = computed(() => {
 })
 
 const estimatedTime = computed(() => {
-    let seconds = (decisionPoints.value-1) * voteTime.value + decisionPoints.value * 90
-    return `${Math.trunc(seconds/60)} Minuten` + (seconds % 60 !== 0 ? ` ${seconds % 60} Sekunden` : '')
+    let seconds = (decisionPoints.value - 1) * voteTime.value + decisionPoints.value * 90
+    return `${Math.trunc(seconds / 60)} Minuten` + (seconds % 60 !== 0 ? ` ${seconds % 60} Sekunden` : '')
 })
 
 const topicTooltip = computed(() => {
