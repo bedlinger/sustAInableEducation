@@ -14,9 +14,9 @@
                             <Step value="2">Einstellungen</Step>
                             <Divider />
                         </Steplist>
-                        <StepPanels class="!p-0 w-full h-full">
-                            <StepPanel v-slot="{ activateCallback }" value="1" class="w-full h-full">
-                                <Tabs value="0" class="w-full h-full flex">
+                        <StepPanels class="!p-0 w-full h-full max-h-[520px]">
+                            <StepPanel v-slot="{ activateCallback }" value="1" class="w-full h-full rounded-xl">
+                                <Tabs value="0" class="w-full h-full flex !rounded-xl">
                                     <TabList class="flex flex-none">
                                         <Tab value="0" as="div"
                                             class="h-10 flex-1 flex justify-center items-center !bg-white !rounded-tl-xl">
@@ -27,9 +27,9 @@
                                             <span>Eigenes Thema</span>
                                         </Tab>
                                     </TabList>
-                                    <TabPanels class="!p-0 !pt-2 !px-4 w-full flex-1">
-                                        <TabPanel value="0" class="flex flex-wrap flex-col h-full w-full">
-                                            <Panel class="h-full max-h-[395px] w-full overflow-y-scroll">
+                                    <TabPanels class="!p-4 w-full flex-1 h-full rounded-xl">
+                                        <TabPanel value="0" class="flex flex-wrap flex-col justify-between h-full w-full">
+                                            <Panel class="h-full max-h-[375px] w-full overflow-y-scroll">
                                                 <div class="w-full flex flex-wrap justify-center">
                                                     <img v-for="sdg in sdgAssets" :src="sdg.asset_path" :alt="sdg.name"
                                                         class="w-40 h-40 m-2 cursor-pointer"
@@ -50,8 +50,8 @@
                                                 </div>
                                             </div>
                                         </TabPanel>
-                                        <TabPanel value="1" class="flex flex-wrap flex-col h-full w-full">
-                                            <Panel class="h-full max-h-[395px] w-full">
+                                        <TabPanel value="1" class="flex flex-wrap flex-col justify-between h-full w-full">
+                                            <Panel class="w-full h-full max-h-[240px]">
                                                 <div class="text-xl flex flex-col w-full">
                                                     <div>
                                                         <div class="flex items-center">
