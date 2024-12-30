@@ -79,12 +79,12 @@ namespace sustAInableEducation_backend.Hubs
                 throw new HubException("Unauthorized");
             }
             var story = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!.Story;
-            if (story.IsComplete)
+            if (story.Result != null)
             {
                 throw new HubException("Story is already complete");
             }
             var lastPart = story.Parts.LastOrDefault();
-            if (lastPart != null && lastPart.ChosenNumber == null)
+            if (!story.IsComplete && lastPart != null && lastPart.ChosenNumber == null)
             {
                 throw new HubException("Choice not set");
             }

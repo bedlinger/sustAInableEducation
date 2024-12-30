@@ -27,10 +27,10 @@ namespace sustAInableEducation_backend.Models
     {
         public string Text { get; set; } = null!;
         public string Summary { get; set; } = null!;
-        public ICollection<string> PositiveChoices { get; set; } = new List<string>();
-        public ICollection<string> NegativeChoices { get; set; } = new List<string>();
-        public ICollection<string> Learnings { get; set; } = new List<string>();
-        public ICollection<string> DiscussionQuestions { get; set; } = new List<string>();
+        public string[] PositiveChoices { get; set; } = [];
+        public string[] NegativeChoices { get; set; } = [];
+        public string[] Learnings { get; set; } = [];
+        public string[] DiscussionQuestions { get; set; } = [];
     }
 
     public class StoryRequest

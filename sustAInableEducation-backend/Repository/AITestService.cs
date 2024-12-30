@@ -10,6 +10,7 @@ namespace sustAInableEducation_backend.Repository
             return (new StoryPart
             {
                 Text = "Once upon a time...",
+                Intertitle = "Intertitle",
                 Choices = new List<StoryChoice>
                 {
                     new StoryChoice
@@ -46,6 +47,7 @@ namespace sustAInableEducation_backend.Repository
             return new StoryPart
             {
                 Text = "And they lived happily ever after...",
+                Intertitle = "Intertitle",
                 Choices = new List<StoryChoice>
                 {
                     new StoryChoice
@@ -82,10 +84,10 @@ namespace sustAInableEducation_backend.Repository
             return new StoryResult {
                 Text = "The end",
                 Summary = "Summary",
-                PositiveChoices = new List<string> { "Option 1" },
-                NegativeChoices = new List<string> { "Option 2" },
-                Learnings = new List<string> { "Learning 1" },
-                DiscussionQuestions = new List<string> { "Question 1" }
+                PositiveChoices = new string[] { "Positive choice 1", "Positive choice 2" },
+                NegativeChoices = new string[] { "Negative choice 1", "Negative choice 2" },
+                Learnings = new string[] { "Learning 1", "Learning 2" },
+                DiscussionQuestions = new string[] { "Discussion question 1", "Discussion question 2" }
             };
         }
 
