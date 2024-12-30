@@ -136,6 +136,23 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
+        private StoryResult GetStoryResult(string assistantContent, string end)
+        {
+            var messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            return new StoryResult
+            {
+                Text = end,
+                Summary = messageContent.Summary,
+                PositiveChoices = messageContent.PositiveChoices,
+                NegativeChoices = messageContent.NegativeChoices,
+                Learnings = messageContent.Learnings,
+                DiscussionQuestions = messageContent.DiscussionQuestions
+            };
+        }
+
+        /**
+         * Benjamin Edlinger
+         */
         private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             if (_client == null) throw new InvalidOperationException("Client is null");
