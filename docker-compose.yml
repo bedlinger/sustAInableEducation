@@ -6,7 +6,9 @@ services:
         environment:
             - Db__Host=database
             - Db__User=sa
-            - DB__Password=Schueler123!
+            - Db__Password=Schueler123!
+            - DeepInfra__Url=https://api.deepinfra.com
+            - DeepInfra__ApiKey=123
         restart: always
         depends_on:
             - database
