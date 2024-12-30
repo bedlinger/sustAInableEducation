@@ -22,20 +22,12 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
-        string? connectionString;
-        if (builder.Environment.IsDevelopment())
-        {
-            connectionString = builder.Configuration.GetConnectionString("DevelopmentDatabase");
-        }
-        else
-        {
-            connectionString = string.Format(
-                builder.Configuration.GetConnectionString("ApplicationDatabase")!,
-                System.Environment.GetEnvironmentVariable("DB_HOST"),
-                System.Environment.GetEnvironmentVariable("DB_USER"),
-                System.Environment.GetEnvironmentVariable("DB_PASSWORD")
-            );
-        }
+        var connectionString = string.Format(
+            builder.Configuration.GetConnectionString("ApplicationDatabase")!,
+            builder.Configuration["Db:Host"],
+            builder.Configuration["Db:User"],
+            builder.Configuration["Db:Password"]
+        );
         options.UseSqlServer(connectionString);
     }
 );
@@ -54,7 +46,7 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-builder.Services.AddTransient<IAIService, AIService>();
+builder.Services.AddTransient<IAIService, AITestService>();
 
 var app = builder.Build();
 

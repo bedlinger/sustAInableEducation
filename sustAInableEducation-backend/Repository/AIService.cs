@@ -22,21 +22,21 @@ namespace sustAInableEducation_backend.Repository
             _config = config;
             _client = new()
             {
-                BaseAddress = new Uri(_config["deepinfra:url"] ?? throw new ArgumentNullException("deepinfra:url configuration is missing"))
+                BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing"))
             };
-            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["deepinfra:api_key"] ?? throw new ArgumentNullException("deepinfra:api_key configuration is missing")}");
+            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
         }
 
         /**
          * Benjamin Edlinger
          */
-        public async Task<StoryPart> StartStory(Story story)
+        public async Task<(StoryPart, string)> StartStory(Story story)
         {
             if (story == null) throw new ArgumentNullException("Story is null");
 
             var chatMessages = RebuildChatMessages(story);
             var response = await FetchStoryPartAsync(chatMessages, story.Temperature, story.TopP);
-            return response.Item1;
+            return response;
         }
 
         /**
@@ -54,7 +54,7 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        public Task<StoryPart> GenerateResult(Story story)
+        public Task<StoryResult> GenerateResult(Story story)
         {
             if (story == null) throw new ArgumentNullException("Story is null");
 
@@ -84,10 +84,10 @@ namespace sustAInableEducation_backend.Repository
             {
                 var assitentContent = new StoryContent
                 {
-                    // Title = story.Title ?? throw new ArgumentNullException("Story has no title"),
-                    Title = "Title", // #TODO: Title in StoryPart.cs hinzufügen
-                    // Intertitle = part.Intertitle ?? throw new ArgumentNullException("Part has no intertitle"),
-                    Intertitle = "Intertitle", // #TODO: Intertitle in StoryPart.cs hinzufügen
+                    Title = story.Title ?? throw new ArgumentNullException("Story has no title"),
+                    //Title = "Title", // #TODO: Title in StoryPart.cs hinzufügen
+                    Intertitle = part.Intertitle ?? throw new ArgumentNullException("Part has no intertitle"),
+                    //Intertitle = "Intertitle", // #TODO: Intertitle in StoryPart.cs hinzufügen
                     Story = part.Text,
                     Options = part.Choices.Select(choice => new Option
                     {
@@ -147,7 +147,7 @@ namespace sustAInableEducation_backend.Repository
             var storyPart = new StoryPart
             {
                 Text = messageContent.Story,
-                // Intertitle = messageContent.Intertitle, #TODO: Intertitle in StoryPart.cs hinzufügen
+                Intertitle = messageContent.Intertitle,
                 Choices = messageContent.Options.Select((option, index) => new StoryChoice
                 {
                     Text = option.Text,

@@ -9,6 +9,7 @@ namespace sustAInableEducation_backend.Models
         public Guid Id { get; set; }
 
         public ICollection<StoryPart> Parts { get; set; } = new List<StoryPart>();
+        public StoryResult? Result { get; set; }
 
         [MaxLength(256)]
         public string? Title { get; set; }
@@ -20,6 +21,16 @@ namespace sustAInableEducation_backend.Models
 
         [JsonIgnore]
         public bool IsComplete => Parts.Count > Length;
+    }
+
+    public class StoryResult
+    {
+        public string Text { get; set; } = null!;
+        public string Summary { get; set; } = null!;
+        public string[] PositiveChoices { get; set; } = [];
+        public string[] NegativeChoices { get; set; } = [];
+        public string[] Learnings { get; set; } = [];
+        public string[] DiscussionQuestions { get; set; } = [];
     }
 
     public class StoryRequest

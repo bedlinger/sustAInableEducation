@@ -4,12 +4,13 @@ namespace sustAInableEducation_backend.Repository
 {
     public class AITestService : IAIService
     {
-        public async Task<StoryPart> StartStory(Story story)
+        public async Task<(StoryPart, string)> StartStory(Story story)
         {
             Thread.Sleep(2000);
-            return new StoryPart
+            return (new StoryPart
             {
                 Text = "Once upon a time...",
+                Intertitle = "Intertitle",
                 Choices = new List<StoryChoice>
                 {
                     new StoryChoice
@@ -37,7 +38,7 @@ namespace sustAInableEducation_backend.Repository
                         Impact = -0.6f,
                     }
                 }
-            };
+            }, "Test title");
         }
 
         public async Task<StoryPart> GenerateNextPart(Story story)
@@ -46,6 +47,7 @@ namespace sustAInableEducation_backend.Repository
             return new StoryPart
             {
                 Text = "And they lived happily ever after...",
+                Intertitle = "Intertitle",
                 Choices = new List<StoryChoice>
                 {
                     new StoryChoice
@@ -76,12 +78,16 @@ namespace sustAInableEducation_backend.Repository
             };
         }
 
-        public async Task<StoryPart> GenerateResult(Story story)
+        public async Task<StoryResult> GenerateResult(Story story)
         {
             Thread.Sleep(3000);
-            return new StoryPart
-            {
-                Text = "The end."
+            return new StoryResult {
+                Text = "The end",
+                Summary = "Summary",
+                PositiveChoices = new string[] { "Positive choice 1", "Positive choice 2" },
+                NegativeChoices = new string[] { "Negative choice 1", "Negative choice 2" },
+                Learnings = new string[] { "Learning 1", "Learning 2" },
+                DiscussionQuestions = new string[] { "Discussion question 1", "Discussion question 2" }
             };
         }
 

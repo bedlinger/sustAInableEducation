@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using sustAInableEducation_backend.Models;
+using System.Text.Json;
 using Space = sustAInableEducation_backend.Models.Space;
 
 namespace sustAInableEducation_backend.Repository
@@ -18,8 +19,12 @@ namespace sustAInableEducation_backend.Repository
                 .HasKey(e => new { e.SpaceId, e.UserId });
             builder.Entity<SpaceAccessCode>()
                 .HasKey(e => e.Code);
+
+            builder.Entity<Story>()
+                .OwnsOne(e => e.Result);
             builder.Entity<StoryChoice>()
                 .HasKey(e => new { e.StoryPartId, e.Number });
+
             builder.Entity<QuizChoice>()
                 .HasKey(e => new { e.QuizQuestionId, e.Number });
             builder.Entity<QuizResult>()

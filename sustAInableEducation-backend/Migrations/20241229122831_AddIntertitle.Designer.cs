@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using sustAInableEducation_backend.Repository;
 
@@ -11,9 +12,11 @@ using sustAInableEducation_backend.Repository;
 namespace sustAInableEducation_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241229122831_AddIntertitle")]
+    partial class AddIntertitle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -585,48 +588,6 @@ namespace sustAInableEducation_backend.Migrations
                     b.Navigation("Space");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("sustAInableEducation_backend.Models.Story", b =>
-                {
-                    b.OwnsOne("sustAInableEducation_backend.Models.StoryResult", "Result", b1 =>
-                        {
-                            b1.Property<Guid>("StoryId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("DiscussionQuestions")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("Learnings")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("NegativeChoices")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("PositiveChoices")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("Summary")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("Text")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("StoryId");
-
-                            b1.ToTable("Story");
-
-                            b1.WithOwner()
-                                .HasForeignKey("StoryId");
-                        });
-
-                    b.Navigation("Result");
                 });
 
             modelBuilder.Entity("sustAInableEducation_backend.Models.StoryChoice", b =>

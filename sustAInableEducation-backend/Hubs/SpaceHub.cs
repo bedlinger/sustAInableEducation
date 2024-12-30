@@ -14,7 +14,7 @@ namespace sustAInableEducation_backend.Hubs
         public const string UserLeft = "UserLeft";
         public const string PartGenerating = "PartGenerating";
         public const string PartGenerated = "PartGenerated";
-        public const string StoryCompleted = "StoryCompleted";
+        public const string ResultGenerated = "ResultGenerated";
         public const string VotingStarted = "VotingStarted";
         public const string VotingUpdated = "VotingUpdated";
         public const string ChoiceSet = "ChoiceSet";
@@ -61,6 +61,8 @@ namespace sustAInableEducation_backend.Hubs
             _context.SpaceParticipant.Find(_spaceId, _userId)!.IsOnline = false;
             await _context.SaveChangesAsync();
 
+            await Clients.Client(Context!.ConnectionId).SendAsync(exception?.ToString() ?? "");
+
             await SendMessage(MessageType.UserLeft, _userId);
             await base.OnDisconnectedAsync(exception);
         }
@@ -77,41 +79,42 @@ namespace sustAInableEducation_backend.Hubs
                 throw new HubException("Unauthorized");
             }
             var story = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!.Story;
-            if (story.IsComplete)
+            if (story.Result != null)
             {
                 throw new HubException("Story is already complete");
             }
             var lastPart = story.Parts.LastOrDefault();
-            if (lastPart != null && lastPart.ChosenNumber == null)
+            if (!story.IsComplete && lastPart != null && lastPart.ChosenNumber == null)
             {
                 throw new HubException("Choice not set");
             }
 
             await SendMessage(MessageType.PartGenerating);
 
-            StoryPart part;
             if (story.Parts.Count == 0)
             {
-                part = await _ai.StartStory(story);
+                var storyStart = await _ai.StartStory(story);
+                story.Parts.Add(storyStart.Item1);
+                story.Title = storyStart.Item2;
             }
-            else if (story.Parts.Count >= story.Length)
+            else if (story.IsComplete)
             {
-                part = await _ai.GenerateResult(story);
+                story.Result = await _ai.GenerateResult(story);
             }
             else
             {
-                part = await _ai.GenerateNextPart(story);
+                story.Parts.Add(await _ai.GenerateNextPart(story));
             }
 
-            story.Parts.Add(part);
             await _context.SaveChangesAsync();
+
             if (story.IsComplete)
             {
-                await SendMessage(MessageType.StoryCompleted, part);
+                await SendMessage(MessageType.ResultGenerated, story.Result);
             }
             else
             {
-                await SendMessage(MessageType.PartGenerated, part);
+                await SendMessage(MessageType.PartGenerated, story.Parts.Last());
             }
         }
 

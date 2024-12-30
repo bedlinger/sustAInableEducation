@@ -4,9 +4,11 @@ services:
         ports:
             - 8080:8080
         environment:
-            - DB_HOST=database
-            - DB_USER=sa
-            - DB_PASSWORD=Schueler123!
+            - Db__Host=database
+            - Db__User=sa
+            - Db__Password=Schueler123!
+            - DeepInfra__Url=https://api.deepinfra.com
+            - DeepInfra__ApiKey=123
         restart: always
         depends_on:
             - database
