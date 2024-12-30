@@ -14,3 +14,39 @@ html {
 .background {
     @apply absolute inset-x-0 top-0 h-screen bg-gradient-to-br bg-no-repeat bg-cover from-slate-50 via-20% via-primary-200 to-50% -z-50 blur-3xl;
 }
+
+.p-step-title {
+    @apply text-xl;
+}
+
+.p-panel-header {
+    @apply text-2xl !pb-0;
+}
+
+.p-panel-content-container {
+    @apply !h-[calc(100%-4rem)];
+}
+
+.p-panel-content {
+    @apply !h-[100%];
+}
+
+.p-message-text {
+    @apply !w-full;
+}
+
+.p-message-text {
+    @apply !w-full;
+}
+
+.p-divider-content {
+    @apply !bg-slate-50
+}
+
+.p-tablist-tab-list {
+    @apply !bg-slate-50;
+}
+
+.p-textarea {
+    @apply !px-2 !py-1;
+}

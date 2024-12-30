@@ -13,7 +13,9 @@
                 </form>
 
                 <p class="mt-4">oder</p>
-                <Button variant="link" label="Space erstellen" text />
+                <NuxtLink to="/configuration">
+                    <Button variant="link" label="EcoSpace erstellen"/>
+                </NuxtLink>
             </div>
         </div>
     </div>
