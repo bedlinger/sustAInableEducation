@@ -46,7 +46,7 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-builder.Services.AddTransient<IAIService, AIService>();
+builder.Services.AddTransient<IAIService, AITestService>();
 
 var app = builder.Build();
 

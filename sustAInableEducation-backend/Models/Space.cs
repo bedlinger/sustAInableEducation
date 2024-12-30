@@ -13,6 +13,7 @@ namespace sustAInableEducation_backend.Models
         public Story Story { get; set; } = null!;
         [JsonIgnore]
         public SpaceAccessCode? AccessCode { get; set; }
+
         public uint VotingTimeSeconds { get; set; } = 30;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

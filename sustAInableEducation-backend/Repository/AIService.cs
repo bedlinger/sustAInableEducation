@@ -54,7 +54,7 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        public Task<StoryPart> GenerateResult(Story story)
+        public Task<StoryResult> GenerateResult(Story story)
         {
             if (story == null) throw new ArgumentNullException("Story is null");
 

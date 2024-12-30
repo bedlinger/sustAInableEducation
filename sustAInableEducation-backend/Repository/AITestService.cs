@@ -76,12 +76,16 @@ namespace sustAInableEducation_backend.Repository
             };
         }
 
-        public async Task<StoryPart> GenerateResult(Story story)
+        public async Task<StoryResult> GenerateResult(Story story)
         {
             Thread.Sleep(3000);
-            return new StoryPart
-            {
-                Text = "The end."
+            return new StoryResult {
+                Text = "The end",
+                Summary = "Summary",
+                PositiveChoices = new List<string> { "Option 1" },
+                NegativeChoices = new List<string> { "Option 2" },
+                Learnings = new List<string> { "Learning 1" },
+                DiscussionQuestions = new List<string> { "Question 1" }
             };
         }
 
