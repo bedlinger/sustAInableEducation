@@ -32,7 +32,7 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<(StoryPart, string)> StartStory(Story story)
         {
-            if (story == null) throw new ArgumentNullException("Story is null");
+            ArgumentNullException.ThrowIfNull(story);
 
             var chatMessages = RebuildChatMessages(story);
             var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
@@ -44,7 +44,7 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> GenerateNextPart(Story story)
         {
-            if (story == null) throw new ArgumentNullException("Story is null");
+            ArgumentNullException.ThrowIfNull(story);
 
             var chatMessages = RebuildChatMessages(story);
             var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
@@ -56,7 +56,7 @@ namespace sustAInableEducation_backend.Repository
          */
         public Task<StoryResult> GenerateResult(Story story)
         {
-            if (story == null) throw new ArgumentNullException("Story is null");
+            ArgumentNullException.ThrowIfNull(story);
 
             Thread.Sleep(2000);
             Console.WriteLine("Story is complete --> Generating Result...");
@@ -68,15 +68,15 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private List<ChatMessage> RebuildChatMessages(Story story)
+        private static List<ChatMessage> RebuildChatMessages(Story story)
         {
-            if (story == null) throw new ArgumentNullException("Story is null");
+            ArgumentNullException.ThrowIfNull(story);
             if (story.Length == 0) throw new ArgumentException("Story has set no length");
 
             var chatMessages = new List<ChatMessage>
             {
-                new ChatMessage { Role = ValidRoles.System, Content = story.Prompt },
-                new ChatMessage { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
+                new() { Role = ValidRoles.System, Content = story.Prompt },
+                new() { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
             };
 
             foreach (var part in story.Parts)
@@ -114,7 +114,7 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private (StoryPart, string) GetStoryPart(string assistantContent)
+        private static (StoryPart, string) GetStoryPart(string assistantContent)
         {
             var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
 
@@ -136,7 +136,7 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private StoryResult GetStoryResult(string assistantContent, string end)
+        private static StoryResult GetStoryResult(string assistantContent, string end)
         {
             var messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
             return new StoryResult
@@ -153,7 +153,7 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
+        private static async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             if (_client == null) throw new InvalidOperationException("Client is null");
             if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
