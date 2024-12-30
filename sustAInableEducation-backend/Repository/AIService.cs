@@ -35,8 +35,8 @@ namespace sustAInableEducation_backend.Repository
             if (story == null) throw new ArgumentNullException("Story is null");
 
             var chatMessages = RebuildChatMessages(story);
-            var response = await FetchStoryPartAsync(chatMessages, story.Temperature, story.TopP);
-            return response;
+            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+            return GetStoryPart(assistantContent);
         }
 
         /**
@@ -47,8 +47,8 @@ namespace sustAInableEducation_backend.Repository
             if (story == null) throw new ArgumentNullException("Story is null");
 
             var chatMessages = RebuildChatMessages(story);
-            var response = await FetchStoryPartAsync(chatMessages, story.Temperature, story.TopP);
-            return response.Item1;
+            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+            return GetStoryPart(assistantContent).Item1;
         }
 
         /**
@@ -72,7 +72,6 @@ namespace sustAInableEducation_backend.Repository
         {
             if (story == null) throw new ArgumentNullException("Story is null");
             if (story.Length == 0) throw new ArgumentException("Story has set no length");
-            if (story.Prompt == null) throw new ArgumentException("Story has no prompt");
 
             var chatMessages = new List<ChatMessage>
             {
@@ -85,9 +84,7 @@ namespace sustAInableEducation_backend.Repository
                 var assitentContent = new StoryContent
                 {
                     Title = story.Title ?? throw new ArgumentNullException("Story has no title"),
-                    //Title = "Title", // #TODO: Title in StoryPart.cs hinzufügen
                     Intertitle = part.Intertitle ?? throw new ArgumentNullException("Part has no intertitle"),
-                    //Intertitle = "Intertitle", // #TODO: Intertitle in StoryPart.cs hinzufügen
                     Story = part.Text,
                     Options = part.Choices.Select(choice => new Option
                     {
@@ -101,7 +98,7 @@ namespace sustAInableEducation_backend.Repository
                 {
                     throw new ArgumentException("Story part has invalid choice number");
                 }
-                else if (story.Parts.Count >= story.Length)
+                else if (story.IsComplete)
                 {
                     throw new NotImplementedException("Prompts for generating a result is not implemented");
                 }
@@ -117,7 +114,29 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private async Task<(StoryPart, string)> FetchStoryPartAsync(List<ChatMessage> chatMessages, float temperature, float topP)
+        private (StoryPart, string) GetStoryPart(string assistantContent)
+        {
+            var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+
+            var storyPart = new StoryPart
+            {
+                Text = messageContent.Story,
+                Intertitle = messageContent.Intertitle,
+                Choices = messageContent.Options.Select((option, index) => new StoryChoice
+                {
+                    Text = option.Text,
+                    Number = index + 1,
+                    Impact = option.Impact
+                }).ToList()
+            };
+
+            return (storyPart, messageContent.Title);
+        }
+
+        /**
+         * Benjamin Edlinger
+         */
+        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             if (_client == null) throw new InvalidOperationException("Client is null");
             if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
@@ -141,22 +160,7 @@ namespace sustAInableEducation_backend.Repository
             var responseContent = await response.Content.ReadAsStringAsync();
 
             var responseObject = JsonSerializer.Deserialize<Response>(responseContent) ?? throw new InvalidOperationException("Response is null");
-            var assistantContent = responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
-            var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
-
-            var storyPart = new StoryPart
-            {
-                Text = messageContent.Story,
-                Intertitle = messageContent.Intertitle,
-                Choices = messageContent.Options.Select((option, index) => new StoryChoice
-                {
-                    Text = option.Text,
-                    Number = index + 1,
-                    Impact = option.Impact
-                }).ToList()
-            };
-
-            return (storyPart, messageContent.Title);
+            return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
         }
 
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
@@ -300,13 +304,10 @@ namespace sustAInableEducation_backend.Repository
     /**
      * Benjamin Edlinger
      */
-    public class ResultContent
+    public class AnalysisContent
     {
-        [JsonPropertyName("text")]
-        public string Text { get; set; } = null!;
-
         [JsonPropertyName("summary")]
-        public string Result { get; set; } = null!;
+        public string Summary { get; set; } = null!;
 
         [JsonPropertyName("positive_choices")]
         public string[] PositiveChoices { get; set; } = null!;
