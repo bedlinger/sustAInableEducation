@@ -300,6 +300,30 @@ namespace sustAInableEducation_backend.Repository
     /**
      * Benjamin Edlinger
      */
+    public class ResultContent
+    {
+        [JsonPropertyName("text")]
+        public string Text { get; set; } = null!;
+
+        [JsonPropertyName("summary")]
+        public string Result { get; set; } = null!;
+
+        [JsonPropertyName("positive_choices")]
+        public string[] PositiveChoices { get; set; } = null!;
+
+        [JsonPropertyName("negative_choices")]
+        public string[] NegativeChoices { get; set; } = null!;
+
+        [JsonPropertyName("learnings")]
+        public string[] Learnings { get; set; } = null!;
+
+        [JsonPropertyName("discussion_questions")]
+        public string[] DiscussionQuestions { get; set; } = null!;
+    }
+
+    /**
+     * Benjamin Edlinger
+     */
     public class Usage
     {
         [JsonPropertyName("prompt_tokens")]
