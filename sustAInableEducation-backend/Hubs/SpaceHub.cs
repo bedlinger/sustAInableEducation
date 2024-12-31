@@ -108,7 +108,7 @@ namespace sustAInableEducation_backend.Hubs
 
             await _context.SaveChangesAsync();
 
-            if (story.IsComplete)
+            if (story.Result != null)
             {
                 await SendMessage(MessageType.ResultGenerated, story.Result);
             }
