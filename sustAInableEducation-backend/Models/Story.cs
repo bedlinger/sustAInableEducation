@@ -20,7 +20,7 @@ namespace sustAInableEducation_backend.Models
         public float TotalImpact { get; set; } = 0;
 
         [JsonIgnore]
-        public bool IsComplete => Parts.Count > Length;
+        public bool IsComplete => Parts.Count >= Length;
     }
 
     public class StoryResult
