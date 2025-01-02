@@ -50,3 +50,9 @@ html {
 .p-textarea {
     @apply !px-2 !py-1;
 }
+
+/*
+.p-datatable-thead {
+    @apply !fixed;
+}
+*/

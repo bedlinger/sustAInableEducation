@@ -38,7 +38,7 @@ export interface Story {
     topP: number,
     totalImpact: number,
     parts: Array<Part>,
-    result: Result,
+    result?: Result,
     
 }
 
