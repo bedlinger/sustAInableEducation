@@ -76,7 +76,6 @@
                                         <DataTable :value="selectedSpace.participants">
                                             <Column field="userName" header="Username">
                                                 <template #body="{ data }">
-
                                                     <div class="flex items-center">
                                                         <div class="size-5 mr-1">
                                                             <Icon name="ic:baseline-star-rate"
@@ -88,7 +87,15 @@
                                                     </div>
                                                 </template>
                                             </Column>
-                                            <Column field="impact" header="Impact" />
+                                            <Column field="impact" header="Impact">
+                                                <template #body="{ data }">
+                                                    <div class="flex items-center justify-center">
+                                                        <span v-if="ecoSpaceIsFinished(selectedSpace)">{{ data.impact }}</span>
+                                                        <span v-else>?</span>
+                                                    </div>
+
+                                                </template>
+                                            </Column>
                                         </DataTable>
                                     </div>
                                 </Fieldset>
