@@ -22,8 +22,8 @@
 
                 <div v-if="selectedSpace" class="w-full pt-20 p-4">
                     <div class="flex items-start flex-col w-full h-full">
-                        <h1 class="text-4xl font-bold">{{ selectedSpace.story.title }}</h1>
-                        <Panel header="Informationen" class="w-full">
+                        <h1 class="text-4xl font-bold mb-4">{{ selectedSpace.story.title }}</h1>
+                        <Panel header="Informationen" class="w-full mb-4">
                             <Divider />
                             <div class="w-full h-full flex justify-between">
                                 <div class="flex flex-col justify-between flex-1 mr-40">
@@ -37,7 +37,7 @@
                                             {{ selectedSpace.story.length }}</p>
                                         <p class="mb-2">
                                             <span class="font-bold">Zielgruppe:</span>
-                                            TODO
+                                            TODO    
                                         </p>
                                     </div>
                                     <div class="w-full">
@@ -63,15 +63,15 @@
                                 </Fieldset>
                             </div>
                         </Panel>
-                        <h2 class="text-2xl">Storyteile</h2>
+                        <h2 class="text-2xl mb-2">Storyteile</h2>
                         <Accordion :value="Array.from(Array(selectedSpace.story.parts.length).keys())" multiple
                             class="w-full my-2">
                             <AccordionPanel v-for="part, index in selectedSpace.story.parts" :key="part.intertitle"
                                 :value="index">
                                 <AccordionHeader class="!text-xl">{{ part.intertitle }}</AccordionHeader>
                                 <AccordionContent>
-                                    <p class="m-0">{{ part.text }}</p>
-                                    <h3 class="text-lg font-bold">Optionen</h3>
+                                    <p class="m-0 mb-2">{{ part.text }}</p>
+                                    <h3 class="text-lg font-bold mb-2">Optionen</h3>
                                     <div class="flex flex-col">
                                         <Button v-for="choice in part.choices" class="!w-full !mb-2">
                                             <template #default>
@@ -91,7 +91,7 @@
                                     </div>
                                 </AccordionContent>
                             </AccordionPanel>
-                            <h2 class="text-xl">Ergebnis</h2>
+                            <h2 class="text-xl mt-4 mb-2">Ergebnis</h2>
                             <AccordionPanel v-if="selectedSpace.story.result" :value="selectedSpace.story.parts.length">
                                 <AccordionHeader>{{ selectedSpace.story.result.text }}</AccordionHeader>
                                 <AccordionContent>
