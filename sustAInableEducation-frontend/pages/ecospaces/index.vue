@@ -41,7 +41,7 @@
                                         </p>
                                     </div>
                                     <div class="w-full">
-                                    <MeterGroup :value="getProgressData()" labelPosition="start" v-tooltip.bottom="{value: getProgressLabel()}">
+                                    <MeterGroup :value="getProgressData()" labelPosition="start" v-tooltip.bottom="{value: getProgressLabel(), showDelay: 50}">
                                             <template #label="{totalPercent}">
                                                 <p v-if="totalPercent < 100">Zu {{ totalPercent }}% Abgeschlossen</p>
                                                 <p v-else class="flex items-center">
