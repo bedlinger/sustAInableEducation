@@ -129,11 +129,11 @@
                                     </div>
                                 </AccordionContent>
                             </AccordionPanel>
-                            <h2 class="text-xl mt-4 mb-2">Ergebnis</h2>
-                            <AccordionPanel v-if="selectedSpace.story.result" :value="selectedSpace.story.parts.length">
-                                <AccordionHeader>{{ selectedSpace.story.result.text }}</AccordionHeader>
+                            <h2 class="text-xl mt-4 mb-2" v-if="ecoSpaceIsFinished(selectedSpace)">Ergebnis</h2>
+                            <AccordionPanel v-if="ecoSpaceIsFinished(selectedSpace)" :value="selectedSpace.story.parts.length">
+                                <AccordionHeader>{{ selectedSpace.story.result!.text }}</AccordionHeader>
                                 <AccordionContent>
-                                    <p>{{ selectedSpace.story.result.summary }}</p>
+                                    <p>{{ selectedSpace.story.result!.summary }}</p>
                                 </AccordionContent>
                             </AccordionPanel>
                         </Accordion>
