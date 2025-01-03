@@ -57,6 +57,7 @@
                                 <Fieldset legend="Teilnehmer" class="max-h-64 overflow-scroll">
                                     <div class="h-full w-full">
                                         <DataTable :value="selectedSpace.participants">
+                                            <Column field="userId" header="ID" class=""/>
                                             <Column field="userName" header="Username">
                                                 <template #body="{ data }">
                                                     
