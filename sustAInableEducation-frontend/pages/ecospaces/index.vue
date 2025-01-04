@@ -61,13 +61,19 @@
                             </div>
                         </Panel>
                         <Divider class="!w-full" />
-
                     </div>
                     <div id="sidebar-content">
                         <EcoSpaceListEntry v-for="ecoSpace in searchedSpaces" :ecoSpace="ecoSpace"
                             v-model="spaceRefsById[ecoSpace.id].value" v-on:click="selectSpaceById(ecoSpace.id)" />
-                        <div v-if="sampleSpaces.ecoSpaces.length === 0">
-                            <Message class="flex justify-center items-center w-full">
+                        <NuxtLink to="/configuration">
+                            <Button label="EcoSpace erstellen" rounded size="small" class="w-full !text-">
+                                <template #icon>
+                                    <Icon name="ic:baseline-add" class="size-5" />
+                                </template>
+                            </Button>
+                        </NuxtLink>
+                        <div v-if="sampleSpaces.ecoSpaces.length === 0" class="mt-2">
+                            <Message class="text-md flex justify-center items-center w-full">
                                 Es gibt noch keine EcoSpaces
                             </Message>
                         </div>
