@@ -1,7 +1,7 @@
 <template>
     <div class="w-full h-full">
         <div class="w-screen flex items-center h-full bg-slate-50">
-            <div class="w-80 h-full pt-16 border-solid border-black border-r-2">
+            <div class="w-80 h-full pt-16 border-solid border-slate-300 border-r-2">
                 <div class="sidebar w-full h-full flex flex-col p-2 overflow-y-scroll">
                     <div id="sidebar-header">
                         <div class="flex items-center">
