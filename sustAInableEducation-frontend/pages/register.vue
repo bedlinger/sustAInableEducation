@@ -50,6 +50,9 @@
 <script setup lang="ts">
 import type { Register, RegisterError} from '~/types/register'
 
+const runtimeConfig = useRuntimeConfig();
+console.log(`url: ${runtimeConfig.public.apiUrl}`)
+
 const initialValues = reactive({
     email: '',
     password: '',
