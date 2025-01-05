@@ -27,7 +27,7 @@ import type { EcoSpace } from '~/types/EcoSpace';
 
 const model = defineModel<boolean>();
 
-const emit = defineEmits(['click']);
+const emit = defineEmits(['click', 'delete']);
 
 const props = defineProps<{ ecoSpace: EcoSpace }>();
 
@@ -37,7 +37,7 @@ const menuItems = ref([
     {
         label: 'Löschen',
         Icon: 'ic:baseline-delete',
-        action: () => console.log('Löschen')
+        command: () => deleteEvent()
     }
 ]);
 
@@ -55,6 +55,10 @@ const toggleMenu = (event: Event) => {
 
 function clickEvent() {
     emit('click', model.value);
+}
+
+function deleteEvent() {
+    emit('delete', props.ecoSpace.id);
 }
 
 </script>
