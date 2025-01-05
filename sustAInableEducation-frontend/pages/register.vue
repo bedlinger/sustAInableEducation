@@ -143,8 +143,9 @@ async function register() {
         }),
         onResponse: (response) => {
             if (response.response.status === 200) {
-                toast.add({ severity: 'success', summary: 'Erfolgreich', detail: 'Sie haben sich erfolgreich registriert.' });
+                navigateTo('/login');
             }
+            navigateTo('/login');
         },
         onRequestError: (error) => {
             toast.add({ severity: 'error', summary: `Fehler: ${error.response?.status}`, detail: 'Bei der Registrierung ist ein Fehler aufgetreten.' });
