@@ -22,7 +22,8 @@ namespace sustAInableEducation_backend.Repository
             _config = config;
             _client = new()
             {
-                BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing"))
+                BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
+                Timeout = TimeSpan.FromMinutes(5)
             };
             _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
         }
@@ -32,11 +33,11 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<(StoryPart, string)> StartStory(Story story)
         {
-            if (story == null) throw new ArgumentNullException("Story is null");
+            ArgumentNullException.ThrowIfNull(story);
 
             var chatMessages = RebuildChatMessages(story);
-            var response = await FetchStoryPartAsync(chatMessages, story.Temperature, story.TopP);
-            return response;
+            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+            return GetStoryPart(assistantContent);
         }
 
         /**
@@ -44,52 +45,54 @@ namespace sustAInableEducation_backend.Repository
          */
         public async Task<StoryPart> GenerateNextPart(Story story)
         {
-            if (story == null) throw new ArgumentNullException("Story is null");
+            ArgumentNullException.ThrowIfNull(story);
 
             var chatMessages = RebuildChatMessages(story);
-            var response = await FetchStoryPartAsync(chatMessages, story.Temperature, story.TopP);
-            return response.Item1;
+            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+            return GetStoryPart(assistantContent).Item1;
         }
 
         /**
          * Benjamin Edlinger
          */
-        public Task<StoryResult> GenerateResult(Story story)
+        public async Task<StoryResult> GenerateResult(Story story)
         {
-            if (story == null) throw new ArgumentNullException("Story is null");
+            ArgumentNullException.ThrowIfNull(story);
 
-            Thread.Sleep(2000);
-            Console.WriteLine("Story is complete --> Generating Result...");
-            Thread.Sleep(2000);
+            var chatMessages = RebuildChatMessages(story);
+            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+            var endPart = GetStoryPart(assistantContent).Item1;
+            var end = endPart.Text;
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = assistantContent });
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = "Du schlüpfst in die Rolle einer Lehrkraft, welche die durchlebte Geschichte mit den Teilnehmern bespricht. Deine Aufgabe besteht nicht darin, die Handlung der Geschichte selbst zu analysieren, sondern das nachhaltige Thema zu beleuchten, das die Geschichte behandelt. Präsentiere die zentralen Aspekte faktenbasiert und leicht verständlich, um den Teilnehmern einen klaren Zugang zum Thema zu ermöglichen. Gleichzeitig sollst du die Teilnehmer dazu anregen, ihr eigenes Handeln und ihre Einstellungen kritisch zu hinterfragen. Schaffe Raum für eine offene und respektvolle Diskussion, in der unterschiedliche Perspektiven ausgetauscht werden können. Stelle gezielte Fragen, die zum Nachdenken anregen, und nutze klare Erklärungen sowie passende Beispiele, um komplexe Zusammenhänge greifbar zu machen. Die folgenden Inhalte sollen alle Teil deiner Analyse sein: - Erstelle eine umfassende Analyse der Geschichte, die sich aus mehreren klar strukturierten Teilen zusammensetzt. Beginne mit einer kurzen und prägnanten Zusammenfassung der Geschichte, die den Verlauf verständlich darstellt und die zentralen Ereignisse hervorhebt. Anschließend analysiere den Verlauf und arbeite heraus, wie sich die Entscheidungen und Handlungen der Figuren auf den Verlauf ausgewirkt haben. - Erstelle danach eine Liste mit positiven Entscheidungen, die innerhalb der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv auf den Verlauf ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind. Im Anschluss folgt eine Liste mit negativen Entscheidungen, die getroffen wurden. Erkläre hier ebenfalls, warum diese Entscheidungen negative Konsequenzen hatten und wie sie den Verlauf der Geschichte beeinflusst haben. - Ziehe daraus abgeleitete Erkenntnisse und übertrage sie auf die reale Welt. Erstelle eine Liste von praktischen Lehren, die aus der Geschichte gezogen werden können, und zeige auf, wie diese Erkenntnisse im Alltag oder in konkreten Situationen angewendet werden könnten. - Abschließend präsentiere eine Liste mit gezielten Fragen, die als Grundlage für eine tiefere Diskussion in der Gruppe dienen sollen. Diese Fragen sollten sowohl zum Nachdenken anregen als auch Raum für unterschiedliche Perspektiven schaffen und eine lebendige Diskussion ermöglichen. Antworte ausschließlich im gültigen JSON-Format, um sicherzustellen, dass deine Analyse korrekt dargestellt wird. Jede Antwort folgt exakt dieser Struktur: {\"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\",\"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\",\"Weitere positive Entscheidungen je nach Bedarf\"],\"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\",\"Weitere negative Entscheidungen je nach Bedarf\"],\"learnings\": [\"Erkenntnis 1\",\"Weitere Erkenntnisse je nach Bedarf\"],\"discussion_questions\": [\"Frage 1\",\"Weitere Fragen je nach Bedarf\"]}" });
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Die Geschichte ist soeben vorbei. Du kannst jetzt die Analyse der durchlebten Geschichte erstellen." });
+            assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
 
-            throw new NotImplementedException();
+            return GetStoryResult(assistantContent, end);
         }
 
         /**
          * Benjamin Edlinger
          */
-        private List<ChatMessage> RebuildChatMessages(Story story)
+        private static List<ChatMessage> RebuildChatMessages(Story story)
         {
-            if (story == null) throw new ArgumentNullException("Story is null");
+            ArgumentNullException.ThrowIfNull(story);
             if (story.Length == 0) throw new ArgumentException("Story has set no length");
-            if (story.Prompt == null) throw new ArgumentException("Story has no prompt");
 
             var chatMessages = new List<ChatMessage>
             {
-                new ChatMessage { Role = ValidRoles.System, Content = story.Prompt },
-                new ChatMessage { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
+                new() { Role = ValidRoles.System, Content = story.Prompt },
+                new() { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
             };
 
-            foreach (var part in story.Parts)
+            foreach (var part in story.Parts.Select((value, index) => new { value, index }))
             {
                 var assitentContent = new StoryContent
                 {
                     Title = story.Title ?? throw new ArgumentNullException("Story has no title"),
-                    //Title = "Title", // #TODO: Title in StoryPart.cs hinzufügen
-                    Intertitle = part.Intertitle ?? throw new ArgumentNullException("Part has no intertitle"),
-                    //Intertitle = "Intertitle", // #TODO: Intertitle in StoryPart.cs hinzufügen
-                    Story = part.Text,
-                    Options = part.Choices.Select(choice => new Option
+                    Intertitle = part.value.Intertitle ?? throw new ArgumentNullException("Part has no intertitle"),
+                    Story = part.value.Text,
+                    Options = part.value.Choices.Select(choice => new Option
                     {
                         ImpactString = choice.Impact.ToString(CultureInfo.InvariantCulture),
                         Text = choice.Text
@@ -97,17 +100,17 @@ namespace sustAInableEducation_backend.Repository
                 };
                 chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assitentContent) });
 
-                if (!part.ChosenNumber.HasValue || part.ChosenNumber < 1 || part.ChosenNumber > 4)
+                if (!part.value.ChosenNumber.HasValue || part.value.ChosenNumber < 1 || part.value.ChosenNumber > 4)
                 {
                     throw new ArgumentException("Story part has invalid choice number");
                 }
-                else if (story.Parts.Count >= story.Length)
+                else if (story.Length == part.index + 1)
                 {
-                    throw new NotImplementedException("Prompts for generating a result is not implemented");
+                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = $"Die Option {part.value.ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, nachdem es der letzte Entscheidungspunkt war, kommt nun der Schluss der Geschichte." });
                 }
                 else
                 {
-                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = $"Die Option {part.ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt." });
+                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = $"Die Option {part.value.ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt." });
                 }
             }
 
@@ -117,7 +120,46 @@ namespace sustAInableEducation_backend.Repository
         /**
          * Benjamin Edlinger
          */
-        private async Task<(StoryPart, string)> FetchStoryPartAsync(List<ChatMessage> chatMessages, float temperature, float topP)
+        private static (StoryPart, string) GetStoryPart(string assistantContent)
+        {
+            var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+
+            var storyPart = new StoryPart
+            {
+                Text = messageContent.Story,
+                Intertitle = messageContent.Intertitle,
+                Choices = messageContent.Options.Select((option, index) => new StoryChoice
+                {
+                    Text = option.Text,
+                    Number = index + 1,
+                    Impact = option.Impact
+                }).ToList()
+            };
+
+            return (storyPart, messageContent.Title);
+        }
+
+        /**
+         * Benjamin Edlinger
+         */
+        private static StoryResult GetStoryResult(string assistantContent, string end)
+        {
+            var messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            return new StoryResult
+            {
+                Text = end,
+                Summary = messageContent.Summary,
+                PositiveChoices = messageContent.PositiveChoices,
+                NegativeChoices = messageContent.NegativeChoices,
+                Learnings = messageContent.Learnings,
+                DiscussionQuestions = messageContent.DiscussionQuestions
+            };
+        }
+
+        /**
+         * Benjamin Edlinger
+         */
+        private static async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             if (_client == null) throw new InvalidOperationException("Client is null");
             if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
@@ -141,22 +183,7 @@ namespace sustAInableEducation_backend.Repository
             var responseContent = await response.Content.ReadAsStringAsync();
 
             var responseObject = JsonSerializer.Deserialize<Response>(responseContent) ?? throw new InvalidOperationException("Response is null");
-            var assistantContent = responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
-            var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
-
-            var storyPart = new StoryPart
-            {
-                Text = messageContent.Story,
-                Intertitle = messageContent.Intertitle,
-                Choices = messageContent.Options.Select((option, index) => new StoryChoice
-                {
-                    Text = option.Text,
-                    Number = index + 1,
-                    Impact = option.Impact
-                }).ToList()
-            };
-
-            return (storyPart, messageContent.Title);
+            return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
         }
 
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
@@ -295,6 +322,27 @@ namespace sustAInableEducation_backend.Repository
 
         [JsonPropertyName("text")]
         public string Text { get; set; } = null!;
+    }
+
+    /**
+     * Benjamin Edlinger
+     */
+    public class AnalysisContent
+    {
+        [JsonPropertyName("summary")]
+        public string Summary { get; set; } = null!;
+
+        [JsonPropertyName("positive_choices")]
+        public string[] PositiveChoices { get; set; } = null!;
+
+        [JsonPropertyName("negative_choices")]
+        public string[] NegativeChoices { get; set; } = null!;
+
+        [JsonPropertyName("learnings")]
+        public string[] Learnings { get; set; } = null!;
+
+        [JsonPropertyName("discussion_questions")]
+        public string[] DiscussionQuestions { get; set; } = null!;
     }
 
     /**
