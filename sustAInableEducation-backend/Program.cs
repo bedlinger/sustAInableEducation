@@ -7,10 +7,22 @@ using Microsoft.AspNetCore.Identity;
 using sustAInableEducation_backend.Models;
 using System;
 
+var AllowFrontendOrigin = "_allowFrontendOrigin";
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: AllowFrontendOrigin,
+                      policy =>
+                      {
+                          policy.WithOrigins(builder.Configuration["FrontendHost"]!)
+                                .AllowAnyMethod()
+                                .AllowAnyHeader();
+                      });
+});
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
@@ -19,7 +31,6 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "sustAInableEducation API", Version = "v1" });
     options.AddSignalRSwaggerGen();
 });
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
         var connectionString = string.Format(
@@ -49,6 +60,11 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddTransient<IAIService, AIService>();
 
 var app = builder.Build();
+
+app.UseStaticFiles();
+app.UseRouting();
+
+app.UseCors(AllowFrontendOrigin);
 
 app.UseSwagger();
 app.UseSwaggerUI();
