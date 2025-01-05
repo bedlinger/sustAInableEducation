@@ -58,7 +58,6 @@ function clickEvent() {
 }
 
 function deleteEvent() {
-    console.log("TEST")
     emit('delete', props.ecoSpace.id);
 }
 
