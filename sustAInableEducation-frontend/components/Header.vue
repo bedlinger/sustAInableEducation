@@ -8,7 +8,7 @@
         <div class="flex justify-center items-center">
             <NuxtLink to="/ecospaces" class="text-white mx-4 text-xl">EcoSpaces</NuxtLink>
             <NuxtLink to="/quizzes" class="text-white mx-4 text-xl">Quizzes</NuxtLink>
-            <div class="text-white mx-4 text-xl flex justify-center items-center" :class="route.path in ['/login', '/register'] ? 'cursor-pointer' : ''" @click="toggleMenu">
+            <div class="text-white mx-4 text-xl flex justify-center items-center" :class="!(['/login', '/register'].includes(route.path)) ? 'cursor-pointer' : ''" @click="toggleMenu">
                 <Icon name="ic:baseline-account-circle" class="bg-white mx-4 size-10" />
             </div>
             <Menu ref="menu" :model="items" :popup="true"/>
@@ -19,7 +19,7 @@
 <script setup lang="ts">
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
-
+const toast = useToast();
 
 const menu = ref();
 
@@ -37,23 +37,24 @@ const items = ref([
 ]);
 
 async function logout() {
-    console.log("Test")
     await $fetch(`${runtimeConfig.public.apiUrl}/account/logout`, {
         method: 'POST',
         credentials: 'include',
         onResponse: (response) => {
             if (response.response.status === 200) {
-                // MAybe add toast
+                toast.add({
+                    severity: 'success',
+                    summary: 'Logout erfolgreich',
+                    life: 3000
+                });
             }
         }
     })
 }
 
 const toggleMenu = (event: Event) => {
-    if (route.path in ['/login', '/register']) {
+    if (!(['/login', '/register'].includes(route.path))) {
         menu.value.toggle(event);
     }
-    
 };
-
 </script>
