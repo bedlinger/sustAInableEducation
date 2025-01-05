@@ -1,10 +1,11 @@
 <template>
     <div class="w-full h-full">
         <div class="w-screen flex items-center h-full bg-slate-50">
+            <Toast/>
+            <ConfirmDialog></ConfirmDialog>
             <div class="w-80 h-full pt-16 border-solid border-slate-300 border-r-2">
                 <div class="sidebar w-full h-full flex flex-col p-2 overflow-y-scroll">
                     <div id="sidebar-header">
-                        {{ error?.cause }}
                         <div class="flex items-center">
                             <IconField class="mr-2">
                                 <InputIcon>
@@ -65,7 +66,7 @@
                         <Divider class="!w-full" />
                     </div>
                     <div id="sidebar-content">
-                        <EcoSpaceListEntry v-for="ecoSpace in searchedSpaces" :ecoSpace="ecoSpace"
+                        <EcoSpaceListEntry v-for="ecoSpace in searchedSpaces" :ecoSpace="ecoSpace" v-on:delete="openDialog"
                             v-model="spaceRefsById[ecoSpace.id].value" v-on:click="selectSpaceById(ecoSpace.id)" />
                         <NuxtLink to="/configuration">
                             <Button label="EcoSpace erstellen" rounded size="small" class="w-full !text-">
@@ -219,8 +220,11 @@ import type { EcoSpace } from '~/types/EcoSpace';
 import type { OverviewFilter } from '~/types/filter';
 
 const runtimeConfig = useRuntimeConfig();
+const confirmDialog = useConfirm();
+const toast = useToast();
 
-const { status, error, data: spaces} = await useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`,
+
+const { execute, data: spaces} = await useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`,
     {
         method: 'GET',
         cache: 'no-cache',
@@ -394,6 +398,53 @@ function applyFilters() {
     filters.applied.date.value = filters.refs.date.value;
     filters.applied.sort.subject.value = filters.refs.sort.subject.value;
     filters.applied.sort.direction.value = filters.refs.sort.direction.value;
+}
+
+function deleteSpace(id: string) {
+    $fetch(`${runtimeConfig.public.apiUrl}/spaces/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        onResponse: (response) => {
+            if(response.response.ok) {
+                toast.add({
+                    severity: 'success',
+                    life: 5000,
+                    summary: 'Erfolgreich gelöscht',
+                    detail: `Der EcoSpace, mit der ID ${id}, wurde erfolgreich gelöscht.`,
+                });
+                execute();
+            } else {
+                toast.add({
+                    severity: 'error',
+                    life: 5000,
+                    summary: 'Fehler beim Löschen',
+                    detail: `Der EcoSpace, mit der ID ${id}, konnte nicht gelöscht werden.`
+                });
+            }
+        }
+    });
+}
+
+const openDialog = (id: string) => {
+    confirmDialog.require({
+        message: 'Sind Sie sich sicher, dass Sie diesen EcoSpace löschen möchten?',
+        header: 'Endgültig Löschen',
+        rejectProps: {
+            label: 'Abbrechen',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Löschen',
+            severity: 'danger'
+        },
+        accept: () => {
+            deleteSpace(id);
+        },
+        reject: () => {
+            
+        }
+    });
 }
 </script>
 
