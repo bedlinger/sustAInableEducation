@@ -1,7 +1,15 @@
 <template>
     <div class="w-full h-full">
         <div class="background animate-anim" />
-        <div class="w-screen flex justify-center items-center h-full bg-slate-50 pt-20 p-4">
+        <div class="w-screen flex flex-col justify-center items-center h-full bg-slate-50 pt-[4.5rem] p-4">
+            <div class="top flex justify-between items-center mb-2 w-full">
+                <Button label="Einladen">
+                    <template #icon>
+                        <Icon name="ic:baseline-person-add" class="size-5"/>
+                    </template>
+                </Button>
+                <Button label="Teilnehmer" badge="20"/>
+            </div>
             <div class="panel w-full h-full rounded-xl relative border-solid border-slate-3s00 border-2 flex flex-col justify-center">
                 <div class="content h-full w-full">
                     
