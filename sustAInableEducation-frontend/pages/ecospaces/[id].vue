@@ -2,13 +2,14 @@
     <div class="w-full h-full">
         <div class="background animate-anim" />
         <div class="w-screen flex flex-col justify-center items-center h-full bg-slate-50 pt-[4.5rem] p-4">
+            <UserDialog v-model="userDialogIsVisible" :participants="participants"/>
             <div class="top flex justify-between items-center mb-2 w-full">
                 <Button label="Einladen">
                     <template #icon>
                         <Icon name="ic:baseline-person-add" class="size-5"/>
                     </template>
                 </Button>
-                <Button label="Teilnehmer" badge="20"/>
+                <Button label="Teilnehmer" badge="20" @click="showUserDialog"/>
             </div>
             <div class="panel w-full h-full rounded-xl relative border-solid border-slate-3s00 border-2 flex flex-col justify-center">
                 <div class="content h-full w-full">
@@ -36,12 +37,18 @@
 </template>
 
 <script setup lang="ts">
+import type { Participant } from '~/types/EcoSpace';
+
+
+const participants = ref<Participant[]>([])
 
 const timerValue = ref({
     initialValue: 10,
     time: 10,
     percent: 0,
 });
+
+const userDialogIsVisible = ref<boolean | undefined>(false);
 
 var timerCount = 0;
 
@@ -69,5 +76,8 @@ function startTimer() {
     }, 1000);
 }
 
+function showUserDialog() {
+    userDialogIsVisible.value = true;
+}
 
 </script>
