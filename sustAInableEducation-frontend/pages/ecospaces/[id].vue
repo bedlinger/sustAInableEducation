@@ -35,6 +35,8 @@ const timerValue = ref({
     percent: 0,
 });
 
+var timerCount = 0;
+
 var timerInterval : NodeJS.Timeout;
 
 function setTimer() {
@@ -43,10 +45,15 @@ function setTimer() {
 }
 
 function startTimer() {
+    if(timerCount > 0) {
+        return;
+    }
     let increment = 100 / timerValue.value.time;
+    timerCount++;
     timerInterval = setInterval(() => {
         if(timerValue.value.time <= 0) {
             clearInterval(timerInterval);
+            timerCount--;
             return;
         }
         timerValue.value.time--;
