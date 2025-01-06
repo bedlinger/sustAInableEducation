@@ -2,9 +2,10 @@
     <div class="w-full h-full">
         <div class="background animate-anim" />
         <div class="w-screen flex flex-col justify-center items-center h-full bg-slate-50 pt-[4.5rem] p-4">
+            <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" v-on:generateCode="getJoinCode"/>
             <UserDialog v-model="userDialogIsVisible" :participants="participants"/>
             <div class="top flex justify-between items-center mb-2 w-full">
-                <Button label="Einladen">
+                <Button label="Einladen" @click="showInviteDialog">
                     <template #icon>
                         <Icon name="ic:baseline-person-add" class="size-5"/>
                     </template>
@@ -48,7 +49,11 @@ const timerValue = ref({
     percent: 0,
 });
 
+const inviteDialogIsVisible = ref<boolean | undefined>(false);
+
 const userDialogIsVisible = ref<boolean | undefined>(false);
+
+const joinCode = ref<string>('');
 
 var timerCount = 0;
 
@@ -78,6 +83,14 @@ function startTimer() {
 
 function showUserDialog() {
     userDialogIsVisible.value = true;
+}
+
+function showInviteDialog() {
+    inviteDialogIsVisible.value = true;
+}
+
+async function getJoinCode() {
+    joinCode.value = "123456" // TODO: Implement
 }
 
 </script>
