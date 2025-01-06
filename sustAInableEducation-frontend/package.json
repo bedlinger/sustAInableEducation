@@ -17,6 +17,7 @@
     "dotenv": "^16.4.7",
     "nuxt": "^3.14.159",
     "primevue": "^4.2.2",
+    "qrcode.vue": "^3.6.0",
     "vue": "latest",
     "vue-router": "latest"
   },
