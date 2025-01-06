@@ -12,12 +12,12 @@
                         <Timer class="sm:hidden" v-model="timerValue"/>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:justify-between w-full">
-                        <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 1" @click="setTimer"/>
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1" @click="setTimer"/>
                         <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 2" @click="startTimer"/>
                         <Knob class="hidden sm:block mx-5" v-model="timerValue.percent" :valueTemplate="(number) => { return `${timerValue.time}`}" disabled :size="100">
                         </Knob>
                         <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 3" @click=""/>
-                        <Button class="sm:mx-5 flex-1 sm:!text-2xl" label="Option 4"/>
+                        <Button class="sm:ml-5 flex-1 sm:!text-2xl" label="Option 4"/>
                     </div>
                     
                 </div>
