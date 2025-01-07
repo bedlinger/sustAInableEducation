@@ -13,14 +13,22 @@ namespace sustAInableEducation_backend.Models
 
         [MaxLength(256)]
         public string? Title { get; set; }
-        public string Prompt { get; set; } = null!;
+        public string Topic { get; set; } = null!;
         public uint Length { get; set; }
         public float Temperature { get; set; }
         public float TopP { get; set; }
         public float TotalImpact { get; set; } = 0;
+        public TargetGroup TargetGroup { get; set; }
 
         [JsonIgnore]
         public bool IsComplete => Parts.Count >= Length;
+    }
+
+    public enum TargetGroup
+    {
+        PrimarySchool,
+        MiddleSchool,
+        HighSchool,
     }
 
     public class StoryResult
