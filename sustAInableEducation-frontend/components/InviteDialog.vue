@@ -3,7 +3,7 @@
         <div v-if="props.joinCode">
             <Panel class="w-full h-full !p-0">
                 <div class="flex justify-center items-center">
-                    <qrcode-svg :value="'https://app.sustainable-edu.at'" :size="300" level="H" />
+                    <qrcode-svg :value="`${runtimeConfig.public.hostUrl}/join/${joinCode}`" :size="300" level="H" />
                 </div>
             </Panel>
             <div class="flex justify-center items-center mt-4">
@@ -18,7 +18,7 @@
                 <Button severity="secondary" label="Neu Generieren" @click="emits('generateCode')"/>
             </div>
         </div>
-        <div v-else class="flex justify-center items-center w-full bg-red-300 h-96">
+        <div v-else class="flex justify-center items-center w-full h-96">
             <Button label="Einladungscode generieren" @click="emits('generateCode')"/>
         </div>
 
@@ -27,6 +27,8 @@
 
 <script setup lang="ts">
 import { QrcodeSvg } from 'qrcode.vue'
+
+const runtimeConfig = useRuntimeConfig() 
 
 const model = defineModel<boolean>();
 const props = defineProps<{ joinCode: string }>();
