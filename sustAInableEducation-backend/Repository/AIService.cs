@@ -81,7 +81,7 @@ namespace sustAInableEducation_backend.Repository
 
             var chatMessages = new List<ChatMessage>
             {
-                new() { Role = ValidRoles.System, Content = story.Prompt },
+                //new() { Role = ValidRoles.System, Content = story.Prompt },
                 new() { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
             };
 
