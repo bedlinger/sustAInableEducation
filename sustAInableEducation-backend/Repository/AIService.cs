@@ -194,20 +194,27 @@ namespace sustAInableEducation_backend.Repository
             };
 
             HttpResponseMessage response = null!;
-            string responseContent;
+            string responseString;
             try
             {
                 response = await _client.SendAsync(request);
                 response.EnsureSuccessStatusCode();
-                responseContent = await response.Content.ReadAsStringAsync();
+                responseString = await response.Content.ReadAsStringAsync();
             }
             catch (HttpRequestException e)
             {
                 throw new HttpRequestException($"Request failed with status code {response?.StatusCode}", e);
             }
 
-            var responseObject = JsonSerializer.Deserialize<Response>(responseContent) ?? throw new InvalidOperationException("Response is null");
-            return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
+            try
+            {
+                Response responseObject = JsonSerializer.Deserialize<Response>(responseString) ?? throw new InvalidOperationException("Response object is null");
+                return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException("Failed to deserialize response content", e);
+            }
         }
 
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
