@@ -193,9 +193,18 @@ namespace sustAInableEducation_backend.Repository
                 }), Encoding.UTF8, "application/json")
             };
 
-            var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
+            HttpResponseMessage response = null!;
+            string responseContent;
+            try
+            {
+                response = await _client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                responseContent = await response.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                throw new HttpRequestException($"Request failed with status code {response?.StatusCode}", e);
+            }
 
             var responseObject = JsonSerializer.Deserialize<Response>(responseContent) ?? throw new InvalidOperationException("Response is null");
             return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
