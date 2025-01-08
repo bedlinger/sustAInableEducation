@@ -19,6 +19,7 @@ namespace sustAInableEducation_backend.Repository
          */
         public AIService(IConfiguration config)
         {
+            ArgumentNullException.ThrowIfNull(config);
             _config = config;
             _client = new()
             {
@@ -137,6 +138,7 @@ namespace sustAInableEducation_backend.Repository
          */
         private static (StoryPart, string) GetStoryPart(string assistantContent)
         {
+            ArgumentNullException.ThrowIfNull(assistantContent);
             StoryContent messageContent;
             try
             {
@@ -166,6 +168,8 @@ namespace sustAInableEducation_backend.Repository
          */
         private static StoryResult GetStoryResult(string assistantContent, string end)
         {
+            ArgumentNullException.ThrowIfNull(assistantContent);
+            ArgumentNullException.ThrowIfNull(end);
             AnalysisContent messageContent;
             try
             {
@@ -192,8 +196,9 @@ namespace sustAInableEducation_backend.Repository
          */
         private static async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
-            if (_client == null) throw new InvalidOperationException("Client is null");
-            if (chatMessages == null || chatMessages.Count == 0) throw new ArgumentException("No messages to send");
+            ArgumentNullException.ThrowIfNull(_client);
+            ArgumentNullException.ThrowIfNull(chatMessages);
+            if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
             if (temperature < 0 || temperature > 1) throw new ArgumentException("Invalid temperature");
             if (topP < 0 || topP > 1) throw new ArgumentException("Invalid topP");
 
