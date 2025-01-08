@@ -13,6 +13,7 @@ namespace sustAInableEducation_backend.Repository
          */
         private readonly IConfiguration _config;
         private static HttpClient? _client;
+        const int MAX_RETRY_ATTEMPTS = 2; // Maximum number of retry attempts for a failed request or deserialization
 
         /**
          * Benjamin Edlinger
