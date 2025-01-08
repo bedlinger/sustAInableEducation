@@ -137,7 +137,15 @@ namespace sustAInableEducation_backend.Repository
          */
         private static (StoryPart, string) GetStoryPart(string assistantContent)
         {
-            StoryContent messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            StoryContent messageContent;
+            try
+            {
+                messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException("Failed to deserialize assistant content", e);
+            }
 
             StoryPart storyPart = new()
             {
@@ -150,7 +158,6 @@ namespace sustAInableEducation_backend.Repository
                     Impact = option.Impact
                 }).ToList()
             };
-
             return (storyPart, messageContent.Title);
         }
 
@@ -159,7 +166,16 @@ namespace sustAInableEducation_backend.Repository
          */
         private static StoryResult GetStoryResult(string assistantContent, string end)
         {
-            AnalysisContent messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            AnalysisContent messageContent;
+            try
+            {
+                messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException("Failed to deserialize assistant content", e);
+            }
+
             return new StoryResult
             {
                 Text = end,
@@ -177,7 +193,7 @@ namespace sustAInableEducation_backend.Repository
         private static async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             if (_client == null) throw new InvalidOperationException("Client is null");
-            if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
+            if (chatMessages == null || chatMessages.Count == 0) throw new ArgumentException("No messages to send");
             if (temperature < 0 || temperature > 1) throw new ArgumentException("Invalid temperature");
             if (topP < 0 || topP > 1) throw new ArgumentException("Invalid topP");
 
