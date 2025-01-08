@@ -35,8 +35,8 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            var chatMessages = RebuildChatMessages(story);
-            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+            List<ChatMessage> chatMessages = RebuildChatMessages(story);
+            string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
             return GetStoryPart(assistantContent);
         }
 
@@ -47,8 +47,8 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            var chatMessages = RebuildChatMessages(story);
-            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+            List<ChatMessage> chatMessages = RebuildChatMessages(story);
+            string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
             return GetStoryPart(assistantContent).Item1;
         }
 
@@ -59,10 +59,10 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            var chatMessages = RebuildChatMessages(story);
-            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-            var endPart = GetStoryPart(assistantContent).Item1;
-            var end = endPart.Text;
+            List<ChatMessage> chatMessages = RebuildChatMessages(story);
+            string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+            StoryPart endPart = GetStoryPart(assistantContent).Item1;
+            string end = endPart.Text;
             chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = assistantContent });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = "Du schlüpfst in die Rolle einer Lehrkraft, welche die durchlebte Geschichte mit den Teilnehmern bespricht. Deine Aufgabe besteht nicht darin, die Handlung der Geschichte selbst zu analysieren, sondern das nachhaltige Thema zu beleuchten, das die Geschichte behandelt. Präsentiere die zentralen Aspekte faktenbasiert und leicht verständlich, um den Teilnehmern einen klaren Zugang zum Thema zu ermöglichen. Gleichzeitig sollst du die Teilnehmer dazu anregen, ihr eigenes Handeln und ihre Einstellungen kritisch zu hinterfragen. Schaffe Raum für eine offene und respektvolle Diskussion, in der unterschiedliche Perspektiven ausgetauscht werden können. Stelle gezielte Fragen, die zum Nachdenken anregen, und nutze klare Erklärungen sowie passende Beispiele, um komplexe Zusammenhänge greifbar zu machen. Die folgenden Inhalte sollen alle Teil deiner Analyse sein: - Erstelle eine umfassende Analyse der Geschichte, die sich aus mehreren klar strukturierten Teilen zusammensetzt. Beginne mit einer kurzen und prägnanten Zusammenfassung der Geschichte, die den Verlauf verständlich darstellt und die zentralen Ereignisse hervorhebt. Anschließend analysiere den Verlauf und arbeite heraus, wie sich die Entscheidungen und Handlungen der Figuren auf den Verlauf ausgewirkt haben. - Erstelle danach eine Liste mit positiven Entscheidungen, die innerhalb der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv auf den Verlauf ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind. Im Anschluss folgt eine Liste mit negativen Entscheidungen, die getroffen wurden. Erkläre hier ebenfalls, warum diese Entscheidungen negative Konsequenzen hatten und wie sie den Verlauf der Geschichte beeinflusst haben. - Ziehe daraus abgeleitete Erkenntnisse und übertrage sie auf die reale Welt. Erstelle eine Liste von praktischen Lehren, die aus der Geschichte gezogen werden können, und zeige auf, wie diese Erkenntnisse im Alltag oder in konkreten Situationen angewendet werden könnten. - Abschließend präsentiere eine Liste mit gezielten Fragen, die als Grundlage für eine tiefere Diskussion in der Gruppe dienen sollen. Diese Fragen sollten sowohl zum Nachdenken anregen als auch Raum für unterschiedliche Perspektiven schaffen und eine lebendige Diskussion ermöglichen. Antworte ausschließlich im gültigen JSON-Format, um sicherzustellen, dass deine Analyse korrekt dargestellt wird. Jede Antwort folgt exakt dieser Struktur: {\"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\",\"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\",\"Weitere positive Entscheidungen je nach Bedarf\"],\"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\",\"Weitere negative Entscheidungen je nach Bedarf\"],\"learnings\": [\"Erkenntnis 1\",\"Weitere Erkenntnisse je nach Bedarf\"],\"discussion_questions\": [\"Frage 1\",\"Weitere Fragen je nach Bedarf\"]}" });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Die Geschichte ist soeben vorbei. Du kannst jetzt die Analyse der durchlebten Geschichte erstellen." });
@@ -94,15 +94,15 @@ namespace sustAInableEducation_backend.Repository
                 story.Topic +
                 "Antworte ausschließlich im gültigen JSON-Format, damit deine Antworten den Teilnehmern richtig dargestellt werden können. Jede deiner Antworten hat den identen JSON-Aufbau. Erstens den Titel der Geschichte, dieser bleibt immer gleich und der Zwischentitel des Abschnittes. Darauf folgt die Geschichte, also der Abschnitt der Geschichte, welchen du geschrieben hast. Dann die vier Optionen des Entscheidungspunkts in einem Array. Wenn es der letzte Teil der Geschichte ist, befülle das Array, mit den Optionen, mit leeren Inhalten, welche trotzdem valide sind. Hier ist die JSON-Struktur, welche immer geliefert werden soll: { \"title\": \"Titel der Geschichte\", \"intertitle\": \"Zwischentitel des Abschnitt\", \"story\": \"Aktueller Teil der Geschichte basierend auf den bisherigen Entscheidungen.\", \"options\": [ { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 1 Beschreibung\" }, { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 2 Beschreibung\" } , { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 3 Beschreibung\" } , { \"impact\": \"Wert zwischen -1 und 1\", \"text \": \"Option 4 Beschreibung\" } ] }";
 
-            var chatMessages = new List<ChatMessage>
-            {
+            List<ChatMessage> chatMessages =
+            [
                 new() { Role = ValidRoles.System, Content = systemPrompt },
                 new() { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
-            };
+            ];
 
             foreach (var part in story.Parts.Select((value, index) => new { value, index }))
             {
-                var assitentContent = new StoryContent
+                StoryContent assitentContent = new()
                 {
                     Title = story.Title ?? throw new ArgumentNullException("Story has no title"),
                     Intertitle = part.value.Intertitle,
@@ -137,9 +137,9 @@ namespace sustAInableEducation_backend.Repository
          */
         private static (StoryPart, string) GetStoryPart(string assistantContent)
         {
-            var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            StoryContent messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
 
-            var storyPart = new StoryPart
+            StoryPart storyPart = new()
             {
                 Text = messageContent.Story,
                 Intertitle = messageContent.Intertitle,
@@ -159,7 +159,7 @@ namespace sustAInableEducation_backend.Repository
          */
         private static StoryResult GetStoryResult(string assistantContent, string end)
         {
-            var messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            AnalysisContent messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
             return new StoryResult
             {
                 Text = end,
@@ -181,7 +181,7 @@ namespace sustAInableEducation_backend.Repository
             if (temperature < 0 || temperature > 1) throw new ArgumentException("Invalid temperature");
             if (topP < 0 || topP > 1) throw new ArgumentException("Invalid topP");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/v1/openai/chat/completions")
+            HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
             {
                 Content = new StringContent(JsonSerializer.Serialize(new
                 {
