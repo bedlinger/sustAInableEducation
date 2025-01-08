@@ -77,7 +77,6 @@ namespace sustAInableEducation_backend.Repository
         private static List<ChatMessage> RebuildChatMessages(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
-            if (story.Length == 0) throw new ArgumentException("Story has set no length");
 
             string targetGroupString = story.TargetGroup switch
             {
@@ -106,7 +105,7 @@ namespace sustAInableEducation_backend.Repository
                 var assitentContent = new StoryContent
                 {
                     Title = story.Title ?? throw new ArgumentNullException("Story has no title"),
-                    Intertitle = part.value.Intertitle ?? throw new ArgumentNullException("Part has no intertitle"),
+                    Intertitle = part.value.Intertitle,
                     Story = part.value.Text,
                     Options = part.value.Choices.Select(choice => new Option
                     {
