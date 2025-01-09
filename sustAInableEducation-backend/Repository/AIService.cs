@@ -196,6 +196,7 @@ namespace sustAInableEducation_backend.Repository
                 try
                 {
                     endPart = GetStoryPart(assistantContent).Item1;
+                    break;
                 }
                 catch (Exception e)
                 {
