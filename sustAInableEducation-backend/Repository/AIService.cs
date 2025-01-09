@@ -37,7 +37,15 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            List<ChatMessage> chatMessages = RebuildChatMessages(story);
+            List<ChatMessage> chatMessages;
+            try
+            {
+                chatMessages = RebuildChatMessages(story);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
+            }
 
             string assistantContent = null!;
             int attempt = 0;
@@ -85,7 +93,15 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            List<ChatMessage> chatMessages = RebuildChatMessages(story);
+            List<ChatMessage> chatMessages;
+            try
+            {
+                chatMessages = RebuildChatMessages(story);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
+            }
 
             string assistantContent = null!;
             int attempt = 0;
@@ -133,7 +149,15 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            List<ChatMessage> chatMessages = RebuildChatMessages(story);
+            List<ChatMessage> chatMessages;
+            try
+            {
+                chatMessages = RebuildChatMessages(story);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
+            }
 
             string assistantContent = null!;
             int attempt = 0;
