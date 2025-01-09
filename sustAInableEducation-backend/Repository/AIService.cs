@@ -8,17 +8,15 @@ namespace sustAInableEducation_backend.Repository
 {
     public class AIService : IAIService
     {
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
         private readonly IConfiguration _config;
         private static HttpClient? _client;
+        const int MAX_RETRY_ATTEMPTS = 2; // Maximum number of retry attempts for a failed request or deserialization
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
         public AIService(IConfiguration config)
         {
+            ArgumentNullException.ThrowIfNull(config);
             _config = config;
             _client = new()
             {
@@ -28,56 +26,241 @@ namespace sustAInableEducation_backend.Repository
             _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Starts a new story with the given story object
+        /// </summary>
+        /// <param name="story"> The story object to start</param>
+        /// <returns>The first part of the story and the title of the story</returns>
+        /// <exception cref="ArgumentException">If the story object is invalid</exception>
+        /// <exception cref="AIException">If the story could not be started due to an error while fetching the content or deserializing</exception>
         public async Task<(StoryPart, string)> StartStory(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            var chatMessages = RebuildChatMessages(story);
-            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-            return GetStoryPart(assistantContent);
+            List<ChatMessage> chatMessages;
+            try
+            {
+                chatMessages = RebuildChatMessages(story);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
+            }
+
+            string assistantContent = null!;
+            int attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to start story", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    return GetStoryPart(assistantContent);
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to start story", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            throw new AIException("Failed to start story after maximum retry attempts");
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Generates the next part of the story based on the given story object
+        /// </summary>
+        /// <param name="story">The story object to generate the next part for</param>
+        /// <returns>The next part of the story</returns>
+        /// <exception cref="ArgumentException">If the story object is invalid</exception>
+        /// <exception cref="AIException">If the next part could not be generated due to an error while fetching the content or deserializing</exception>
         public async Task<StoryPart> GenerateNextPart(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            var chatMessages = RebuildChatMessages(story);
-            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-            return GetStoryPart(assistantContent).Item1;
+            List<ChatMessage> chatMessages;
+            try
+            {
+                chatMessages = RebuildChatMessages(story);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
+            }
+
+            string assistantContent = null!;
+            int attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate next part", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    return GetStoryPart(assistantContent).Item1;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate next part", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            throw new AIException("Failed to generate next part after maximum retry attempts");
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Generates the result of the story based on the given story object
+        /// </summary>
+        /// <param name="story">The story object to generate the result for</param>
+        /// <returns>The result of the story</returns>
+        /// <exception cref="ArgumentException">If the story object is invalid</exception>
+        /// <exception cref="AIException">If the result could not be generated due to an error while fetching the content or deserializing</exception>
         public async Task<StoryResult> GenerateResult(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            var chatMessages = RebuildChatMessages(story);
-            var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-            var endPart = GetStoryPart(assistantContent).Item1;
-            var end = endPart.Text;
+            List<ChatMessage> chatMessages;
+            try
+            {
+                chatMessages = RebuildChatMessages(story);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
+            }
+
+            string assistantContent = null!;
+            int attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate result", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            StoryPart endPart = null!;
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    endPart = GetStoryPart(assistantContent).Item1;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate result", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            string end = endPart.Text;
             chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = assistantContent });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = "Du schlüpfst in die Rolle einer Lehrkraft, welche die durchlebte Geschichte mit den Teilnehmern bespricht. Deine Aufgabe besteht nicht darin, die Handlung der Geschichte selbst zu analysieren, sondern das nachhaltige Thema zu beleuchten, das die Geschichte behandelt. Präsentiere die zentralen Aspekte faktenbasiert und leicht verständlich, um den Teilnehmern einen klaren Zugang zum Thema zu ermöglichen. Gleichzeitig sollst du die Teilnehmer dazu anregen, ihr eigenes Handeln und ihre Einstellungen kritisch zu hinterfragen. Schaffe Raum für eine offene und respektvolle Diskussion, in der unterschiedliche Perspektiven ausgetauscht werden können. Stelle gezielte Fragen, die zum Nachdenken anregen, und nutze klare Erklärungen sowie passende Beispiele, um komplexe Zusammenhänge greifbar zu machen. Die folgenden Inhalte sollen alle Teil deiner Analyse sein: - Erstelle eine umfassende Analyse der Geschichte, die sich aus mehreren klar strukturierten Teilen zusammensetzt. Beginne mit einer kurzen und prägnanten Zusammenfassung der Geschichte, die den Verlauf verständlich darstellt und die zentralen Ereignisse hervorhebt. Anschließend analysiere den Verlauf und arbeite heraus, wie sich die Entscheidungen und Handlungen der Figuren auf den Verlauf ausgewirkt haben. - Erstelle danach eine Liste mit positiven Entscheidungen, die innerhalb der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv auf den Verlauf ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind. Im Anschluss folgt eine Liste mit negativen Entscheidungen, die getroffen wurden. Erkläre hier ebenfalls, warum diese Entscheidungen negative Konsequenzen hatten und wie sie den Verlauf der Geschichte beeinflusst haben. - Ziehe daraus abgeleitete Erkenntnisse und übertrage sie auf die reale Welt. Erstelle eine Liste von praktischen Lehren, die aus der Geschichte gezogen werden können, und zeige auf, wie diese Erkenntnisse im Alltag oder in konkreten Situationen angewendet werden könnten. - Abschließend präsentiere eine Liste mit gezielten Fragen, die als Grundlage für eine tiefere Diskussion in der Gruppe dienen sollen. Diese Fragen sollten sowohl zum Nachdenken anregen als auch Raum für unterschiedliche Perspektiven schaffen und eine lebendige Diskussion ermöglichen. Antworte ausschließlich im gültigen JSON-Format, um sicherzustellen, dass deine Analyse korrekt dargestellt wird. Jede Antwort folgt exakt dieser Struktur: {\"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\",\"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\",\"Weitere positive Entscheidungen je nach Bedarf\"],\"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\",\"Weitere negative Entscheidungen je nach Bedarf\"],\"learnings\": [\"Erkenntnis 1\",\"Weitere Erkenntnisse je nach Bedarf\"],\"discussion_questions\": [\"Frage 1\",\"Weitere Fragen je nach Bedarf\"]}" });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Die Geschichte ist soeben vorbei. Du kannst jetzt die Analyse der durchlebten Geschichte erstellen." });
-            assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
 
-            return GetStoryResult(assistantContent, end);
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate result", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    return GetStoryResult(assistantContent, end);
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate result", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            throw new AIException("Failed to generate result after maximum retry attempts");
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Rebuilds the chat messages for the given story object
+        /// </summary>
+        /// <param name="story">The story object to rebuild the chat messages for</param>
+        /// <returns>The rebuilt chat messages</returns>
+        /// <exception cref="ArgumentException">If the story object is invalid</exception>
+        /// <exception cref="ArgumentNullException">If the story object is null</exception>
         private static List<ChatMessage> RebuildChatMessages(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
-            if (story.Length == 0) throw new ArgumentException("Story has set no length");
 
             string targetGroupString = story.TargetGroup switch
             {
@@ -95,18 +278,18 @@ namespace sustAInableEducation_backend.Repository
                 story.Topic +
                 "Antworte ausschließlich im gültigen JSON-Format, damit deine Antworten den Teilnehmern richtig dargestellt werden können. Jede deiner Antworten hat den identen JSON-Aufbau. Erstens den Titel der Geschichte, dieser bleibt immer gleich und der Zwischentitel des Abschnittes. Darauf folgt die Geschichte, also der Abschnitt der Geschichte, welchen du geschrieben hast. Dann die vier Optionen des Entscheidungspunkts in einem Array. Wenn es der letzte Teil der Geschichte ist, befülle das Array, mit den Optionen, mit leeren Inhalten, welche trotzdem valide sind. Hier ist die JSON-Struktur, welche immer geliefert werden soll: { \"title\": \"Titel der Geschichte\", \"intertitle\": \"Zwischentitel des Abschnitt\", \"story\": \"Aktueller Teil der Geschichte basierend auf den bisherigen Entscheidungen.\", \"options\": [ { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 1 Beschreibung\" }, { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 2 Beschreibung\" } , { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 3 Beschreibung\" } , { \"impact\": \"Wert zwischen -1 und 1\", \"text \": \"Option 4 Beschreibung\" } ] }";
 
-            var chatMessages = new List<ChatMessage>
-            {
+            List<ChatMessage> chatMessages =
+            [
                 new() { Role = ValidRoles.System, Content = systemPrompt },
                 new() { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
-            };
+            ];
 
             foreach (var part in story.Parts.Select((value, index) => new { value, index }))
             {
-                var assitentContent = new StoryContent
+                StoryContent assitentContent = new()
                 {
                     Title = story.Title ?? throw new ArgumentNullException("Story has no title"),
-                    Intertitle = part.value.Intertitle ?? throw new ArgumentNullException("Part has no intertitle"),
+                    Intertitle = part.value.Intertitle,
                     Story = part.value.Text,
                     Options = part.value.Choices.Select(choice => new Option
                     {
@@ -133,14 +316,29 @@ namespace sustAInableEducation_backend.Repository
             return chatMessages;
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Gets the story part from the given assistant content
+        /// </summary>
+        /// <param name="assistantContent">The assistant content to get the story part from</param>
+        /// <returns>The story part and the title of the story</returns>
+        /// <exception cref="InvalidOperationException">If the message content is null</exception>
+        /// <exception cref="JsonException">If the assistant content could not be deserialized</exception>
         private static (StoryPart, string) GetStoryPart(string assistantContent)
         {
-            var messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            ArgumentNullException.ThrowIfNull(assistantContent);
 
-            var storyPart = new StoryPart
+            StoryContent messageContent;
+            try
+            {
+                messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException("Failed to deserialize assistant content", e);
+            }
+
+            StoryPart storyPart = new()
             {
                 Text = messageContent.Story,
                 Intertitle = messageContent.Intertitle,
@@ -151,16 +349,33 @@ namespace sustAInableEducation_backend.Repository
                     Impact = option.Impact
                 }).ToList()
             };
-
             return (storyPart, messageContent.Title);
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Gets the story result from the given assistant content
+        /// </summary>
+        /// <param name="assistantContent">The assistant content to get the story result from</param>
+        /// <param name="end">The end of the story</param>
+        /// <returns>The story result</returns>
+        /// <exception cref="InvalidOperationException">If the message content is null</exception>
+        /// <exception cref="JsonException">If the assistant content could not be deserialized</exception>
         private static StoryResult GetStoryResult(string assistantContent, string end)
         {
-            var messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            ArgumentNullException.ThrowIfNull(assistantContent);
+            ArgumentNullException.ThrowIfNull(end);
+
+            AnalysisContent messageContent;
+            try
+            {
+                messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException("Failed to deserialize assistant content", e);
+            }
+
             return new StoryResult
             {
                 Text = end,
@@ -172,17 +387,27 @@ namespace sustAInableEducation_backend.Repository
             };
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Fetches the assistant content based on the given chat messages, temperature and topP
+        /// </summary>
+        /// <param name="chatMessages">The chat messages to fetch the assistant content for</param>
+        /// <param name="temperature">The temperature for the assistant content</param>
+        /// <param name="topP">The topP for the assistant content</param>
+        /// <returns>The assistant content</returns>
+        /// <exception cref="ArgumentException">If the chat messages are empty, the temperature is invalid or the topP is invalid</exception>
+        /// <exception cref="HttpRequestException">If the request failed</exception>
+        /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
+        /// <exception cref="JsonException">If the response content could not be deserialized</exception>
         private static async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
-            if (_client == null) throw new InvalidOperationException("Client is null");
+            ArgumentNullException.ThrowIfNull(_client);
+            ArgumentNullException.ThrowIfNull(chatMessages);
             if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
             if (temperature < 0 || temperature > 1) throw new ArgumentException("Invalid temperature");
             if (topP < 0 || topP > 1) throw new ArgumentException("Invalid topP");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "/v1/openai/chat/completions")
+            HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
             {
                 Content = new StringContent(JsonSerializer.Serialize(new
                 {
@@ -194,12 +419,28 @@ namespace sustAInableEducation_backend.Repository
                 }), Encoding.UTF8, "application/json")
             };
 
-            var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var responseContent = await response.Content.ReadAsStringAsync();
+            HttpResponseMessage response = null!;
+            string responseString;
+            try
+            {
+                response = await _client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                responseString = await response.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                throw new HttpRequestException($"Request failed with status code {response?.StatusCode}", e);
+            }
 
-            var responseObject = JsonSerializer.Deserialize<Response>(responseContent) ?? throw new InvalidOperationException("Response is null");
-            return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
+            try
+            {
+                Response responseObject = JsonSerializer.Deserialize<Response>(responseString) ?? throw new InvalidOperationException("Response object is null");
+                return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException("Failed to deserialize response content", e);
+            }
         }
 
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
@@ -208,9 +449,28 @@ namespace sustAInableEducation_backend.Repository
         }
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
+    /// <summary>
+    /// Exception for AI service
+    /// </summary>
+    public class AIException : Exception
+    {
+        public AIException()
+        {
+        }
+
+        public AIException(string message)
+            : base(message)
+        {
+        }
+
+        public AIException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+    }
+
+    // Benjamin Edlinger
     public static class ValidRoles
     {
         public const string System = "system";
@@ -218,9 +478,7 @@ namespace sustAInableEducation_backend.Repository
         public const string Assistant = "assistant";
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class ChatMessage
     {
         private string _role = null!;
@@ -243,9 +501,7 @@ namespace sustAInableEducation_backend.Repository
         public string Content { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Response
     {
         [JsonPropertyName("id")]
@@ -267,9 +523,7 @@ namespace sustAInableEducation_backend.Repository
         public Usage Usage { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Choice
     {
         [JsonPropertyName("index")]
@@ -282,9 +536,7 @@ namespace sustAInableEducation_backend.Repository
         public string FinishReason { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Message
     {
         private string _role = null!;
@@ -307,9 +559,7 @@ namespace sustAInableEducation_backend.Repository
         public string Content { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class StoryContent
     {
         [JsonPropertyName("title")]
@@ -325,9 +575,7 @@ namespace sustAInableEducation_backend.Repository
         public List<Option> Options { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Option
     {
         [JsonPropertyName("impact")]
@@ -340,9 +588,7 @@ namespace sustAInableEducation_backend.Repository
         public string Text { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class AnalysisContent
     {
         [JsonPropertyName("summary")]
@@ -361,9 +607,7 @@ namespace sustAInableEducation_backend.Repository
         public string[] DiscussionQuestions { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Usage
     {
         [JsonPropertyName("prompt_tokens")]
