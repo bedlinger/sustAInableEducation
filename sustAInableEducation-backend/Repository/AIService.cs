@@ -38,9 +38,44 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(story);
 
             List<ChatMessage> chatMessages = RebuildChatMessages(story);
-            string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
 
-            return GetStoryPart(assistantContent);
+            string assistantContent = null!;
+            int attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to start story", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    return GetStoryPart(assistantContent);
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to start story", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            throw new AIException("Failed to start story after maximum retry attempts");
         }
 
         /**
@@ -51,9 +86,44 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(story);
 
             List<ChatMessage> chatMessages = RebuildChatMessages(story);
-            string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
 
-            return GetStoryPart(assistantContent).Item1;
+            string assistantContent = null!;
+            int attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate next part", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    return GetStoryPart(assistantContent).Item1;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate next part", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            throw new AIException("Failed to generate next part after maximum retry attempts");
         }
 
         /**
@@ -64,16 +134,85 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(story);
 
             List<ChatMessage> chatMessages = RebuildChatMessages(story);
-            string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-            StoryPart endPart = GetStoryPart(assistantContent).Item1;
+
+            string assistantContent = null!;
+            int attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate result", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            StoryPart endPart = null!;
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    endPart = GetStoryPart(assistantContent).Item1;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate result", e);
+                    }
+                    attempt++;
+                }
+            }
 
             string end = endPart.Text;
             chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = assistantContent });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = "Du schlüpfst in die Rolle einer Lehrkraft, welche die durchlebte Geschichte mit den Teilnehmern bespricht. Deine Aufgabe besteht nicht darin, die Handlung der Geschichte selbst zu analysieren, sondern das nachhaltige Thema zu beleuchten, das die Geschichte behandelt. Präsentiere die zentralen Aspekte faktenbasiert und leicht verständlich, um den Teilnehmern einen klaren Zugang zum Thema zu ermöglichen. Gleichzeitig sollst du die Teilnehmer dazu anregen, ihr eigenes Handeln und ihre Einstellungen kritisch zu hinterfragen. Schaffe Raum für eine offene und respektvolle Diskussion, in der unterschiedliche Perspektiven ausgetauscht werden können. Stelle gezielte Fragen, die zum Nachdenken anregen, und nutze klare Erklärungen sowie passende Beispiele, um komplexe Zusammenhänge greifbar zu machen. Die folgenden Inhalte sollen alle Teil deiner Analyse sein: - Erstelle eine umfassende Analyse der Geschichte, die sich aus mehreren klar strukturierten Teilen zusammensetzt. Beginne mit einer kurzen und prägnanten Zusammenfassung der Geschichte, die den Verlauf verständlich darstellt und die zentralen Ereignisse hervorhebt. Anschließend analysiere den Verlauf und arbeite heraus, wie sich die Entscheidungen und Handlungen der Figuren auf den Verlauf ausgewirkt haben. - Erstelle danach eine Liste mit positiven Entscheidungen, die innerhalb der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv auf den Verlauf ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind. Im Anschluss folgt eine Liste mit negativen Entscheidungen, die getroffen wurden. Erkläre hier ebenfalls, warum diese Entscheidungen negative Konsequenzen hatten und wie sie den Verlauf der Geschichte beeinflusst haben. - Ziehe daraus abgeleitete Erkenntnisse und übertrage sie auf die reale Welt. Erstelle eine Liste von praktischen Lehren, die aus der Geschichte gezogen werden können, und zeige auf, wie diese Erkenntnisse im Alltag oder in konkreten Situationen angewendet werden könnten. - Abschließend präsentiere eine Liste mit gezielten Fragen, die als Grundlage für eine tiefere Diskussion in der Gruppe dienen sollen. Diese Fragen sollten sowohl zum Nachdenken anregen als auch Raum für unterschiedliche Perspektiven schaffen und eine lebendige Diskussion ermöglichen. Antworte ausschließlich im gültigen JSON-Format, um sicherzustellen, dass deine Analyse korrekt dargestellt wird. Jede Antwort folgt exakt dieser Struktur: {\"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\",\"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\",\"Weitere positive Entscheidungen je nach Bedarf\"],\"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\",\"Weitere negative Entscheidungen je nach Bedarf\"],\"learnings\": [\"Erkenntnis 1\",\"Weitere Erkenntnisse je nach Bedarf\"],\"discussion_questions\": [\"Frage 1\",\"Weitere Fragen je nach Bedarf\"]}" });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Die Geschichte ist soeben vorbei. Du kannst jetzt die Analyse der durchlebten Geschichte erstellen." });
-            assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
 
-            return GetStoryResult(assistantContent, end);
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate result", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            attempt = 0;
+            while (attempt < MAX_RETRY_ATTEMPTS)
+            {
+                try
+                {
+                    return GetStoryResult(assistantContent, end);
+                }
+                catch (Exception e)
+                {
+                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
+                    {
+                        throw new AIException("Failed to generate result", e);
+                    }
+                    attempt++;
+                }
+            }
+
+            throw new AIException("Failed to generate result after maximum retry attempts");
         }
 
         /**
@@ -247,6 +386,23 @@ namespace sustAInableEducation_backend.Repository
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class AIException : Exception
+    {
+        public AIException()
+        {
+        }
+
+        public AIException(string message)
+            : base(message)
+        {
+        }
+
+        public AIException(string message, Exception inner)
+            : base(message, inner)
+        {
         }
     }
 
