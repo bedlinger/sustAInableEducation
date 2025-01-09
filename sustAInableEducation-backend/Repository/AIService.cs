@@ -8,16 +8,12 @@ namespace sustAInableEducation_backend.Repository
 {
     public class AIService : IAIService
     {
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
         private readonly IConfiguration _config;
         private static HttpClient? _client;
         const int MAX_RETRY_ATTEMPTS = 2; // Maximum number of retry attempts for a failed request or deserialization
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
         public AIService(IConfiguration config)
         {
             ArgumentNullException.ThrowIfNull(config);
@@ -30,9 +26,14 @@ namespace sustAInableEducation_backend.Repository
             _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Starts a new story with the given story object
+        /// </summary>
+        /// <param name="story"> The story object to start</param>
+        /// <returns>The first part of the story and the title of the story</returns>
+        /// <exception cref="ArgumentException">If the story object is invalid</exception>
+        /// <exception cref="AIException">If the story could not be started due to an error while fetching the content or deserializing</exception>
         public async Task<(StoryPart, string)> StartStory(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
@@ -86,9 +87,14 @@ namespace sustAInableEducation_backend.Repository
             throw new AIException("Failed to start story after maximum retry attempts");
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Generates the next part of the story based on the given story object
+        /// </summary>
+        /// <param name="story">The story object to generate the next part for</param>
+        /// <returns>The next part of the story</returns>
+        /// <exception cref="ArgumentException">If the story object is invalid</exception>
+        /// <exception cref="AIException">If the next part could not be generated due to an error while fetching the content or deserializing</exception>
         public async Task<StoryPart> GenerateNextPart(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
@@ -142,9 +148,14 @@ namespace sustAInableEducation_backend.Repository
             throw new AIException("Failed to generate next part after maximum retry attempts");
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Generates the result of the story based on the given story object
+        /// </summary>
+        /// <param name="story">The story object to generate the result for</param>
+        /// <returns>The result of the story</returns>
+        /// <exception cref="ArgumentException">If the story object is invalid</exception>
+        /// <exception cref="AIException">If the result could not be generated due to an error while fetching the content or deserializing</exception>
         public async Task<StoryResult> GenerateResult(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
@@ -239,9 +250,14 @@ namespace sustAInableEducation_backend.Repository
             throw new AIException("Failed to generate result after maximum retry attempts");
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Rebuilds the chat messages for the given story object
+        /// </summary>
+        /// <param name="story">The story object to rebuild the chat messages for</param>
+        /// <returns>The rebuilt chat messages</returns>
+        /// <exception cref="ArgumentException">If the story object is invalid</exception>
+        /// <exception cref="ArgumentNullException">If the story object is null</exception>
         private static List<ChatMessage> RebuildChatMessages(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
@@ -300,9 +316,14 @@ namespace sustAInableEducation_backend.Repository
             return chatMessages;
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Gets the story part from the given assistant content
+        /// </summary>
+        /// <param name="assistantContent">The assistant content to get the story part from</param>
+        /// <returns>The story part and the title of the story</returns>
+        /// <exception cref="InvalidOperationException">If the message content is null</exception>
+        /// <exception cref="JsonException">If the assistant content could not be deserialized</exception>
         private static (StoryPart, string) GetStoryPart(string assistantContent)
         {
             ArgumentNullException.ThrowIfNull(assistantContent);
@@ -331,9 +352,15 @@ namespace sustAInableEducation_backend.Repository
             return (storyPart, messageContent.Title);
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Gets the story result from the given assistant content
+        /// </summary>
+        /// <param name="assistantContent">The assistant content to get the story result from</param>
+        /// <param name="end">The end of the story</param>
+        /// <returns>The story result</returns>
+        /// <exception cref="InvalidOperationException">If the message content is null</exception>
+        /// <exception cref="JsonException">If the assistant content could not be deserialized</exception>
         private static StoryResult GetStoryResult(string assistantContent, string end)
         {
             ArgumentNullException.ThrowIfNull(assistantContent);
@@ -360,9 +387,18 @@ namespace sustAInableEducation_backend.Repository
             };
         }
 
-        /**
-         * Benjamin Edlinger
-         */
+        // Benjamin Edlinger
+        /// <summary>
+        /// Fetches the assistant content based on the given chat messages, temperature and topP
+        /// </summary>
+        /// <param name="chatMessages">The chat messages to fetch the assistant content for</param>
+        /// <param name="temperature">The temperature for the assistant content</param>
+        /// <param name="topP">The topP for the assistant content</param>
+        /// <returns>The assistant content</returns>
+        /// <exception cref="ArgumentException">If the chat messages are empty, the temperature is invalid or the topP is invalid</exception>
+        /// <exception cref="HttpRequestException">If the request failed</exception>
+        /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
+        /// <exception cref="JsonException">If the response content could not be deserialized</exception>
         private static async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             ArgumentNullException.ThrowIfNull(_client);
@@ -413,6 +449,10 @@ namespace sustAInableEducation_backend.Repository
         }
     }
 
+    // Benjamin Edlinger
+    /// <summary>
+    /// Exception for AI service
+    /// </summary>
     public class AIException : Exception
     {
         public AIException()
@@ -430,9 +470,7 @@ namespace sustAInableEducation_backend.Repository
         }
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public static class ValidRoles
     {
         public const string System = "system";
@@ -440,9 +478,7 @@ namespace sustAInableEducation_backend.Repository
         public const string Assistant = "assistant";
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class ChatMessage
     {
         private string _role = null!;
@@ -465,9 +501,7 @@ namespace sustAInableEducation_backend.Repository
         public string Content { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Response
     {
         [JsonPropertyName("id")]
@@ -489,9 +523,7 @@ namespace sustAInableEducation_backend.Repository
         public Usage Usage { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Choice
     {
         [JsonPropertyName("index")]
@@ -504,9 +536,7 @@ namespace sustAInableEducation_backend.Repository
         public string FinishReason { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Message
     {
         private string _role = null!;
@@ -529,9 +559,7 @@ namespace sustAInableEducation_backend.Repository
         public string Content { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class StoryContent
     {
         [JsonPropertyName("title")]
@@ -547,9 +575,7 @@ namespace sustAInableEducation_backend.Repository
         public List<Option> Options { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Option
     {
         [JsonPropertyName("impact")]
@@ -562,9 +588,7 @@ namespace sustAInableEducation_backend.Repository
         public string Text { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class AnalysisContent
     {
         [JsonPropertyName("summary")]
@@ -583,9 +607,7 @@ namespace sustAInableEducation_backend.Repository
         public string[] DiscussionQuestions { get; set; } = null!;
     }
 
-    /**
-     * Benjamin Edlinger
-     */
+    // Benjamin Edlinger
     public class Usage
     {
         [JsonPropertyName("prompt_tokens")]
