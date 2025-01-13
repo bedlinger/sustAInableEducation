@@ -40,7 +40,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      apiUrl: process.env.API_URL
+      apiUrl: process.env.API_URL,
+      hostUrl: process.env.HOST_URL
     }
   },
   modules: [
