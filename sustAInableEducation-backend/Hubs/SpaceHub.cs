@@ -18,6 +18,7 @@ namespace sustAInableEducation_backend.Hubs
         public const string VotingStarted = "VotingStarted";
         public const string VotingUpdated = "VotingUpdated";
         public const string ChoiceSet = "ChoiceSet";
+        public const string AIErrorOccured = "ErrorOccured";
     }
 
     [SignalRHub("spaceHub/{spaceId}", tag: "(WebSocket) SpaceHub")]
@@ -62,21 +63,19 @@ namespace sustAInableEducation_backend.Hubs
             _context.SpaceParticipant.Find(_spaceId, _userId)!.IsOnline = false;
             await _context.SaveChangesAsync();
 
-            await Clients.Client(Context!.ConnectionId).SendAsync(exception?.ToString() ?? "");
-
             await SendMessage(MessageType.UserLeft, _userId);
             await base.OnDisconnectedAsync(exception);
         }
 
-        private async Task SendMessage(string type, object? message1 = null, object? message2 = null)
+        private async Task SendMessage(string type, object? arg1 = null, object? message2 = null)
         {
             if (message2 != null)
             {
-                await Clients.Group(_spaceId.ToString()).SendAsync(type, message1, message2);
+                await Clients.Group(_spaceId.ToString()).SendAsync(type, arg1, message2);
             }
             else
             {
-                await Clients.Group(_spaceId.ToString()).SendAsync(type, message1);
+                await Clients.Group(_spaceId.ToString()).SendAsync(type, arg1);
             }
         }
 
@@ -99,19 +98,27 @@ namespace sustAInableEducation_backend.Hubs
 
             await SendMessage(MessageType.PartGenerating);
 
-            if (story.Parts.Count == 0)
+            try
             {
-                var storyStart = await _ai.StartStory(story);
-                story.Parts.Add(storyStart.Item1);
-                story.Title = storyStart.Item2;
+                if (story.Parts.Count == 0)
+                {
+                    var storyStart = await _ai.StartStory(story);
+                    story.Parts.Add(storyStart.Item1);
+                    story.Title = storyStart.Item2;
+                }
+                else if (story.IsComplete)
+                {
+                    story.Result = await _ai.GenerateResult(story);
+                }
+                else
+                {
+                    story.Parts.Add(await _ai.GenerateNextPart(story));
+                }
             }
-            else if (story.IsComplete)
+            catch(AIException e)
             {
-                story.Result = await _ai.GenerateResult(story);
-            }
-            else
-            {
-                story.Parts.Add(await _ai.GenerateNextPart(story));
+                await SendMessage(MessageType.AIErrorOccured, e.Message);
+                throw new HubException("AI error");
             }
 
             await _context.SaveChangesAsync();

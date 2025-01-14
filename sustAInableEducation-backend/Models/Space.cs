@@ -14,13 +14,15 @@ namespace sustAInableEducation_backend.Models
         [JsonIgnore]
         public SpaceAccessCode? AccessCode { get; set; }
 
-        public uint VotingTimeSeconds { get; set; } = 30;
+        public uint VotingTimeSeconds { get; set; } = 10;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
     public class SpaceRequest
     {
-        public StoryRequest Story { get; set; }
-        public uint VotingTimeSeconds { get; set; } = 30;
+        public StoryRequest Story { get; set; } = null!;
+
+        [Range(10, 30)]
+        public uint VotingTimeSeconds { get; set; } = 10;
     }
 }
