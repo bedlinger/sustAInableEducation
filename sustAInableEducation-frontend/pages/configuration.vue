@@ -213,6 +213,9 @@ const sdgAssets = ref(Object.fromEntries(
 // Other Variables
 const zielgruppen = ['Volksschule (6-10 Jahre)', 'Sekundarstufe I (11-14 Jahre)', 'Sekundarstufe II (15-19 Jahre)',]
 
+onMounted(() => {
+    isLoggedInRequest()
+})
 
 // Computed Properties
 const topicFilledOut = computed(() => {
@@ -318,6 +321,18 @@ function createSpace() {
     } else {
         createSpaceFromTopic(targetGroupNum)
     }
+}
+
+function isLoggedInRequest() {
+    $fetch(`${runtimeConfig.public.apiUrl}/account`, {
+        method: 'GET',
+        credentials: 'include',
+        onResponse: (response) => {
+            if (response.response.status === 401) {
+                navigateTo('/login')
+            }
+        }
+    })
 }
 
 function createSpaceFromSdg(targetGroup: number) {
