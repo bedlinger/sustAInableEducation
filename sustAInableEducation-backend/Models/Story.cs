@@ -43,9 +43,10 @@ namespace sustAInableEducation_backend.Models
 
     public class StoryRequest
     {
-        public string Prompt { get; set; } = null!;
+        public string Topic { get; set; } = null!;
         public uint Length { get; set; }
         public float Temperature { get; set; }
         public float TopP { get; set; }
+        public TargetGroup TargetGroup { get; set; }
     }
 }
