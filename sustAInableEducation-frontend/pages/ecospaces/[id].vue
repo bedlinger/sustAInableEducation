@@ -15,7 +15,7 @@
             <div
                 class="panel w-full h-full rounded-xl relative border-solid border-slate-3s00 border-2 flex flex-col justify-center">
                 <div class="content h-full w-full">
-
+                    
                 </div>
                 <div class="controls flex flex-col m-4">
                     <Divider />
@@ -42,13 +42,35 @@
 <script setup lang="ts">
 import type { Participant } from '~/types/EcoSpace';
 
-definePageMeta
-    ({
-        validate: async (route) => {4
-                return true
-            }
-    })
+const runtime = useRuntimeConfig()
 
+definePageMeta({
+    validate: async (route) => {
+        var spaceId = route.path.substring(route.path.lastIndexOf('/') + 1);
+
+        var isValid = false
+
+        await $fetch(`http://localhost:8080/spaces/${spaceId}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: useRequestHeaders(['cookie']),
+            onResponse: (response) => {
+                if(response.response.ok) {
+                    isValid = true;
+                } else {
+                    isValid = false;
+                }
+            }
+        }).then(() => {
+            return isValid;
+        })
+        .catch(() => {
+            return isValid
+        })
+
+        return isValid
+    }
+})
 
 const participants = ref<Participant[]>([])
 
@@ -100,6 +122,15 @@ function showInviteDialog() {
 
 async function getJoinCode() {
     joinCode.value = "123456" // TODO: Implement
+    /*
+    $fetch(`${runtime.public.apiUrl}/${}`, {
+        method: 'POST',
+        body: JSON.stringify({ joinCode: joinCode.value }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        */
 }
 
 </script>
