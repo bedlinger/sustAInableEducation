@@ -1,7 +1,7 @@
 <template>
     <div class="w-full mb-2 p-2 rounded-md cursor-pointer" :class="model ? 'bg-slate-300' : 'bg-slate-200'" @click="clickEvent">
         <div class="flex justify-between items-center">
-            <span>{{ props.ecoSpace.story.title }}</span>
+            <span>{{ displayTitle() }}</span>
             <Button variant="text" class="!rounded-full aspect-square !p-1" @click="toggleMenu">
                 <Icon name="ic:baseline-more-vert" class="aspect-square size-6 bg-black" />
             </Button>
@@ -59,6 +59,14 @@ function clickEvent() {
 
 function deleteEvent() {
     emit('delete', props.ecoSpace.id);
+}
+
+function displayTitle() {
+    if(props.ecoSpace.story.title) {
+        return props.ecoSpace.story.title
+    } else {
+        return "[Neuer EcoSpace]"
+    }
 }
 
 </script>

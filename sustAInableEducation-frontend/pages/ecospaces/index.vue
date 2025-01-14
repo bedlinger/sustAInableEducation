@@ -283,7 +283,16 @@ const selectedSpace = ref<EcoSpace>();
 const searchInput = ref('');
 
 const searchedSpaces = computed(() => {
-    return sortedSpaces.value.filter(space => space.story.title.toLowerCase().includes(searchInput.value.toLowerCase()));
+    return sortedSpaces.value.filter(space => {
+        if(space.story.title) {
+            return space.story.title.toLowerCase().includes(searchInput.value.toLowerCase())
+        } else {
+            if(searchInput.value !== "") {
+                return false
+            }
+            return true
+        }
+    });
 });
 
 const filteredSpaces = computed<EcoSpace[]>(() => {
