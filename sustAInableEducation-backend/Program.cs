@@ -20,7 +20,8 @@ builder.Services.AddCors(options =>
                       {
                           policy.WithOrigins(builder.Configuration["FrontendHost"]!)
                                 .AllowAnyMethod()
-                                .AllowAnyHeader();
+                                .AllowAnyHeader()
+                                .AllowCredentials();
                       });
 });
 builder.Services.AddControllers();
