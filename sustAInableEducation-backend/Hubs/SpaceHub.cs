@@ -48,10 +48,11 @@ namespace sustAInableEducation_backend.Hubs
             }
 
             await Groups.AddToGroupAsync(Context!.ConnectionId, _spaceId.ToString());
-            _context.SpaceParticipant.Find(_spaceId, _userId)!.IsOnline = true;
+            var participtant = _context.SpaceParticipant.Find(_spaceId, _userId)!;
+            participtant.IsOnline = true;
             await _context.SaveChangesAsync();
 
-            await SendMessage(MessageType.UserJoined, _userId);
+            await SendMessage(MessageType.UserJoined, participtant);
             await base.OnConnectedAsync();
         }
 
@@ -67,9 +68,16 @@ namespace sustAInableEducation_backend.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        private async Task SendMessage(string type, object? message = null)
+        private async Task SendMessage(string type, object? message1 = null, object? message2 = null)
         {
-            await Clients.Group(_spaceId.ToString()).SendAsync(type, message);
+            if (message2 != null)
+            {
+                await Clients.Group(_spaceId.ToString()).SendAsync(type, message1, message2);
+            }
+            else
+            {
+                await Clients.Group(_spaceId.ToString()).SendAsync(type, message1);
+            }
         }
 
         public async Task GeneratePart()
@@ -202,7 +210,7 @@ namespace sustAInableEducation_backend.Hubs
                     .SetProperty(x => x.Impact, x => x.Impact + x.VoteImpact)
                     .SetProperty(x => x.VoteImpact, x => null));
             await _context.SaveChangesAsync();
-            await SendMessage(MessageType.ChoiceSet, number);
+            await SendMessage(MessageType.ChoiceSet, number, story.TotalImpact);
         }
     }
 }
