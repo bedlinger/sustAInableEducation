@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using sustAInableEducation_backend.Repository;
-using sustAInableEducation_backend.Controllers;
 using sustAInableEducation_backend.Hubs;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using sustAInableEducation_backend.Models;
-using System;
 
 var AllowFrontendOrigin = "_allowFrontendOrigin";
 
@@ -25,7 +23,10 @@ builder.Services.AddCors(options =>
                       });
 });
 builder.Services.AddControllers();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -81,6 +82,7 @@ using (var Scope = app.Services.CreateScope())
 app.MapControllers();
 
 app.MapGroup("/account").MapIdentityApi<ApplicationUser>().WithTags("Account");
+
 
 app.MapHub<SpaceHub>("/spaceHub/{id}");
 
