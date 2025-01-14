@@ -15,8 +15,8 @@ namespace sustAInableEducation_backend.Models
         public string? Title { get; set; }
         public string Topic { get; set; } = null!;
         public uint Length { get; set; }
-        public float Temperature { get; set; }
-        public float TopP { get; set; }
+        public float Temperature { get; set; } = 0.8f;
+        public float TopP { get; set; } = 0.7f;
         public float TotalImpact { get; set; } = 0;
         public TargetGroup TargetGroup { get; set; }
 
@@ -44,9 +44,37 @@ namespace sustAInableEducation_backend.Models
     public class StoryRequest
     {
         public string Topic { get; set; } = null!;
-        public uint Length { get; set; }
-        public float Temperature { get; set; }
-        public float TopP { get; set; }
+
+        [Range(3, 10)]
+        public uint Length { get; set; } = 3;
+
+        [Range(0, 2)]
+        public float Temperature { get; set; } = 0.8f;
+
+        [Range(0, 1, MinimumIsExclusive = true)]
+        public float TopP { get; set; } = 0.7f;
+
+        [ValidEnum]
         public TargetGroup TargetGroup { get; set; }
+    }
+
+    public class ValidEnumAttribute : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
+        {
+            if (value == null)
+            {
+                return ValidationResult.Success!;
+            }
+
+            var type = value.GetType();
+
+            if (!(type.IsEnum && Enum.IsDefined(type, value)))
+            {
+                return new ValidationResult(ErrorMessage ?? $"{value} is not a valid value for type {type.Name}");
+            }
+
+            return ValidationResult.Success!;
+        }
     }
 }
