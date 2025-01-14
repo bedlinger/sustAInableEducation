@@ -41,7 +41,7 @@ namespace sustAInableEducation_backend.Repository
             List<ChatMessage> chatMessages;
             try
             {
-                chatMessages = RebuildChatMessages(story);
+                chatMessages = RebuildChatMessagesStory(story);
             }
             catch (Exception e)
             {
@@ -102,7 +102,7 @@ namespace sustAInableEducation_backend.Repository
             List<ChatMessage> chatMessages;
             try
             {
-                chatMessages = RebuildChatMessages(story);
+                chatMessages = RebuildChatMessagesStory(story);
             }
             catch (Exception e)
             {
@@ -163,7 +163,7 @@ namespace sustAInableEducation_backend.Repository
             List<ChatMessage> chatMessages;
             try
             {
-                chatMessages = RebuildChatMessages(story);
+                chatMessages = RebuildChatMessagesStory(story);
             }
             catch (Exception e)
             {
@@ -259,7 +259,7 @@ namespace sustAInableEducation_backend.Repository
         /// <returns>The rebuilt chat messages</returns>
         /// <exception cref="ArgumentException">If the story object is invalid</exception>
         /// <exception cref="ArgumentNullException">If the story object is null</exception>
-        private static List<ChatMessage> RebuildChatMessages(Story story)
+        private static List<ChatMessage> RebuildChatMessagesStory(Story story)
         {
             ArgumentNullException.ThrowIfNull(story);
 
