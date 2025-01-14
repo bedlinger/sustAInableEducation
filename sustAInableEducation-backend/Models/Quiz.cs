@@ -30,7 +30,11 @@ namespace sustAInableEducation_backend.Models
     public class QuizRequest
     {
         public Guid SpaceId { get; set; }
+
+        [Validation.ValidEnum]
         public ICollection<QuizType> Types { get; set; } = new List<QuizType>();
+
+        [Range(1, 20)]
         public uint NumberQuestions { get; set; }
     }
 }

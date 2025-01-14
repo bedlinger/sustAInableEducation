@@ -54,27 +54,7 @@ namespace sustAInableEducation_backend.Models
         [Range(0, 1, MinimumIsExclusive = true)]
         public float TopP { get; set; } = 0.7f;
 
-        [ValidEnum]
+        [Validation.ValidEnum]
         public TargetGroup TargetGroup { get; set; }
-    }
-
-    public class ValidEnumAttribute : ValidationAttribute
-    {
-        protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
-        {
-            if (value == null)
-            {
-                return ValidationResult.Success!;
-            }
-
-            var type = value.GetType();
-
-            if (!(type.IsEnum && Enum.IsDefined(type, value)))
-            {
-                return new ValidationResult(ErrorMessage ?? $"{value} is not a valid value for type {type.Name}");
-            }
-
-            return ValidationResult.Success!;
-        }
     }
 }
