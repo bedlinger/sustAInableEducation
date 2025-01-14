@@ -166,7 +166,7 @@
                                                 @click="activateCallback('1')" />
                                             <Button label="EcoSpace erstellen"
                                                 v-tooltip.bottom="{ value: configurationTooltip }"
-                                                :disabled="!configFilledOut" @click="" />
+                                                :disabled="!configFilledOut || createButtonDisabled" @click="createSpace()" />
                                         </div>
                                     </div>
                                 </div>
@@ -180,7 +180,11 @@
 </template>
 
 <script setup lang="ts">
+import { Configuration } from '~/types/configuration';
 import { SdgAsset } from '~/types/sdgs';
+
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
 // Refs
 const topicType = ref('sdg')
@@ -190,6 +194,8 @@ const bulletPoints = ref([ref('')])
 const decisionPoints = ref(3)
 const selectedZielgruppe = ref('')
 const voteTime = ref(10)
+
+const createButtonDisabled = ref(false)
 
 const showEstimatedTimeDialog = ref(false)
 
@@ -207,6 +213,9 @@ const sdgAssets = ref(Object.fromEntries(
 // Other Variables
 const zielgruppen = ['Volksschule (6-10 Jahre)', 'Sekundarstufe I (11-14 Jahre)', 'Sekundarstufe II (15-19 Jahre)',]
 
+onMounted(() => {
+    isLoggedInRequest()
+})
 
 // Computed Properties
 const topicFilledOut = computed(() => {
@@ -290,5 +299,93 @@ function addBulletPoint() {
 
 function removeBulletPoint(index: number) {
     bulletPoints.value.splice(index, 1)
+}
+
+function createSpace() {
+    let targetGroupNum = 0
+    switch(selectedZielgruppe.value) {
+        case 'Volksschule (6-10 Jahre)':
+            targetGroupNum = 0
+            break
+        case 'Sekundarstufe I (11-14 Jahre)':
+            targetGroupNum = 1
+            break
+        case 'Sekundarstufe II (15-19 Jahre)':
+            targetGroupNum = 2
+            break
+    }
+
+
+    if (topicType.value === 'sdg') {
+        createSpaceFromSdg(targetGroupNum)
+    } else {
+        createSpaceFromTopic(targetGroupNum)
+    }
+}
+
+function isLoggedInRequest() {
+    $fetch(`${runtimeConfig.public.apiUrl}/account`, {
+        method: 'GET',
+        credentials: 'include',
+        onResponse: (response) => {
+            if (response.response.status === 401) {
+                navigateTo('/login')
+            }
+        }
+    })
+}
+
+function createSpaceFromSdg(targetGroup: number) {
+
+    createButtonDisabled.value = true
+
+    $fetch(`${runtimeConfig.public.apiUrl}/spaces`, {
+        method: 'POST',
+        credentials: 'include',
+        body: {
+            votingTimeSeconds: voteTime.value,
+            story: {
+                topic: Configuration.generatePromptFromSdg(selectedSdg.value),
+                targetGroup: targetGroup,
+                length: decisionPoints.value,
+                temperature: Configuration.defaultTemperature,
+                topP: Configuration.defaultTopP
+            }
+        },
+        onResponse: (response) => {
+            if(response.response.ok) {
+                navigateTo(`/ecospaces/${response.response._data.id}`)
+            } else {
+                console.error(response.error)
+            }
+        }
+    })
+}
+
+function createSpaceFromTopic(targetGroup: number) {
+
+    createButtonDisabled.value = true
+
+    $fetch(`${runtimeConfig.public.apiUrl}/spaces`, {
+        method: 'POST',
+        credentials: 'include',
+        body: {
+            votingTimeSeconds: voteTime.value,
+            story: {
+                topic: Configuration.generatePromptFromTopic(customTopic.value, bulletPoints.value.map(ref => ref.value)),
+                targetGroup: targetGroup,
+                length: decisionPoints.value,
+                temperature: Configuration.defaultTemperature,
+                topP: Configuration.defaultTopP
+            }
+        },
+        onResponse: (response) => {
+            if(response.response.ok) {
+                navigateTo(`/ecospaces/${response.response._data.id}`)
+            } else {
+                console.error(response.error)
+            }
+        }
+    })
 }
 </script>
