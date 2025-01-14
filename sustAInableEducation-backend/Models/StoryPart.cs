@@ -14,10 +14,11 @@ namespace sustAInableEducation_backend.Models
         public string Text { get; set; } = null!;
         [JsonIgnore]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
         public DateTime? VotingEndAt { get; set; }
 
         public uint? ChosenNumber { get; set; }
+        public string? Image { get; set; }
+
         [JsonIgnore]
         public bool IsVotingActive => VotingEndAt.HasValue && VotingEndAt.Value > DateTime.Now;
     }

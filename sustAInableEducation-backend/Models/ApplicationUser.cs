@@ -11,6 +11,7 @@ namespace sustAInableEducation_backend.Models
         public ICollection<SpaceParticipant> Participations { get; set; } = new List<SpaceParticipant>();
 
         public string AnonUserName { get; set; } = UserNameGenService.GenerateUserName();
+        public string? ProfileImage { get; set; }
     }
 
     public class ChangeEmailRequest
