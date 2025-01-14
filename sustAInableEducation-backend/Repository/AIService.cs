@@ -484,6 +484,76 @@ namespace sustAInableEducation_backend.Repository
             }
         }
 
+        private static async Task<string> FetchStoryImage(string text)
+        {
+            ArgumentNullException.ThrowIfNull(_client);
+            ArgumentNullException.ThrowIfNull(text);
+
+            List<ChatMessage> chatMessages =
+            [
+                new ChatMessage { Role = ValidRoles.User, Content = $"Generate me only a prompt and nothing else for another ai to generate an image based on the following story: {text}" },
+            ];
+            HttpRequestMessage requestPrompt = new(HttpMethod.Post, "/v1/openai/chat/completions")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(new
+                {
+                    model = "meta-llama/Llama-3.3-70B-Instruct",
+                    messages = chatMessages,
+                }), Encoding.UTF8, "application/json")
+            };
+            HttpResponseMessage responsePrompt = null!;
+            string responseStringPrompt;
+            try
+            {
+                responsePrompt = await _client.SendAsync(requestPrompt);
+                responsePrompt.EnsureSuccessStatusCode();
+                responseStringPrompt = await responsePrompt.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                throw new HttpRequestException($"Request failed with status code {responsePrompt?.StatusCode}", e);
+            }
+            string imagePrompt = null!;
+            try
+            {
+                Response responseObjectPrompt = JsonSerializer.Deserialize<Response>(responseStringPrompt) ?? throw new InvalidOperationException("Response object is null");
+                imagePrompt = responseObjectPrompt.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException("Failed to deserialize response content", e);
+            }
+
+            HttpRequestMessage requestImage = new(HttpMethod.Post, "/v1/inference/black-forest-labs/FLUX-1-dev")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(new
+                {
+                    prompt = imagePrompt,
+                }), Encoding.UTF8, "application/json")
+            };
+            HttpResponseMessage responseImage = null!;
+            string responseStringImage;
+            try
+            {
+                responseImage = await _client.SendAsync(requestImage);
+                responseImage.EnsureSuccessStatusCode();
+                responseStringImage = await responseImage.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                throw new HttpRequestException($"Request failed with status code {responseImage?.StatusCode}", e);
+            }
+            try
+            {
+                ImageContent responseObjectImage = JsonSerializer.Deserialize<ImageContent>(responseStringImage) ?? throw new InvalidOperationException("Response object is null");
+                return responseObjectImage.Images[0];
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException("Failed to deserialize response content", e);
+            }
+        }
+
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
         {
             throw new NotImplementedException();
@@ -646,6 +716,44 @@ namespace sustAInableEducation_backend.Repository
 
         [JsonPropertyName("discussion_questions")]
         public string[] DiscussionQuestions { get; set; } = null!;
+    }
+
+    // Benjamin Edlinger
+    public class ImageContent
+    {
+        [JsonPropertyName("request_id")]
+        public string RequestId { get; set; } = null!;
+
+        [JsonPropertyName("inference_status")]
+        public InferenceStatus InferenceStatus { get; set; } = null!;
+
+        [JsonPropertyName("images")]
+        public List<string> Images { get; set; } = null!;
+
+        [JsonPropertyName("nsfw_content_detected")]
+        public List<bool> NsfwContentDetected { get; set; } = null!;
+
+        [JsonPropertyName("seed")]
+        public long Seed { get; set; }
+    }
+
+    // Benjamin Edlinger
+    public class InferenceStatus
+    {
+        [JsonPropertyName("status")]
+        public string Status { get; set; } = null!;
+
+        [JsonPropertyName("runtime_ms")]
+        public int RuntimeMs { get; set; }
+
+        [JsonPropertyName("cost")]
+        public double Cost { get; set; }
+
+        [JsonPropertyName("tokens_generated")]
+        public int? TokensGenerated { get; set; }
+
+        [JsonPropertyName("tokens_input")]
+        public int? TokensInput { get; set; }
     }
 
     // Benjamin Edlinger
