@@ -16,7 +16,7 @@
             <Divider />
             <div class="w-full flex justify-between items-center">
                 <span>Läuft ab in {{ codeTimer }}</span>
-                <Button severity="secondary" label="Neu Generieren" @click="emits('generateCode')" />
+                <Button severity="secondary" label="Neu Generieren" @click="generateCode" />
             </div>
         </div>
         <div v-else class="flex justify-center items-center w-full h-96">
@@ -40,9 +40,17 @@ const interval = ref<NodeJS.Timeout>()
 
 watch(model, (newVal, oldVal) => {
     if (newVal) {
-        setCodeTimer()
+        if(props.expirationDate) {
+            setCodeTimer()
+        }
     } else {
         clearInterval(interval.value)
+    }
+})
+
+watch(() => props.expirationDate, (newVal, oldVal) => {
+    if (newVal) {
+        setCodeTimer()
     }
 })
 
@@ -76,6 +84,10 @@ function setCodeTimer() {
         }
 
     }, 1000)
+}
+
+function generateCode() {
+    emits('generateCode')
 }
 
 </script>
