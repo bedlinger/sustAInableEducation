@@ -14,6 +14,7 @@ namespace sustAInableEducation_backend.Models
         public Space Space { get; set; } = null!;
 
         public string UserName => User?.AnonUserName ?? "";
+        public string? ProfileImage => User?.ProfileImage;
         public bool IsHost { get; set; }
         public bool IsOnline { get; set; }
         [JsonIgnore]

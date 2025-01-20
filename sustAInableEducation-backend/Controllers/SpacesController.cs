@@ -60,17 +60,28 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Space>> PostSpace(Space space)
+        public async Task<ActionResult<Space>> PostSpace(SpaceRequest spaceReq)
         {
-            space.Participants = new List<SpaceParticipant>()
+            var space = new Space()
             {
-                new SpaceParticipant()
+                Participants = new List<SpaceParticipant>()
                 {
-                    UserId = _userId,
-                    User = _user,
-                    SpaceId = space.Id,
-                    IsHost = true
-                }
+                    new SpaceParticipant()
+                    {
+                        UserId = _userId,
+                        User = _user,
+                        IsHost = true
+                    }
+                },
+                Story = new Story()
+                {
+                    Topic = spaceReq.Story.Topic,
+                    Length = spaceReq.Story.Length,
+                    Temperature = spaceReq.Story.Temperature,
+                    TopP = spaceReq.Story.TopP,
+                    TargetGroup = spaceReq.Story.TargetGroup,
+                },
+                VotingTimeSeconds = spaceReq.VotingTimeSeconds
             };
             _context.Space.Add(space);
             await _context.SaveChangesAsync();
