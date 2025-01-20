@@ -2,7 +2,7 @@
     <div class="w-full h-full">
         <div class="background animate-anim" />
         <div class="w-screen flex flex-col justify-center items-center h-full bg-slate-50 pt-[4.5rem] p-4">
-            <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" v-on:generateCode="getJoinCode" />
+            <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="expirationDate" v-on:generateCode="getJoinCode" />
             <UserDialog v-model="userDialogIsVisible" :participants="participants" />
             <div class="top flex justify-between items-center mb-2 w-full">
                 <Button label="Einladen" @click="showInviteDialog">
@@ -43,6 +43,8 @@
 import type { Participant } from '~/types/EcoSpace';
 
 const runtime = useRuntimeConfig()
+const route = useRoute()
+const id = route.fullPath.substring(route.fullPath.lastIndexOf('/') + 1)
 
 const participants = ref<Participant[]>([])
 
@@ -57,6 +59,7 @@ const inviteDialogIsVisible = ref<boolean | undefined>(false);
 const userDialogIsVisible = ref<boolean | undefined>(false);
 
 const joinCode = ref<string>('');
+const expirationDate = ref<string>('');
 
 var timerCount = 0;
 
@@ -94,15 +97,19 @@ function showInviteDialog() {
 
 async function getJoinCode() {
     joinCode.value = "123456" // TODO: Implement
-    /*
-    $fetch(`${runtime.public.apiUrl}/${}`, {
+    $fetch(`${runtime.public.apiUrl}/spaces/${id}/open`, {
         method: 'POST',
+        credentials: 'include',
         body: JSON.stringify({ joinCode: joinCode.value }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
+        onResponse: (response) => {
+            if (response.response.ok) {
+                joinCode.value = response.response._data.code
+                expirationDate.value = response.response._data.expiresAt
+            } else {
+                console.log("ERROR")
+            }
+        },
     })
-        */
 }
 
 </script>
