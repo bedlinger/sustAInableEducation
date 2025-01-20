@@ -44,34 +44,6 @@ import type { Participant } from '~/types/EcoSpace';
 
 const runtime = useRuntimeConfig()
 
-definePageMeta({
-    validate: async (route) => {
-        var spaceId = route.path.substring(route.path.lastIndexOf('/') + 1);
-
-        var isValid = false
-
-        await $fetch(`http://localhost:8080/spaces/${spaceId}`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: useRequestHeaders(['cookie']),
-            onResponse: (response) => {
-                if(response.response.ok) {
-                    isValid = true;
-                } else {
-                    isValid = false;
-                }
-            }
-        }).then(() => {
-            return isValid;
-        })
-        .catch(() => {
-            return isValid
-        })
-
-        return isValid
-    }
-})
-
 const participants = ref<Participant[]>([])
 
 const timerValue = ref({
