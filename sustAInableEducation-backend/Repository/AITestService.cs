@@ -137,7 +137,7 @@ namespace sustAInableEducation_backend.Repository
             return quiz;
         }
 
-        string IAIService.GenerateStoryImage(Story story)
+        public Task<string> GenerateStoryImage(Story story)
         {
             throw new NotImplementedException();
         }
