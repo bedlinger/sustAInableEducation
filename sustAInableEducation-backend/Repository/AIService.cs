@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Drawing;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -72,7 +73,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    return GetStoryPart(assistantContent);
+                    var storyPart = GetStoryPart(assistantContent);
+                    Console.WriteLine(await FetchStoryImage(storyPart.Item1.Text));
+                    return storyPart;
                 }
                 catch (Exception e)
                 {
@@ -543,15 +546,36 @@ namespace sustAInableEducation_backend.Repository
             {
                 throw new HttpRequestException($"Request failed with status code {responseImage?.StatusCode}", e);
             }
+            string base64String;
             try
             {
                 ImageContent responseObjectImage = JsonSerializer.Deserialize<ImageContent>(responseStringImage) ?? throw new InvalidOperationException("Response object is null");
-                return responseObjectImage.Images[0];
+                base64String = responseObjectImage.Images[0];
+                if (base64String.StartsWith("data:image/png;base64,"))
+                {
+                    base64String = base64String.Replace("data:image/png;base64,", string.Empty);
+                }
             }
             catch (JsonException e)
             {
                 throw new JsonException("Failed to deserialize response content", e);
             }
+
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            var filePath = Path.Combine(directoryPath, $"{Guid.NewGuid()}.png");
+            byte[] imageBytes = Convert.FromBase64String(base64String);
+            using (var ms = new MemoryStream(imageBytes))
+            {
+                Image storyImage = Image.FromStream(ms);
+                storyImage.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+            }
+
+            return filePath;
+
         }
 
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
