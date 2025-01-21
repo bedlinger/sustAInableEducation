@@ -74,7 +74,7 @@ namespace sustAInableEducation_backend.Repository
                 try
                 {
                     var storyPart = GetStoryPart(assistantContent);
-                    Console.WriteLine(await FetchStoryImage(storyPart.Item1.Text));
+                    storyPart.Item1.Image = await FetchStoryImage(storyPart.Item1.Text);
                     return storyPart;
                 }
                 catch (Exception e)
@@ -136,7 +136,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    return GetStoryPart(assistantContent).Item1;
+                    StoryPart storyPart = GetStoryPart(assistantContent).Item1;
+                    storyPart.Image = await FetchStoryImage(storyPart.Text);
+                    return storyPart;
                 }
                 catch (Exception e)
                 {
@@ -487,6 +489,15 @@ namespace sustAInableEducation_backend.Repository
             }
         }
 
+        // Benjamin Edlinger
+        /// <summary>
+        /// Fetches the story image based on the given text
+        /// </summary>
+        /// <param name="text">The text to fetch the story image for</param>
+        /// <returns>The path to the story image</returns>
+        /// <exception cref="HttpRequestException">If the request failed</exception>
+        /// <exception cref="InvalidOperationException">If the response object is null</exception>
+        /// <exception cref="JsonException">If the response content could not be deserialized</exception>
         private static async Task<string> FetchStoryImage(string text)
         {
             ArgumentNullException.ThrowIfNull(_client);
