@@ -263,6 +263,11 @@ namespace sustAInableEducation_backend.Repository
             throw new AIException("Failed to generate result after maximum retry attempts");
         }
 
+        string IAIService.GenerateStoryImage(Story story)
+        {
+            throw new NotImplementedException();
+        }
+
         // Benjamin Edlinger
         /// <summary>
         /// Rebuilds the chat messages of the story for the given story object
