@@ -1,7 +1,7 @@
 <template>
     <div class="w-full h-full">
         <div class="w-screen flex items-center h-full bg-slate-50">
-            <Toast/>
+            <Toast />
             <ConfirmDialog></ConfirmDialog>
             <div class="w-80 h-full pt-16 border-solid border-slate-300 border-r-2">
                 <div class="sidebar w-full h-full flex flex-col p-2 overflow-y-scroll">
@@ -66,8 +66,9 @@
                         <Divider class="!w-full" />
                     </div>
                     <div id="sidebar-content">
-                        <EcoSpaceListEntry v-for="ecoSpace in searchedSpaces" :ecoSpace="ecoSpace" v-on:delete="openDialog"
-                            v-model="spaceRefsById[ecoSpace.id].value" v-on:click="selectSpaceById(ecoSpace.id)" />
+                        <EcoSpaceListEntry v-for="ecoSpace in searchedSpaces" :ecoSpace="ecoSpace"
+                            v-on:delete="openDialog" v-model="spaceRefsById[ecoSpace.id].value"
+                            v-on:click="selectSpaceById(ecoSpace.id)" />
                         <NuxtLink to="/configuration">
                             <Button label="EcoSpace erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
@@ -224,14 +225,14 @@ const confirmDialog = useConfirm();
 const toast = useToast();
 
 
-const { execute, data: spaces} = await useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`,
+const { execute, data: spaces } = await useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`,
     {
         method: 'GET',
         cache: 'no-cache',
         credentials: 'include',
         headers: useRequestHeaders(['cookie']),
         onResponse: (response) => {
-            if(response.response.status === 401) {
+            if (response.response.status === 401) {
                 navigateTo('/login');
             }
         }
@@ -284,10 +285,10 @@ const searchInput = ref('');
 
 const searchedSpaces = computed(() => {
     return sortedSpaces.value.filter(space => {
-        if(space.story.title) {
+        if (space.story.title) {
             return space.story.title.toLowerCase().includes(searchInput.value.toLowerCase())
         } else {
-            if(searchInput.value !== "") {
+            if (searchInput.value !== "") {
                 return false
             }
             return true
@@ -359,10 +360,18 @@ const isFilterApplied = computed(() => {
     return filters.applied.finished.value === filters.refs.finished.value && filters.applied.date.value === filters.refs.date.value && filters.applied.sort.subject.value === filters.refs.sort.subject.value && filters.applied.sort.direction.value === filters.refs.sort.direction.value;
 })
 
-function selectSpaceById(id: string) {
+async function selectSpaceById(id: string) {
     spaceRefsById[id].value = true;
     if (spaces.value) {
-        selectedSpace.value = spaces.value.find(space => space.id === id);
+        await $fetch(`${runtimeConfig.public.apiUrl}/spaces/${id}`, {
+            method: 'GET',
+            credentials: 'include',
+            onResponse: (response) => {
+                if (response.response.ok) {
+                    selectedSpace.value = response.response._data;
+                }
+            }
+        });
     }
     Object.keys(spaceRefsById).forEach(key => {
         if (key !== id) {
@@ -419,7 +428,7 @@ function deleteSpace(id: string) {
         method: 'DELETE',
         credentials: 'include',
         onResponse: (response) => {
-            if(response.response.ok) {
+            if (response.response.ok) {
                 toast.add({
                     severity: 'success',
                     life: 5000,
@@ -456,7 +465,7 @@ const openDialog = (id: string) => {
             deleteSpace(id);
         },
         reject: () => {
-            
+
         }
     });
 }
