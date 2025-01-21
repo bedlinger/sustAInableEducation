@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -74,9 +73,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    var storyPart = GetStoryPart(assistantContent);
-                    storyPart.Item1.Image = await FetchStoryImage(storyPart.Item1.Text);
-                    return storyPart;
+                    return GetStoryPart(assistantContent);
                 }
                 catch (Exception e)
                 {
@@ -137,9 +134,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    StoryPart storyPart = GetStoryPart(assistantContent).Item1;
-                    storyPart.Image = await FetchStoryImage(storyPart.Text);
-                    return storyPart;
+                    return GetStoryPart(assistantContent).Item1;
                 }
                 catch (Exception e)
                 {
@@ -247,9 +242,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    StoryResult storyResult = GetStoryResult(assistantContent, end);
-                    storyResult.Image = await FetchStoryImage(storyResult.Text);
-                    return storyResult;
+                    return GetStoryResult(assistantContent, end);
                 }
                 catch (Exception e)
                 {
@@ -262,11 +255,6 @@ namespace sustAInableEducation_backend.Repository
             }
 
             throw new AIException("Failed to generate result after maximum retry attempts");
-        }
-
-        string IAIService.GenerateStoryImage(Story story)
-        {
-            throw new NotImplementedException();
         }
 
         // Benjamin Edlinger
@@ -499,17 +487,19 @@ namespace sustAInableEducation_backend.Repository
 
         // Benjamin Edlinger
         /// <summary>
-        /// Fetches the story image based on the given text
+        /// Generates an image based on the given story object
         /// </summary>
-        /// <param name="text">The text to fetch the story image for</param>
-        /// <returns>The path to the story image</returns>
-        /// <exception cref="HttpRequestException">If the request failed</exception>
-        /// <exception cref="InvalidOperationException">If the response object is null</exception>
-        /// <exception cref="JsonException">If the response content could not be deserialized</exception>
-        private static async Task<string> FetchStoryImage(string text)
+        /// <param name="story">Based on this story object the image will be generated</param>
+        /// <returns>The path to the generated image</returns>
+        /// <exception cref="AIException">If the request for generating the prompt failed, the request for generating the image failed, the response content could not be deserialized or the image could not be saved</exception>
+        /// <exception cref="InvalidOperationException">If the response object is null, the assistant content is null or empty, the image content is not a base64 string or the image content is null</exception>
+        public async Task<string> GenerateStoryImage(Story story)
         {
             ArgumentNullException.ThrowIfNull(_client);
-            ArgumentNullException.ThrowIfNull(text);
+            ArgumentNullException.ThrowIfNull(story);
+
+            string text = story.Result != null ? story.Result.Text : story.Parts.Last().Text;
+            ArgumentException.ThrowIfNullOrEmpty(text);
 
             List<ChatMessage> chatMessages =
             [
@@ -533,7 +523,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (HttpRequestException e)
             {
-                throw new HttpRequestException($"Request failed with status code {responsePrompt?.StatusCode}", e);
+                throw new AIException($"Request for generating prompt failed with status code {responsePrompt?.StatusCode}", e);
             }
             string imagePrompt = null!;
             try
@@ -543,7 +533,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (JsonException e)
             {
-                throw new JsonException("Failed to deserialize response content", e);
+                throw new AIException("Failed to deserialize response content", e);
             }
 
             HttpRequestMessage requestImage = new(HttpMethod.Post, "/v1/inference/black-forest-labs/FLUX-1-dev")
@@ -563,7 +553,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (HttpRequestException e)
             {
-                throw new HttpRequestException($"Request failed with status code {responseImage?.StatusCode}", e);
+                throw new AIException($"Request for image generation failed with status code {responseImage?.StatusCode}", e);
             }
             string base64String;
             try
@@ -574,29 +564,39 @@ namespace sustAInableEducation_backend.Repository
                 {
                     base64String = base64String.Replace("data:image/png;base64,", string.Empty);
                 }
+                else
+                {
+                    throw new InvalidOperationException("Image content is not a base64 string");
+                }
             }
             catch (JsonException e)
             {
-                throw new JsonException("Failed to deserialize response content", e);
+                throw new AIException("Failed to deserialize response content", e);
             }
-
-            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
-            if (!Directory.Exists(directoryPath))
+            String filePath;
+            try
             {
-                Directory.CreateDirectory(directoryPath);
+                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                filePath = Path.Combine(directoryPath, $"{Guid.NewGuid()}.png");
+                byte[] imageBytes = Convert.FromBase64String(base64String);
+                using (var ms = new MemoryStream(imageBytes))
+                {
+                    using var skImage = SKImage.FromEncodedData(ms);
+                    using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
+                    using var fileStream = File.OpenWrite(filePath);
+                    skData.SaveTo(fileStream);
+                }
             }
-            var filePath = Path.Combine(directoryPath, $"{Guid.NewGuid()}.png");
-            byte[] imageBytes = Convert.FromBase64String(base64String);
-            using (var ms = new MemoryStream(imageBytes))
+            catch (Exception e)
             {
-                using var skImage = SKImage.FromEncodedData(ms);
-                using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
-                using var fileStream = File.OpenWrite(filePath);
-                skData.SaveTo(fileStream);
+                throw new AIException("Failed to save image", e);
             }
 
             return filePath;
-
         }
 
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
