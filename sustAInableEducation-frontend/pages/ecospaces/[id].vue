@@ -1,37 +1,61 @@
 <template>
     <div class="w-full h-full">
         <div class="background animate-anim" />
-        <div class="w-screen flex flex-col justify-center items-center h-full bg-slate-50 pt-[4.5rem] p-4">
+        <div class="w-screen flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4">
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="expirationDate"
                 v-on:generateCode="getJoinCode" />
-            <UserDialog v-model="userDialogIsVisible" :participants="participants" />
+            <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" />
+            
+            <Dialog v-model:visible="showResult" modal :title="result?.text" class="m-10">
+                <h1 class="text-2xl mb-2">Ergebnis</h1>
+                <p class="text-lg mb-2">
+                    {{ result?.text }}
+                </p>
+            </Dialog>
+
             <div class="top flex justify-between items-center mb-2 w-full">
                 <Button label="Einladen" @click="showInviteDialog">
                     <template #icon>
                         <Icon name="ic:baseline-person-add" class="size-5" />
                     </template>
                 </Button>
-                <Button label="Teilnehmer" badge="20" @click="showUserDialog" />
+                <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
-                class="panel w-full h-full rounded-xl relative border-solid border-slate-3s00 border-2 flex flex-col justify-center">
+                class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-3s00 border-2 flex flex-col justify-center">
                 <div class="content h-full mt-4 mx-4 relative overflow-y-scroll">
                     <div class="hostcontrols w-full flex justify-end absolute" v-if="role === 'host'">
-                        <Button label="Start (Generate)" @click="generatePart" :disabled="enableStart" size="small" class="mx-2"/>
-                        <Button label="Start Voting" @click="" size="small"/>
+                        <Button label="Start (Generate)" @click="generatePart" size="small" class="mx-2" />
+                        <Button label="Start Voting" @click="" size="small" />
                     </div>
-                    <div v-for="part,index in parts" class="p-4">
-                        <h1 class="text-3xl font-bold mb-2">{{ `${index+1}: ${part.intertitle}` }}</h1>
+                    <div v-for="part, index in space?.story.parts" class="p-4">
+                        <Divider v-if="index !== 0" />
+                        <h1 class="text-3xl font-bold mb-2">{{ `${index + 1}: ${part.intertitle}` }}</h1>
                         <p class="text-lg mb-4">{{ part.text }}</p>
                         <ul class="list-disc text-lg">
-                            <li v-for="choice in part.choices">
+                            <li v-for="choice in part.choices" :class="{ 'font-bold bg-primary-200 rounded-lg p-1': choice.number === part.chosenNumber }">
                                 <p>{{ `${choice.number}: ${choice.text}` }}</p>
                             </li>
                         </ul>
-                        <Divider/>
+
                     </div>
-                    <div>
-                        <Skeleton height="8rem" v-if="isLoading"/>
+                    <div v-if="isLoading">
+                        <Skeleton height="8rem" />
+                    </div>
+                    <div v-if="showReloadButton && !result" class="w-full flex justify-center items-center">
+                        <Button @click="generatePart" severity="secondary">
+                            <template #default>
+                                <Icon name="ic:baseline-refresh" class="size-5" />
+                                <span>Erneut versuchen</span>
+                            </template>
+                        </Button>
+                    </div>
+                    <div v-if="result" class="w-full flex justify-center items-center">
+                        <Button @click="showResult = !showResult" severity="primary">
+                            <template #default>
+                                <span>Ergebnis anzeigen</span>
+                            </template>
+                        </Button>
                     </div>
                 </div>
                 <div class="controls flex flex-col m-4">
@@ -41,17 +65,16 @@
                     </div>
                     <div class="flex flex-col sm:flex-row sm:justify-between w-full">
                         <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1"
-                            @click="selectOption(1)" />
+                            @click="selectOption(1)" :disabled="!!space?.story.result || isLoading" />
                         <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 2"
-                            @click="selectOption(2)" />
+                            @click="selectOption(2)" :disabled="!!space?.story.result || isLoading"/>
                         <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
                             :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
                         </Knob>
                         <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 3"
-                            @click="selectOption(3)" />
-                        <Button class="sm:ml-5 flex-1 sm:!text-2xl" label="Option 4" @click="selectOption(4)" />
+                            @click="selectOption(3)" :disabled="!!space?.story.result || isLoading"/>
+                        <Button class="sm:ml-5 flex-1 sm:!text-2xl" label="Option 4" @click="selectOption(4)" :disabled="!!space?.story.result || isLoading"/>
                     </div>
-                    {{ role }}
                 </div>
             </div>
 
@@ -61,13 +84,25 @@
 
 <script setup lang="ts">
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-import type { Participant, Part } from '~/types/EcoSpace';
+import type { Participant, Part, EcoSpace, Result } from '~/types/EcoSpace';
 
 const runtime = useRuntimeConfig()
 const route = useRoute()
 const id = route.params.id
 
-const users = ref<Participant[]>([])
+const space = ref<EcoSpace | null>(null)
+
+const parts = computed(() => {
+    if (space.value)
+        return space.value?.story.parts
+    return []
+})
+
+const result = computed(() => {
+    if (space.value)
+        return space.value?.story.result
+    return null
+})
 
 const cookieHeaders = useRequestHeaders(['cookie'])
 
@@ -76,7 +111,10 @@ const role = ref<string>('')
 const enableStart = ref(true)
 
 const isLoading = ref(false)
-const parts = ref<Part[]>([])
+
+const showReloadButton = ref(false)
+
+const showResult = ref(false)
 
 await getSpace()
 
@@ -88,13 +126,35 @@ const connection = new HubConnectionBuilder()
     .build();
 
 async function generatePart() {
-    await connection.invoke("GeneratePart")
+    if(showReloadButton.value)
+        showReloadButton.value = false
+    try {
+        await connection.invoke("GeneratePart")
+    } catch (err) {
+        isLoading.value = false
+        showReloadButton.value = true
+    }
+    
 }
 
 async function selectOption(number: Number) {
-    if (parts.value.length > 0)
-        await connection.invoke("SetChoice", number)
-    await connection.invoke("GeneratePart")
+    if (space.value !== null) {
+        if (parts.value.length > 0) {
+            try {
+                await connection.invoke("SetChoice", number)
+            } catch (err) {}
+            
+            try {
+                await connection.invoke("GeneratePart")
+            } catch (err) {
+                console.error("ALARM")
+                isLoading.value = false
+                showReloadButton.value = true
+            }
+
+            
+        }
+    }
 }
 
 async function voteOption(number: Number) {
@@ -102,7 +162,7 @@ async function voteOption(number: Number) {
 }
 
 connection.on("PartGenerating", () => {
-    if(parts.value.length > 0) {
+    if (parts.value.length > 0) {
         enableStart.value = false
     }
 
@@ -111,6 +171,15 @@ connection.on("PartGenerating", () => {
 connection.on("PartGenerated", (part: Part) => {
     isLoading.value = false
     parts.value.push(part)
+})
+
+connection.on("ResultGenerated", (result: Result) => {
+    space.value!.story.result = result
+    showResult.value = true
+})
+
+connection.on("ChoiceSet", (choice: number) => {
+    parts.value[parts.value.length - 1].chosenNumber = choice
 })
 
 async function startConnection() {
@@ -179,9 +248,8 @@ async function getSpace() {
         headers: useRequestHeaders(['cookie']),
         onResponse: (response) => {
             if (response.response.ok) {
-                users.value = response.response._data.participants
-                parts.value = response.response._data.story.parts
-                if(parts.value.length > 0) {
+                space.value = response.response._data
+                if (parts.value.length > 0) {
                     enableStart.value = false
                 }
             } else {
@@ -195,10 +263,10 @@ async function getSpace() {
         headers: cookieHeaders,
         onResponse: (response) => {
             if (response.response.ok) {
-                if(response.response._data.anonUserName ) {
-                    let participantEntry = users.value.find((participant) => participant.userName === response.response._data.anonUserName)
-                    if(participantEntry) {
-                        if(participantEntry.isHost) {
+                if (response.response._data.anonUserName) {
+                    let participantEntry = space.value?.participants.find((participant) => participant.userName === response.response._data.anonUserName)
+                    if (participantEntry) {
+                        if (participantEntry.isHost) {
                             role.value = 'host'
                         } else {
                             role.value = 'participant'
