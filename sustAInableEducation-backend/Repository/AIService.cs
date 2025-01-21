@@ -541,6 +541,9 @@ namespace sustAInableEducation_backend.Repository
                 Content = new StringContent(JsonSerializer.Serialize(new
                 {
                     prompt = imagePrompt,
+                    // approx. 2.67:1 ratio
+                    width = 2048,
+                    heigth = 768
                 }), Encoding.UTF8, "application/json")
             };
             HttpResponseMessage responseImage = null!;
