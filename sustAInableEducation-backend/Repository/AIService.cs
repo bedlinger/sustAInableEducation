@@ -246,7 +246,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    return GetStoryResult(assistantContent, end);
+                    StoryResult storyResult = GetStoryResult(assistantContent, end);
+                    storyResult.Image = await FetchStoryImage(storyResult.Text);
+                    return storyResult;
                 }
                 catch (Exception e)
                 {
