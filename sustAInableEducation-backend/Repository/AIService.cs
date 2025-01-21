@@ -74,7 +74,7 @@ namespace sustAInableEducation_backend.Repository
                 try
                 {
                     var storyPart = GetStoryPart(assistantContent);
-                    Console.WriteLine(await FetchStoryImage(storyPart.Item1.Text));
+                    storyPart.Item1.Image = await FetchStoryImage(storyPart.Item1.Text);
                     return storyPart;
                 }
                 catch (Exception e)
@@ -136,7 +136,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    return GetStoryPart(assistantContent).Item1;
+                    StoryPart storyPart = GetStoryPart(assistantContent).Item1;
+                    storyPart.Image = await FetchStoryImage(storyPart.Text);
+                    return storyPart;
                 }
                 catch (Exception e)
                 {
