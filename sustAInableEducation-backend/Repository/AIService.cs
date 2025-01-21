@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using SkiaSharp;
 using sustAInableEducation_backend.Models;
 
 namespace sustAInableEducation_backend.Repository
@@ -588,8 +589,10 @@ namespace sustAInableEducation_backend.Repository
             byte[] imageBytes = Convert.FromBase64String(base64String);
             using (var ms = new MemoryStream(imageBytes))
             {
-                Image storyImage = Image.FromStream(ms);
-                storyImage.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+                using var skImage = SKImage.FromEncodedData(ms);
+                using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
+                using var fileStream = File.OpenWrite(filePath);
+                skData.SaveTo(fileStream);
             }
 
             return filePath;
