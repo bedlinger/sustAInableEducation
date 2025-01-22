@@ -39,6 +39,7 @@ namespace sustAInableEducation_backend.Models
         public string[] NegativeChoices { get; set; } = [];
         public string[] Learnings { get; set; } = [];
         public string[] DiscussionQuestions { get; set; } = [];
+        public string? Image { get; set; }
     }
 
     public class StoryRequest

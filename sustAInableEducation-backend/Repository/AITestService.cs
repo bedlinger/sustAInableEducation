@@ -136,5 +136,10 @@ namespace sustAInableEducation_backend.Repository
             }
             return quiz;
         }
+
+        public Task<string> GenerateStoryImage(Story story)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

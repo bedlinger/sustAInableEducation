@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using SkiaSharp;
 using sustAInableEducation_backend.Models;
 
 namespace sustAInableEducation_backend.Repository
@@ -484,6 +485,124 @@ namespace sustAInableEducation_backend.Repository
             }
         }
 
+        // Benjamin Edlinger
+        /// <summary>
+        /// Generates an image based on the given story object
+        /// </summary>
+        /// <param name="story">Based on this story object the image will be generated</param>
+        /// <returns>The path to the generated image</returns>
+        /// <exception cref="AIException">If the request for generating the prompt failed, the request for generating the image failed, the response content could not be deserialized or the image could not be saved</exception>
+        /// <exception cref="InvalidOperationException">If the response object is null, the assistant content is null or empty, the image content is not a base64 string or the image content is null</exception>
+        public async Task<string> GenerateStoryImage(Story story)
+        {
+            ArgumentNullException.ThrowIfNull(_client);
+            ArgumentNullException.ThrowIfNull(story);
+
+            string text = story.Result != null ? story.Result.Text : story.Parts.Last().Text;
+            ArgumentException.ThrowIfNullOrEmpty(text);
+
+            List<ChatMessage> chatMessages =
+            [
+                new ChatMessage { Role = ValidRoles.System, Content = "You are a professional prompt engineer specializing in creating highly detailed and consistent image descriptions for AI-based image generation systems. Your primary objective is to craft prompts that result in visually harmonious and stylistically coherent images. Always ensure the description is vivid and specific, including details about the setting, characters, lighting, colors, mood, and artistic style. All elements in the prompt must align with the tone and narrative of the story, avoiding any contradictions or conflicting stylistic elements. Clearly define the artistic style, specifying an era, medium, or technique if necessary, such as \"a surreal oil painting from the 19th century\" or \"a cinematic, photorealistic scene with soft lighting.\" Focus on clarity and precision, ensuring the AI can interpret and render the intended image accurately. Your goal is to deliver high-quality, concise prompts that balance creativity and precision to produce visually stunning and cohesive outputs." },
+                new ChatMessage { Role = ValidRoles.User, Content = $"Create a vivid and detailed prompt for another AI to generate an image based on the following story: {text}. Ensure all elements, including setting, characters, lighting, mood, colors, and artistic style, align with the narrative and are stylistically consistent. Use clear and precise language to guide the image generation AI effectively." },
+            ];
+            HttpRequestMessage requestPrompt = new(HttpMethod.Post, "/v1/openai/chat/completions")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(new
+                {
+                    model = "meta-llama/Llama-3.3-70B-Instruct",
+                    messages = chatMessages,
+                }), Encoding.UTF8, "application/json")
+            };
+            HttpResponseMessage responsePrompt = null!;
+            string responseStringPrompt;
+            try
+            {
+                responsePrompt = await _client.SendAsync(requestPrompt);
+                responsePrompt.EnsureSuccessStatusCode();
+                responseStringPrompt = await responsePrompt.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                throw new AIException($"Request for generating prompt failed with status code {responsePrompt?.StatusCode}", e);
+            }
+            string imagePrompt = null!;
+            try
+            {
+                Response responseObjectPrompt = JsonSerializer.Deserialize<Response>(responseStringPrompt) ?? throw new InvalidOperationException("Response object is null");
+                imagePrompt = responseObjectPrompt.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
+            }
+            catch (JsonException e)
+            {
+                throw new AIException("Failed to deserialize response content", e);
+            }
+
+            HttpRequestMessage requestImage = new(HttpMethod.Post, "/v1/inference/black-forest-labs/FLUX-1-dev")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(new
+                {
+                    prompt = imagePrompt,
+                    // approx. 2.67:1 ratio
+                    width = 2048,
+                    heigth = 768
+                }), Encoding.UTF8, "application/json")
+            };
+            HttpResponseMessage responseImage = null!;
+            string responseStringImage;
+            try
+            {
+                responseImage = await _client.SendAsync(requestImage);
+                responseImage.EnsureSuccessStatusCode();
+                responseStringImage = await responseImage.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                throw new AIException($"Request for image generation failed with status code {responseImage?.StatusCode}", e);
+            }
+            string base64String;
+            try
+            {
+                ImageContent responseObjectImage = JsonSerializer.Deserialize<ImageContent>(responseStringImage) ?? throw new InvalidOperationException("Response object is null");
+                base64String = responseObjectImage.Images[0];
+                if (base64String.StartsWith("data:image/png;base64,"))
+                {
+                    base64String = base64String.Replace("data:image/png;base64,", string.Empty);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Image content is not a base64 string");
+                }
+            }
+            catch (JsonException e)
+            {
+                throw new AIException("Failed to deserialize response content", e);
+            }
+            String filePath;
+            try
+            {
+                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                filePath = Path.Combine(directoryPath, $"{Guid.NewGuid()}.png");
+                byte[] imageBytes = Convert.FromBase64String(base64String);
+                using (var ms = new MemoryStream(imageBytes))
+                {
+                    using var skImage = SKImage.FromEncodedData(ms);
+                    using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
+                    using var fileStream = File.OpenWrite(filePath);
+                    skData.SaveTo(fileStream);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new AIException("Failed to save image", e);
+            }
+
+            return filePath;
+        }
+
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
         {
             throw new NotImplementedException();
@@ -646,6 +765,44 @@ namespace sustAInableEducation_backend.Repository
 
         [JsonPropertyName("discussion_questions")]
         public string[] DiscussionQuestions { get; set; } = null!;
+    }
+
+    // Benjamin Edlinger
+    public class ImageContent
+    {
+        [JsonPropertyName("request_id")]
+        public string RequestId { get; set; } = null!;
+
+        [JsonPropertyName("inference_status")]
+        public InferenceStatus InferenceStatus { get; set; } = null!;
+
+        [JsonPropertyName("images")]
+        public List<string> Images { get; set; } = null!;
+
+        [JsonPropertyName("nsfw_content_detected")]
+        public List<bool> NsfwContentDetected { get; set; } = null!;
+
+        [JsonPropertyName("seed")]
+        public long Seed { get; set; }
+    }
+
+    // Benjamin Edlinger
+    public class InferenceStatus
+    {
+        [JsonPropertyName("status")]
+        public string Status { get; set; } = null!;
+
+        [JsonPropertyName("runtime_ms")]
+        public int RuntimeMs { get; set; }
+
+        [JsonPropertyName("cost")]
+        public double Cost { get; set; }
+
+        [JsonPropertyName("tokens_generated")]
+        public int? TokensGenerated { get; set; }
+
+        [JsonPropertyName("tokens_input")]
+        public int? TokensInput { get; set; }
     }
 
     // Benjamin Edlinger
