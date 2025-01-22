@@ -580,7 +580,7 @@ namespace sustAInableEducation_backend.Repository
             String filePath;
             try
             {
-                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
                 if (!Directory.Exists(directoryPath))
                 {
                     Directory.CreateDirectory(directoryPath);
