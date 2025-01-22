@@ -18,7 +18,6 @@
                         <Icon name="ic:baseline-person-add" class="size-5" />
                     </template>
                 </Button>
-                <Button label="test" @click="scrollToBottom" />
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
@@ -41,7 +40,18 @@
 
                     </div>
                     <div v-if="isLoading">
-                        <Skeleton height="8rem" />
+                        <Divider/>
+                        <Skeleton height="3.25rem" width="40rem" class="mb-2" />
+                        <Skeleton height="1.75rem" width="94%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="98%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="96%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="97%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="95%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="90%" class="mb-8"/>
+                        <Skeleton height="1.75rem" width="68%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="65%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="70%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="73%" class="mb-2"/>
                     </div>
                     <div v-if="showReloadButton && !result" class="w-full flex justify-center items-center">
                         <Button @click="generatePart" severity="secondary">
@@ -86,7 +96,6 @@
 
 <script setup lang="ts">
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-import { VirtualScroller } from 'primevue';
 import type { Participant, Part, EcoSpace, Result } from '~/types/EcoSpace';
 
 const runtime = useRuntimeConfig()
@@ -181,6 +190,7 @@ connection.on("PartGenerated", async (part: Part) => {
 
 connection.on("ResultGenerated", (result: Result) => {
     space.value!.story.result = result
+    isLoading.value = false
     showResult.value = true
 })
 
