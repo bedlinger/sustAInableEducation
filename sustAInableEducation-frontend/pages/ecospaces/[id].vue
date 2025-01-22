@@ -5,25 +5,25 @@
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="expirationDate"
                 v-on:generateCode="getJoinCode" />
             <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" />
-            
+
             <Dialog v-model:visible="showResult" modal :title="result?.text" class="m-10">
                 <h1 class="text-2xl mb-2">Ergebnis</h1>
                 <p class="text-lg mb-2">
                     {{ result?.text }}
                 </p>
             </Dialog>
-
             <div class="top flex justify-between items-center mb-2 w-full">
                 <Button label="Einladen" @click="showInviteDialog">
                     <template #icon>
                         <Icon name="ic:baseline-person-add" class="size-5" />
                     </template>
                 </Button>
+                <Button label="test" @click="scrollToBottom" />
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
                 class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-3s00 border-2 flex flex-col justify-center">
-                <div class="content h-full mt-4 mx-4 relative overflow-y-scroll">
+                <div class="content h-full mt-4 mx-4 relative overflow-y-scroll" ref="contentDiv">
                     <div class="hostcontrols w-full flex justify-end absolute" v-if="role === 'host'">
                         <Button label="Start (Generate)" @click="generatePart" size="small" class="mx-2" />
                         <Button label="Start Voting" @click="" size="small" />
@@ -33,7 +33,8 @@
                         <h1 class="text-3xl font-bold mb-2">{{ `${index + 1}: ${part.intertitle}` }}</h1>
                         <p class="text-lg mb-4">{{ part.text }}</p>
                         <ul class="list-disc text-lg">
-                            <li v-for="choice in part.choices" :class="{ 'font-bold bg-primary-200 rounded-lg p-1': choice.number === part.chosenNumber }">
+                            <li v-for="choice in part.choices"
+                                :class="{ 'font-bold bg-primary-200 rounded-lg p-1': choice.number === part.chosenNumber }">
                                 <p>{{ `${choice.number}: ${choice.text}` }}</p>
                             </li>
                         </ul>
@@ -67,13 +68,14 @@
                         <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1"
                             @click="selectOption(1)" :disabled="!!space?.story.result || isLoading" />
                         <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 2"
-                            @click="selectOption(2)" :disabled="!!space?.story.result || isLoading"/>
+                            @click="selectOption(2)" :disabled="!!space?.story.result || isLoading" />
                         <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
                             :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
                         </Knob>
                         <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 3"
-                            @click="selectOption(3)" :disabled="!!space?.story.result || isLoading"/>
-                        <Button class="sm:ml-5 flex-1 sm:!text-2xl" label="Option 4" @click="selectOption(4)" :disabled="!!space?.story.result || isLoading"/>
+                            @click="selectOption(3)" :disabled="!!space?.story.result || isLoading" />
+                        <Button class="sm:ml-5 flex-1 sm:!text-2xl" label="Option 4" @click="selectOption(4)"
+                            :disabled="!!space?.story.result || isLoading" />
                     </div>
                 </div>
             </div>
@@ -84,6 +86,7 @@
 
 <script setup lang="ts">
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { VirtualScroller } from 'primevue';
 import type { Participant, Part, EcoSpace, Result } from '~/types/EcoSpace';
 
 const runtime = useRuntimeConfig()
@@ -126,7 +129,7 @@ const connection = new HubConnectionBuilder()
     .build();
 
 async function generatePart() {
-    if(showReloadButton.value)
+    if (showReloadButton.value)
         showReloadButton.value = false
     try {
         await connection.invoke("GeneratePart")
@@ -134,7 +137,7 @@ async function generatePart() {
         isLoading.value = false
         showReloadButton.value = true
     }
-    
+
 }
 
 async function selectOption(number: Number) {
@@ -142,8 +145,8 @@ async function selectOption(number: Number) {
         if (parts.value.length > 0) {
             try {
                 await connection.invoke("SetChoice", number)
-            } catch (err) {}
-            
+            } catch (err) { }
+
             try {
                 await connection.invoke("GeneratePart")
             } catch (err) {
@@ -152,7 +155,7 @@ async function selectOption(number: Number) {
                 showReloadButton.value = true
             }
 
-            
+
         }
     }
 }
@@ -161,16 +164,19 @@ async function voteOption(number: Number) {
     await connection.invoke("Vote", number)
 }
 
-connection.on("PartGenerating", () => {
+connection.on("PartGenerating", async () => {
     if (parts.value.length > 0) {
         enableStart.value = false
     }
-
     isLoading.value = true
+    await nextTick()
+    scrollToBottom()
 })
-connection.on("PartGenerated", (part: Part) => {
+connection.on("PartGenerated", async (part: Part) => {
     isLoading.value = false
     parts.value.push(part)
+    await nextTick()
+    scrollToBottom()
 })
 
 connection.on("ResultGenerated", (result: Result) => {
@@ -296,4 +302,15 @@ async function getJoinCode() {
     })
 }
 
+const contentDiv = ref<HTMLDivElement | null>(null);
+const scrollToBottom = () => {
+    const el = contentDiv.value;
+
+    if (el) {
+        el.scrollTo({
+            top: el.scrollHeight,
+            behavior: 'smooth'
+        })
+    }
+};
 </script>
