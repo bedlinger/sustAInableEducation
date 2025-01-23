@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full h-full">
+    <div class="w-full h-full prose-lg">
         <div class="background animate-anim" />
         <div class="w-screen flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4">
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="expirationDate"
@@ -29,42 +29,81 @@
                     </div>
                     <div v-for="part, index in space?.story.parts" class="p-4">
                         <Divider v-if="index !== 0" />
-                        <h1 class="text-3xl font-bold mb-2">{{ `${index + 1}: ${part.intertitle}` }}</h1>
-                        <p class="text-lg mb-4">{{ part.text }}</p>
-                        <ul class="list-disc text-lg">
+                        <h2 class="font-bold mb-2">{{ `${index + 1}: ${part.intertitle}` }}</h2>
+                        <p class="mb-4">{{ part.text }}</p>
+                        <ul class="list-disc">
                             <li v-for="choice in part.choices"
                                 :class="{ 'font-bold bg-primary-200 rounded-lg p-1': choice.number === part.chosenNumber }">
-                                <p>{{ `${choice.number}: ${choice.text}` }}</p>
+                                <span>{{ `${choice.number}: ${choice.text}` }}</span>
                             </li>
                         </ul>
-
                     </div>
                     <div v-if="isLoading">
-                        <Divider/>
+                        <Divider v-if="parts.length > 0" />
                         <Skeleton height="3.25rem" width="40rem" class="mb-2" />
-                        <Skeleton height="1.75rem" width="94%" class="mb-2"/>
-                        <Skeleton height="1.75rem" width="98%" class="mb-2"/>
-                        <Skeleton height="1.75rem" width="96%" class="mb-2"/>
-                        <Skeleton height="1.75rem" width="97%" class="mb-2"/>
-                        <Skeleton height="1.75rem" width="95%" class="mb-2"/>
-                        <Skeleton height="1.75rem" width="90%" class="mb-8"/>
-                        <Skeleton height="1.75rem" width="68%" class="mb-2"/>
-                        <Skeleton height="1.75rem" width="65%" class="mb-2"/>
-                        <Skeleton height="1.75rem" width="70%" class="mb-2"/>
-                        <Skeleton height="1.75rem" width="73%" class="mb-2"/>
+                        <Skeleton height="1.75rem" width="94%" class="mb-2" />
+                        <Skeleton height="1.75rem" width="98%" class="mb-2" />
+                        <Skeleton height="1.75rem" width="96%" class="mb-2" />
+                        <Skeleton height="1.75rem" width="97%" class="mb-2" />
+                        <Skeleton height="1.75rem" width="95%" class="mb-2" />
+                        <Skeleton height="1.75rem" width="90%" class="mb-8" />
+                        <Skeleton height="1.75rem" width="68%" class="mb-2" />
+                        <Skeleton height="1.75rem" width="65%" class="mb-2" />
+                        <Skeleton height="1.75rem" width="70%" class="mb-2" />
+                        <Skeleton height="1.75rem" width="73%" class="mb-2" />
+                    </div>
+                    <div v-if="result" class="w-full">
+                        <Divider />
+                        <h2 class="font-bold mb-2">Ergebnis</h2>
+                        <p>{{ result.text }}</p>
+                        <Accordion :value="Array.from(Array(parts.length).keys())" multiple>
+                            <AccordionPanel :value="0" key="options">
+                                <AccordionHeader>Gewählte Optionen</AccordionHeader>
+                                <AccordionContent>
+                                    <div class="flex flex-col">
+                                        <p>Sie haben {{ result.negativeChoices.length }} negative und {{ result.positiveChoices.length }} positive Entscheidungen getroffen.</p>
+                                        <div class="flex flex-row">
+                                            <Fieldset legend="Positiv" class="flex-1 !mr-2" v-if="result.positiveChoices">
+                                                <ul class="list-disc">
+                                                    <li v-for="choice in result.positiveChoices">{{ choice }}</li>
+                                                </ul>
+                                            </Fieldset>
+                                            <Fieldset legend="Negativ" class="flex-1 !ml-2" v-if="result.negativeChoices">
+                                                <ul class="list-disc">
+                                                    <li v-for="choice in result.negativeChoices">{{ choice }}</li>
+                                                </ul>
+                                            </Fieldset>
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionPanel>
+                            <AccordionPanel :value="1" key="learnings">
+                                <AccordionHeader>Erkenntnisse</AccordionHeader>
+                                <AccordionContent>
+                                    <div class="flex">
+                                        <ul class="list-disc">
+                                            <li v-for="learning in result.learnings">{{ learning }}</li>
+                                        </ul>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionPanel>
+                            <AccordionPanel :value="2" key="discussionQuestions">
+                                <AccordionHeader>Diskussionsfragen</AccordionHeader>
+                                <AccordionContent>
+                                    <div class="flex">
+                                        <ul class="list-disc">
+                                            <li v-for="question in result.discussionQuestions">{{ question }}</li>
+                                        </ul>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionPanel>
+                        </Accordion>
                     </div>
                     <div v-if="showReloadButton && !result" class="w-full flex justify-center items-center">
                         <Button @click="generatePart" severity="secondary">
                             <template #default>
                                 <Icon name="ic:baseline-refresh" class="size-5" />
                                 <span>Erneut versuchen</span>
-                            </template>
-                        </Button>
-                    </div>
-                    <div v-if="result" class="w-full flex justify-center items-center">
-                        <Button @click="showResult = !showResult" severity="primary">
-                            <template #default>
-                                <span>Ergebnis anzeigen</span>
                             </template>
                         </Button>
                     </div>
@@ -76,20 +115,19 @@
                     </div>
                     <div class="flex flex-col sm:flex-row sm:justify-between w-full">
                         <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1"
-                            @click="selectOption(1)" :disabled="!!space?.story.result || isLoading" />
+                            @click="selectOption(1)" :disabled="disableOptionButtons" />
                         <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 2"
-                            @click="selectOption(2)" :disabled="!!space?.story.result || isLoading" />
+                            @click="selectOption(2)" :disabled="disableOptionButtons" />
                         <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
                             :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
                         </Knob>
                         <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 3"
-                            @click="selectOption(3)" :disabled="!!space?.story.result || isLoading" />
+                            @click="selectOption(3)" :disabled="disableOptionButtons" />
                         <Button class="sm:ml-5 flex-1 sm:!text-2xl" label="Option 4" @click="selectOption(4)"
-                            :disabled="!!space?.story.result || isLoading" />
+                            :disabled="disableOptionButtons" />
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </template>
@@ -100,6 +138,7 @@ import type { Participant, Part, EcoSpace, Result } from '~/types/EcoSpace';
 
 const runtime = useRuntimeConfig()
 const route = useRoute()
+const router = useRouter()
 const id = route.params.id
 
 const space = ref<EcoSpace | null>(null)
@@ -108,6 +147,12 @@ const parts = computed(() => {
     if (space.value)
         return space.value?.story.parts
     return []
+})
+
+console.log(Array(parts.value.length).keys().toArray().toString())
+
+const disableOptionButtons = computed(() => {
+    return !!space.value?.story.result || isLoading.value
 })
 
 const result = computed(() => {
@@ -163,8 +208,6 @@ async function selectOption(number: Number) {
                 isLoading.value = false
                 showReloadButton.value = true
             }
-
-
         }
     }
 }
@@ -194,6 +237,11 @@ connection.on("ResultGenerated", (result: Result) => {
     showResult.value = true
 })
 
+connection.on("ErrorOccured", (msg: string) => {
+    isLoading.value = false;
+    showReloadButton.value = true;
+})
+
 connection.on("ChoiceSet", (choice: number) => {
     parts.value[parts.value.length - 1].chosenNumber = choice
 })
@@ -203,11 +251,13 @@ async function startConnection() {
         await connection.start();
         console.log("SignalR Connected.");
     } catch (err) {
-        navigateTo('/login')
+        router.push('/login')
     }
 };
+if (import.meta.client) {
+    startConnection()
+}
 
-startConnection()
 
 const participants = ref<Participant[]>([])
 
