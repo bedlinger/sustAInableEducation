@@ -81,7 +81,8 @@ namespace sustAInableEducation_backend.Controllers
                     TopP = spaceReq.Story.TopP,
                     TargetGroup = spaceReq.Story.TargetGroup,
                 },
-                VotingTimeSeconds = spaceReq.VotingTimeSeconds
+                VotingTimeSeconds = spaceReq.VotingTimeSeconds,
+                IsImageGenerationEnabled = spaceReq.IsImageGenerationEnabled,
             };
             _context.Space.Add(space);
             await _context.SaveChangesAsync();
