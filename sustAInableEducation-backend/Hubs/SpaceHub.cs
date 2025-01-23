@@ -14,6 +14,7 @@ namespace sustAInableEducation_backend.Hubs
         public const string UserLeft = "UserLeft";
         public const string PartGenerating = "PartGenerating";
         public const string PartGenerated = "PartGenerated";
+        public const string ImageGenerated = "ImageGenerated";
         public const string ResultGenerated = "ResultGenerated";
         public const string VotingStarted = "VotingStarted";
         public const string VotingUpdated = "VotingUpdated";
@@ -85,7 +86,8 @@ namespace sustAInableEducation_backend.Hubs
             {
                 throw new HubException("Unauthorized");
             }
-            var story = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!.Story;
+            var space = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!;
+            var story = space.Story;
             if (story.Result != null)
             {
                 throw new HubException("Story is already complete");
@@ -126,10 +128,20 @@ namespace sustAInableEducation_backend.Hubs
             if (story.Result != null)
             {
                 await SendMessage(MessageType.ResultGenerated, story.Result);
+                if (space.IsImageGenerationEnabled)
+                {
+                    story.Result!.Image = await _ai.GenerateStoryImage(story);
+                    await SendMessage(MessageType.ImageGenerated, story.Result!.Image);
+                }
             }
             else
             {
                 await SendMessage(MessageType.PartGenerated, story.Parts.Last());
+                if (space.IsImageGenerationEnabled)
+                {
+                    story.Parts.Last().Image = await _ai.GenerateStoryImage(story);
+                    await SendMessage(MessageType.ImageGenerated, story.Parts.Last().Image);
+                }
             }
         }
 

@@ -15,6 +15,7 @@ namespace sustAInableEducation_backend.Models
         public SpaceAccessCode? AccessCode { get; set; }
 
         public uint VotingTimeSeconds { get; set; } = 10;
+        public bool IsImageGenerationEnabled { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
@@ -24,5 +25,7 @@ namespace sustAInableEducation_backend.Models
 
         [Range(10, 30)]
         public uint VotingTimeSeconds { get; set; } = 10;
+
+        public bool IsImageGenerationEnabled { get; set; } = true;
     }
 }

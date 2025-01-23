@@ -577,15 +577,18 @@ namespace sustAInableEducation_backend.Repository
             {
                 throw new AIException("Failed to deserialize response content", e);
             }
-            String filePath;
+            string folderName, fileName;
             try
             {
-                var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+                var wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                folderName = "images";
+                var directoryPath = Path.Combine(wwwRootPath, folderName);
                 if (!Directory.Exists(directoryPath))
                 {
                     Directory.CreateDirectory(directoryPath);
                 }
-                filePath = Path.Combine(directoryPath, $"{Guid.NewGuid()}.png");
+                fileName = $"{Guid.NewGuid()}.png";
+                var filePath = Path.Combine(directoryPath, fileName);
                 byte[] imageBytes = Convert.FromBase64String(base64String);
                 using (var ms = new MemoryStream(imageBytes))
                 {
@@ -600,7 +603,7 @@ namespace sustAInableEducation_backend.Repository
                 throw new AIException("Failed to save image", e);
             }
 
-            return filePath;
+            return Path.Combine("/", folderName, fileName).Replace("\\", "/");
         }
 
         public Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
