@@ -5,13 +5,6 @@
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="expirationDate"
                 v-on:generateCode="getJoinCode" />
             <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" />
-
-            <Dialog v-model:visible="showResult" modal :title="result?.text" class="m-10">
-                <h1 class="text-2xl mb-2">Ergebnis</h1>
-                <p class="text-lg mb-2">
-                    {{ result?.text }}
-                </p>
-            </Dialog>
             <div class="top flex justify-between items-center mb-2 w-full">
                 <Button label="Einladen" @click="showInviteDialog">
                     <template #icon>
@@ -149,8 +142,6 @@ const parts = computed(() => {
     return []
 })
 
-console.log(Array(parts.value.length).keys().toArray().toString())
-
 const disableOptionButtons = computed(() => {
     return !!space.value?.story.result || isLoading.value
 })
@@ -170,8 +161,6 @@ const enableStart = ref(true)
 const isLoading = ref(false)
 
 const showReloadButton = ref(false)
-
-const showResult = ref(false)
 
 await getSpace()
 
@@ -231,10 +220,9 @@ connection.on("PartGenerated", async (part: Part) => {
     scrollToBottom()
 })
 
-connection.on("ResultGenerated", (result: Result) => {
+connection.on("ResultGenerated", async (result: Result) => {
     space.value!.story.result = result
     isLoading.value = false
-    showResult.value = true
 })
 
 connection.on("ErrorOccured", (msg: string) => {
@@ -257,9 +245,6 @@ async function startConnection() {
 if (import.meta.client) {
     startConnection()
 }
-
-
-const participants = ref<Participant[]>([])
 
 const timerValue = ref({
     initialValue: 10,
