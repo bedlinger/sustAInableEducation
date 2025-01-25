@@ -17,8 +17,7 @@
                 class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-3s00 border-2 flex flex-col justify-center">
                 <div class="content h-full mt-4 mx-4 relative overflow-y-scroll" ref="contentDiv">
                     <div class="hostcontrols w-full flex justify-end absolute" v-if="role === 'host'">
-                        <Button label="Start (Generate)" @click="generatePart" size="small" class="mx-2" />
-                        <Button label="Start Voting" @click="" size="small" />
+                        <Button label="Start Voting" @click="scrollToResult" size="small" />
                     </div>
                     <div v-for="part, index in space?.story.parts" class="p-4">
                         <Divider v-if="index !== 0" />
@@ -30,6 +29,9 @@
                                 <span>{{ `${choice.number}: ${choice.text}` }}</span>
                             </li>
                         </ul>
+                    </div>
+                    <div class="w-full h-full flex justify-center items-center" v-if="parts.length === 0 && !isLoading">
+                        <Button label="Start" @click="generatePart" severity="primary"/>
                     </div>
                     <div v-if="isLoading">
                         <Divider v-if="parts.length > 0" />
@@ -45,7 +47,7 @@
                         <Skeleton height="1.75rem" width="70%" class="mb-2" />
                         <Skeleton height="1.75rem" width="73%" class="mb-2" />
                     </div>
-                    <div v-if="result" class="w-full">
+                    <div v-if="result" class="w-full" ref="resultAccordion">
                         <Divider />
                         <h2 class="font-bold mb-2">Ergebnis</h2>
                         <p>{{ result.text }}</p>
@@ -127,7 +129,7 @@
 
 <script setup lang="ts">
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-import type { Participant, Part, EcoSpace, Result } from '~/types/EcoSpace';
+import type { Part, EcoSpace, Result } from '~/types/EcoSpace';
 
 const runtime = useRuntimeConfig()
 const route = useRoute()
@@ -143,7 +145,7 @@ const parts = computed(() => {
 })
 
 const disableOptionButtons = computed(() => {
-    return !!space.value?.story.result || isLoading.value
+    return !!space.value?.story.result || isLoading.value || parts.value.length === 0
 })
 
 const result = computed(() => {
@@ -155,6 +157,8 @@ const result = computed(() => {
 const cookieHeaders = useRequestHeaders(['cookie'])
 
 const role = ref<string>('')
+
+const resultAccordion = ref<HTMLDivElement | null>(null);
 
 const enableStart = ref(true)
 
@@ -223,6 +227,8 @@ connection.on("PartGenerated", async (part: Part) => {
 connection.on("ResultGenerated", async (result: Result) => {
     space.value!.story.result = result
     isLoading.value = false
+    await nextTick()
+    scrollToResult()
 })
 
 connection.on("ErrorOccured", (msg: string) => {
@@ -357,5 +363,21 @@ const scrollToBottom = () => {
             behavior: 'smooth'
         })
     }
+};
+
+const scrollToResult = () => {
+  const contentDivVal = contentDiv.value;
+  const resultVal = resultAccordion.value;
+
+  if (contentDivVal && resultVal) {
+    // Calculate the target's position relative to the container
+    const targetPosition = resultVal.offsetTop - contentDivVal.offsetTop;
+
+    // Scroll the container to the target's position
+    contentDivVal.scrollTo({
+      top: targetPosition,
+      behavior: 'smooth',
+    });
+  }
 };
 </script>
