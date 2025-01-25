@@ -31,7 +31,7 @@
                         </ul>
                     </div>
                     <div class="w-full h-full flex justify-center items-center" v-if="parts.length === 0 && !isLoading">
-                        <Button label="Start" @click="generatePart" severity="primary"/>
+                        <Button label="Start" @click="generatePart" severity="primary" />
                     </div>
                     <div v-if="isLoading">
                         <Divider v-if="parts.length > 0" />
@@ -56,14 +56,17 @@
                                 <AccordionHeader>Gewählte Optionen</AccordionHeader>
                                 <AccordionContent>
                                     <div class="flex flex-col">
-                                        <p>Sie haben {{ result.negativeChoices.length }} negative und {{ result.positiveChoices.length }} positive Entscheidungen getroffen.</p>
+                                        <p>Sie haben {{ result.negativeChoices.length }} negative und {{
+                                            result.positiveChoices.length }} positive Entscheidungen getroffen.</p>
                                         <div class="flex flex-row">
-                                            <Fieldset legend="Positiv" class="flex-1 !mr-2" v-if="result.positiveChoices">
+                                            <Fieldset legend="Positiv" class="flex-1 !mr-2"
+                                                v-if="result.positiveChoices">
                                                 <ul class="list-disc">
                                                     <li v-for="choice in result.positiveChoices">{{ choice }}</li>
                                                 </ul>
                                             </Fieldset>
-                                            <Fieldset legend="Negativ" class="flex-1 !ml-2" v-if="result.negativeChoices">
+                                            <Fieldset legend="Negativ" class="flex-1 !ml-2"
+                                                v-if="result.negativeChoices">
                                                 <ul class="list-disc">
                                                     <li v-for="choice in result.negativeChoices">{{ choice }}</li>
                                                 </ul>
@@ -109,17 +112,25 @@
                         <Timer class="sm:hidden" v-model="timerValue" />
                     </div>
                     <div class="flex flex-col sm:flex-row sm:justify-between w-full">
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1"
-                            @click="selectOption(1)" :disabled="disableOptionButtons" />
-                        <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 2"
-                            @click="selectOption(2)" :disabled="disableOptionButtons" />
+                        <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
+                            <HostButton label="Option 1" :disabled="disableOptionButtons" :percentage="percentages[0]"
+                                @click="selectOption(1)" :voting="isVoting" />
+                        </div>
+                        <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
+                            <HostButton label="Option 1" :disabled="disableOptionButtons" :percentage="percentages[1]"
+                                @click="selectOption(1)" :voting="isVoting" />
+                        </div>
                         <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
                             :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
                         </Knob>
-                        <Button class="mb-2 sm:mb-0 sm:mx-5 flex-1 sm:!text-2xl" label="Option 3"
-                            @click="selectOption(3)" :disabled="disableOptionButtons" />
-                        <Button class="sm:ml-5 flex-1 sm:!text-2xl" label="Option 4" @click="selectOption(4)"
-                            :disabled="disableOptionButtons" />
+                        <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
+                            <HostButton label="Option 1" :disabled="disableOptionButtons" :percentage="percentages[2]"
+                                @click="selectOption(1)" :voting="isVoting" />
+                        </div>
+                        <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
+                            <HostButton label="Option 1" :disabled="disableOptionButtons" :percentage="percentages[3]"
+                                @click="selectOption(1)" :voting="isVoting" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -136,7 +147,12 @@ const route = useRoute()
 const router = useRouter()
 const id = route.params.id
 
+
+
 const space = ref<EcoSpace | null>(null)
+
+const isVoting = ref(false)
+const percentages = ref([0, 0, 0, 0])
 
 const parts = computed(() => {
     if (space.value)
@@ -366,18 +382,18 @@ const scrollToBottom = () => {
 };
 
 const scrollToResult = () => {
-  const contentDivVal = contentDiv.value;
-  const resultVal = resultAccordion.value;
+    const contentDivVal = contentDiv.value;
+    const resultVal = resultAccordion.value;
 
-  if (contentDivVal && resultVal) {
-    // Calculate the target's position relative to the container
-    const targetPosition = resultVal.offsetTop - contentDivVal.offsetTop;
+    if (contentDivVal && resultVal) {
+        // Calculate the target's position relative to the container
+        const targetPosition = resultVal.offsetTop - contentDivVal.offsetTop;
 
-    // Scroll the container to the target's position
-    contentDivVal.scrollTo({
-      top: targetPosition,
-      behavior: 'smooth',
-    });
-  }
+        // Scroll the container to the target's position
+        contentDivVal.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth',
+        });
+    }
 };
 </script>
