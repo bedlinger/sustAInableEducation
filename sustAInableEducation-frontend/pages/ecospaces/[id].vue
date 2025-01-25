@@ -14,8 +14,8 @@
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
-                class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-3s00 border-2 flex flex-col justify-center">
-                <div class="content h-full mt-4 mx-4 relative overflow-y-scroll" ref="contentDiv">
+                class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-center">
+                <div class="content h-[32rem] mt-4 mx-4 relative overflow-y-scroll" ref="contentDiv">
                     <div class="hostcontrols w-full flex justify-end absolute" v-if="role === 'host'">
                         <Button label="Start Voting" @click="scrollToResult" size="small" />
                     </div>
