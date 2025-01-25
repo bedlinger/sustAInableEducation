@@ -17,7 +17,7 @@
                 class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-center">
                 <div class="content h-[32rem] mt-4 mx-4 relative overflow-y-scroll" ref="contentDiv">
                     <div class="hostcontrols w-full flex justify-end absolute" v-if="role === 'host'">
-                        <Button label="Start Voting" @click="scrollToResult" size="small" />
+                        <Button label="Start Voting" @click="printLogs" size="small" />
                     </div>
                     <div v-for="part, index in space?.story.parts" class="p-4">
                         <Divider v-if="index !== 0" />
@@ -106,7 +106,7 @@
                         </Button>
                     </div>
                 </div>
-                <div class="controls flex flex-col m-4">
+                <div class="controls flex flex-col m-4" v-if="role === 'host'">
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
@@ -131,6 +131,21 @@
                             <HostButton label="Option 1" :disabled="disableOptionButtons" :percentage="percentages[3]"
                                 @click="selectOption(1)" :voting="isVoting" />
                         </div>
+                    </div>
+                </div>
+                <div class="controls flex flex-col m-4 text-xl" v-else>
+                    <Divider />
+                    <div class="timer">
+                        <Timer class="sm:hidden" v-model="timerValue" />
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between w-full">
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1" @click="voteOption(1)" :disabled="disableOptionButtons" />
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 2" @click="voteOption(2)" :disabled="disableOptionButtons" />
+                        <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
+                            :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
+                        </Knob>
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 3" @click="voteOption(3)" :disabled="disableOptionButtons" />
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 4" @click="voteOption(4)" :disabled="disableOptionButtons" />
                     </div>
                 </div>
             </div>
@@ -396,4 +411,8 @@ const scrollToResult = () => {
         });
     }
 };
+
+function printLogs() {
+    console.table(parts.value)
+}
 </script>
