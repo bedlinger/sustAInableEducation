@@ -115,22 +115,22 @@
                     <div class="flex flex-col sm:flex-row sm:justify-between w-full">
                         <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
                             <HostButton label="Option 1" :disabled="disableOptionButtons" :percentage="percentages[0]"
-                                @click="selectOption(1)" :voting="isVoting" />
+                                @click="selectOption(1)" :voting="showPercentages" />
                         </div>
                         <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
                             <HostButton label="Option 2" :disabled="disableOptionButtons" :percentage="percentages[1]"
-                                @click="selectOption(2)" :voting="isVoting" />
+                                @click="selectOption(2)" :voting="showPercentages" />
                         </div>
                         <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
                             :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
                         </Knob>
                         <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
                             <HostButton label="Option 3" :disabled="disableOptionButtons" :percentage="percentages[2]"
-                                @click="selectOption(3)" :voting="isVoting" />
+                                @click="selectOption(3)" :voting="showPercentages" />
                         </div>
                         <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
                             <HostButton label="Option 4" :disabled="disableOptionButtons" :percentage="percentages[3]"
-                                @click="selectOption(4)" :voting="isVoting" />
+                                @click="selectOption(4)" :voting="showPercentages" />
                         </div>
                     </div>
                 </div>
@@ -140,13 +140,17 @@
                         <Timer class="sm:hidden" v-model="timerValue" />
                     </div>
                     <div class="flex flex-col sm:flex-row sm:justify-between w-full">
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1" @click="voteOption(1)" :disabled="disableOptionButtons" />
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 2" @click="voteOption(2)" :disabled="disableOptionButtons" />
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1" @click="voteOption(1)"
+                            :disabled="disableOptionButtons" />
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 2" @click="voteOption(2)"
+                            :disabled="disableOptionButtons" />
                         <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
                             :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
                         </Knob>
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 3" @click="voteOption(3)" :disabled="disableOptionButtons" />
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 4" @click="voteOption(4)" :disabled="disableOptionButtons" />
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 3" @click="voteOption(3)"
+                            :disabled="disableOptionButtons" />
+                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 4" @click="voteOption(4)"
+                            :disabled="disableOptionButtons" />
                     </div>
                 </div>
             </div>
@@ -167,8 +171,10 @@ const id = route.params.id
 
 const space = ref<EcoSpace | null>(null)
 
+const hasVoted = ref(false)
 const isVoting = ref(false)
 const percentages = ref([0, 0, 0, 0])
+const showPercentages = ref(false)
 
 const parts = computed(() => {
     if (space.value)
@@ -177,10 +183,10 @@ const parts = computed(() => {
 })
 
 const disableOptionButtons = computed(() => {
-    if(role.value === 'host') {
-        return !!space.value?.story.result || isLoading.value || parts.value.length === 0
+    if (role.value === 'host') {
+        return !!space.value?.story.result || isLoading.value || parts.value.length === 0 || isVoting.value
     }
-    return !isVoting.value
+    return !isVoting.value || hasVoted.value
 })
 
 const result = computed(() => {
@@ -241,14 +247,19 @@ async function selectOption(number: Number) {
 }
 
 async function voteOption(number: Number) {
-    await connection.invoke("Vote", number)
+    try {
+        await connection.invoke("Vote", number)
+        hasVoted.value = true
+    } catch (err) {
+        console.error("There was an error voting")
+    }
 }
 
 async function startVoting() {
     await connection.invoke("StartVoting")
 }
 
-if(role.value === 'host') {
+if (role.value === 'host') {
     connection.on("VotingUpdated", async (choices: Choice[]) => {
         let sum = choices.reduce((a, b) => a + b.numberVotes, 0)
         percentages.value = choices.map((choice) => Math.round((choice.numberVotes / sum) * 100))
@@ -259,6 +270,7 @@ connection.on("PartGenerating", async () => {
     if (parts.value.length > 0) {
         enableStart.value = false
     }
+    showPercentages.value = false
     isLoading.value = true
     await nextTick()
     scrollToBottom()
@@ -279,7 +291,10 @@ connection.on("ResultGenerated", async (result: Result) => {
 })
 
 connection.on("VotingStarted", async (expirationStr: string) => {
+    hasVoted.value = false
     isVoting.value = true
+    showPercentages.value = true
+    percentages.value = [0, 0, 0, 0]
     startTimer(expirationStr)
 })
 
@@ -307,7 +322,7 @@ if (import.meta.client) {
 const timerValue = ref({
     initialValue: space.value!.votingTimeSeconds,
     time: space.value!.votingTimeSeconds,
-    percent: 0,
+    percent: 100,
 });
 
 const inviteDialogIsVisible = ref<boolean | undefined>(false);
@@ -321,7 +336,7 @@ var timerInterval: NodeJS.Timeout;
 
 function resetTimer() {
     timerValue.value.time = timerValue.value.initialValue;
-    timerValue.value.percent = 0;
+    timerValue.value.percent = 100;
 }
 
 function startTimer(expirationStr: string) {
