@@ -12,7 +12,6 @@
                         <Icon name="ic:baseline-person-add" class="size-5" />
                     </template>
                 </Button>
-                <p>{{ myUserId }}</p>
                 <div v-if="isVoting" class="font-bold text-xl absolute w-full flex justify-center items-center">
                     Abstimmungszeit</div>
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
