@@ -4,7 +4,7 @@
         <div class="w-screen flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4">
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="joinExpirationDate"
                 v-on:generateCode="getJoinCode" />
-            <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" :my-user-id="myUserId"/>
+            <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" :my-user-id="myUserId" />
             <div class="top flex items-center mb-2 w-full relative"
                 :class="[role === 'host' ? 'justify-between' : 'justify-end']">
                 <Button label="Einladen" @click="showInviteDialog" v-if="role === 'host'">
@@ -19,16 +19,20 @@
             </div>
             <div
                 class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-center">
-                <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4" v-if="role === 'host'">
+                <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4"
+                    v-if="role === 'host'">
                     <div class="bg-white">
-                        <Button label="Abstimmung starten" @click="startVoting" size="small" :disabled="disableStartVoteButton" />
+                        <Button label="Abstimmung starten" @click="startVoting" size="small"
+                            :disabled="disableStartVoteButton" />
                     </div>
                 </div>
                 <div class="content h-[32rem] mt-4 mx-4 overflow-y-scroll" ref="contentDiv">
 
-                    <div v-for="part, index in space?.story.parts" class="p-4">
-                        <Divider v-if="index !== 0" />
-                        <h2 class="font-bold mb-2">{{ `${index + 1}: ${part.intertitle}` }}</h2>
+                    <div v-for="part, index in space?.story.parts" class="px-4 pb-4 pt-0" ref="partsRef">
+                        
+                        <h2 class="font-bold mb-2" :ref="index === space!.story.parts.length - 1 ? 'lastPart' : ''">{{
+                            `${index + 1}:
+                            ${part.intertitle}` }}</h2>
                         <p class="mb-4">{{ part.text }}</p>
                         <ul class="list-disc">
                             <li v-for="choice in part.choices"
@@ -36,13 +40,13 @@
                                 <span>{{ `${choice.number}: ${choice.text}` }}</span>
                             </li>
                         </ul>
+                        <Divider v-if="index !== space!.story.parts.length-1 || isLoading" />
                     </div>
                     <div class="w-full h-full flex justify-center items-center" v-if="parts.length === 0 && !isLoading">
                         <Button label="Start" @click="generatePart" severity="primary" v-if="role === 'host'" />
                         <span v-else>Warten Sie bis der Host den ersten Teil generiert...</span>
                     </div>
-                    <div v-if="isLoading">
-                        <Divider v-if="parts.length > 0" />
+                    <div v-if="isLoading" ref="loadingAnimation">
                         <Skeleton height="3.25rem" width="40rem" class="mb-2" />
                         <Skeleton height="1.75rem" width="94%" class="mb-2" />
                         <Skeleton height="1.75rem" width="98%" class="mb-2" />
@@ -105,7 +109,8 @@
                             </AccordionPanel>
                         </Accordion>
                     </div>
-                    <div v-if="showReloadButton && !result && role === 'host'" class="w-full flex justify-center items-center">
+                    <div v-if="showReloadButton && !result && role === 'host'"
+                        class="w-full flex justify-center items-center">
                         <Button @click="generatePart" severity="secondary">
                             <template #default>
                                 <Icon name="ic:baseline-refresh" class="size-5" />
@@ -221,6 +226,8 @@ const cookieHeaders = useRequestHeaders(['cookie'])
 const role = ref<string>('')
 
 const resultAccordion = ref<HTMLDivElement | null>(null);
+const partsRef = ref<HTMLDivElement[] | null>(null);
+const loadingAnimation = ref<HTMLDivElement | null>(null);
 
 const enableStart = ref(true)
 
@@ -294,14 +301,14 @@ connection.on("PartGenerating", async () => {
     showPercentages.value = false
     isLoading.value = true
     await nextTick()
-    scrollToBottom()
+    scrollToAnimation()
 })
 connection.on("PartGenerated", async (part: Part) => {
     isLoading.value = false
     resetTimer()
     parts.value.push(part)
     await nextTick()
-    scrollToBottom()
+    scrollToLastPart()
 })
 
 connection.on("ResultGenerated", async (result: Result) => {
@@ -330,7 +337,7 @@ connection.on("ChoiceSet", (choice: number) => {
 
 connection.on("UserJoined", (user: Participant) => {
     const selectedUser = space.value!.participants.find((participant) => participant.userId === user.userId)
-    if(selectedUser) {
+    if (selectedUser) {
         selectedUser.isOnline = true
     } else {
         space.value!.participants.push(user)
@@ -457,16 +464,39 @@ async function getJoinCode() {
 }
 
 const contentDiv = ref<HTMLDivElement | null>(null);
-const scrollToBottom = () => {
-    const el = contentDiv.value;
+const scrollToAnimation = () => {
+    const contentDivVal = contentDiv.value;
+    const animationVal = loadingAnimation.value;
 
-    if (el) {
-        el.scrollTo({
-            top: el.scrollHeight,
-            behavior: 'smooth'
-        })
+    if (contentDivVal && animationVal) {
+        // Calculate the target's position relative to the container
+        const targetPosition = animationVal.offsetTop - contentDivVal.offsetTop;
+
+        // Scroll the container to the target's position
+        contentDivVal.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth',
+        });
     }
 };
+
+const scrollToLastPart = () => {
+    const contentDivVal = contentDiv.value;
+    if (partsRef.value) {
+        const partsVal = partsRef.value[partsRef.value.length - 1];
+
+        if (contentDivVal && partsVal) {
+            // Calculate the target's position relative to the container
+            const targetPosition = partsVal.offsetTop - contentDivVal.offsetTop;
+
+            // Scroll the container to the target's position
+            contentDivVal.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth',
+            });
+        }
+    }
+}
 
 const scrollToResult = () => {
     const contentDivVal = contentDiv.value;
