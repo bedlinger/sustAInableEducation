@@ -16,7 +16,7 @@
                                     <Icon name="ic:baseline-star-rate" class="size-5 bg-yellow-500"
                                         v-tooltip.bottom="{ value: 'Host', showDelay: 50 }" v-if="data.isHost" />
                                 </div>
-                                <span>{{ data.userName }}</span>
+                                <span :class="[data.userId === props.myUserId ? 'font-bold underline decoration-2' : '']">{{ data.userName }}</span>
                             </div>
                         </template>
                     </Column>
@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import type { Participant } from '~/types/EcoSpace';
 
-const props = defineProps<{ participants: Participant[] }>();
+const props = defineProps<{ participants: Participant[], myUserId: string }>();
 
 const model = defineModel<boolean>();
 

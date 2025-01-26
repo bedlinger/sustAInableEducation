@@ -4,7 +4,7 @@
         <div class="w-screen flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4">
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="joinExpirationDate"
                 v-on:generateCode="getJoinCode" />
-            <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" />
+            <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" :my-user-id="myUserId"/>
             <div class="top flex items-center mb-2 w-full relative"
                 :class="[role === 'host' ? 'justify-between' : 'justify-end']">
                 <Button label="Einladen" @click="showInviteDialog" v-if="role === 'host'">
@@ -12,6 +12,7 @@
                         <Icon name="ic:baseline-person-add" class="size-5" />
                     </template>
                 </Button>
+                <p>{{ myUserId }}</p>
                 <div v-if="isVoting" class="font-bold text-xl absolute w-full flex justify-center items-center">
                     Abstimmungszeit</div>
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
@@ -179,6 +180,18 @@ const hasVoted = ref(false)
 const isVoting = ref(false)
 const percentages = ref([0, 0, 0, 0])
 const showPercentages = ref(false)
+
+const myUserId = ref('')
+
+await $fetch(`${runtime.public.apiUrl}/account`, {
+    credentials: 'include',
+    headers: useRequestHeaders(['cookie']),
+    onResponse: (response) => {
+        if (response.response.ok) {
+            myUserId.value = response.response._data.id
+        }
+    },
+})
 
 const parts = computed(() => {
     if (space.value)
