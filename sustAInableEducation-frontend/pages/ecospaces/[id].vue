@@ -104,7 +104,7 @@
                             </AccordionPanel>
                         </Accordion>
                     </div>
-                    <div v-if="showReloadButton && !result" class="w-full flex justify-center items-center">
+                    <div v-if="showReloadButton && !result && role === 'host'" class="w-full flex justify-center items-center">
                         <Button @click="generatePart" severity="secondary">
                             <template #default>
                                 <Icon name="ic:baseline-refresh" class="size-5" />
