@@ -5,13 +5,13 @@
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="joinExpirationDate"
                 v-on:generateCode="getJoinCode" />
             <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" />
-            <div class="top flex justify-between items-center mb-2 w-full">
-                <Button label="Einladen" @click="showInviteDialog">
+            <div class="top flex items-center mb-2 w-full relative" :class="[role === 'host' ? 'justify-between' : 'justify-end']">
+                <Button label="Einladen" @click="showInviteDialog" v-if="role === 'host'">
                     <template #icon>
                         <Icon name="ic:baseline-person-add" class="size-5" />
                     </template>
                 </Button>
-                <div class="font-bold text-xl">Abstimmungszeit</div>
+                <div class="font-bold text-xl absolute w-full flex justify-center items-center">Abstimmungszeit</div>
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
