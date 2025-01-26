@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using sustAInableEducation_backend.Models;
 
 namespace sustAInableEducation_backend.Repository
@@ -14,12 +15,12 @@ namespace sustAInableEducation_backend.Repository
 
         public async Task<IdentityResult> ValidateAsync(UserManager<ApplicationUser> manager, ApplicationUser user)
         {
-            /*var isRegistrationAllowed = await _dbContext.Settings
-                .Where(s => s.Key == "AllowRegistration")
+            var isRegistrationAllowed = await _context.Setting
+                .Where(s => s.Id == "AllowRegistration")
                 .Select(s => s.Value)
-                .FirstOrDefaultAsync();*/
+                .FirstOrDefaultAsync();
 
-            if ("isRegistrationAllowed" != "true")
+            if (isRegistrationAllowed != "true")
             {
                 return IdentityResult.Failed(new IdentityError
                 {

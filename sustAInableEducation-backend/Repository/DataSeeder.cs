@@ -53,6 +53,7 @@ namespace sustAInableEducation_backend.Repository
                     Id = "AllowSpaceCreation",
                     Value = "true"
                 });
+                await _context.SaveChangesAsync();
             }
         }
     }

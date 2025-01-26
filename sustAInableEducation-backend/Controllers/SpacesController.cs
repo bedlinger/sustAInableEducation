@@ -22,12 +22,14 @@ namespace sustAInableEducation_backend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly string _userId;
         private readonly ApplicationUser _user;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public SpacesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+        public SpacesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             _user = _context.Users.Find(_userId)!;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -62,6 +64,10 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Space>> PostSpace(SpaceRequest spaceReq)
         {
+            if (!await _context.SettingIsTrue("AllowSpaceCreation") && !await _userManager.IsInRoleAsync(_user, "Admin"))
+            {
+                return Forbid();
+            }
             var space = new Space()
             {
                 Participants = new List<SpaceParticipant>()

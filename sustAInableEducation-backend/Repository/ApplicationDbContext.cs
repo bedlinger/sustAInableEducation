@@ -66,5 +66,11 @@ namespace sustAInableEducation_backend.Repository
         {
             return await SpaceParticipant.AnyAsync(p => p.UserId == userId && p.SpaceId == spaceId && p.IsHost);
         }
+
+        public async Task<bool> SettingIsTrue(string settingId)
+        {
+            var setting = await Setting.FirstOrDefaultAsync(s => s.Id == settingId);
+            return setting != null && setting.Value == "true";
+        }
     }
 }
