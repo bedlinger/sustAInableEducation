@@ -32,7 +32,8 @@
                         </ul>
                     </div>
                     <div class="w-full h-full flex justify-center items-center" v-if="parts.length === 0 && !isLoading">
-                        <Button label="Start" @click="generatePart" severity="primary" />
+                        <Button label="Start" @click="generatePart" severity="primary" v-if="role === 'host'"/>
+                        <span v-else>Warten Sie bis der Host den ersten Teil generiert...</span>
                     </div>
                     <div v-if="isLoading">
                         <Divider v-if="parts.length > 0" />
