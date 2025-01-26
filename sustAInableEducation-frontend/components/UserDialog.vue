@@ -1,5 +1,5 @@
 <template>
-    <Dialog v-model:visible="model" modal header="Teilnehmer" class="sm:w-[32rem]">
+    <Dialog v-model:visible="model" modal header="Teilnehmer" class="sm:w-[32rem]" :draggable="false">
         <div class="flex flex-col items-center">
             <IconField class="mb-4 w-full">
                 <InputIcon>
