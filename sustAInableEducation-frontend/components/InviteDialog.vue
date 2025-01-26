@@ -1,6 +1,6 @@
 <template>
     <Dialog v-model:visible="model" :draggable="false" modal header="Teilnehmer einladen"
-        class="sm:w-96 m-4 sm:m-0 min-h-96">
+        class="w-96 sm:w-96 m-4 sm:m-0 min-h-96">
         <div v-if="props.joinCode">
             <Panel class="w-full h-full !p-0">
                 <div class="flex justify-center items-center">
