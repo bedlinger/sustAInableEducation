@@ -41,6 +41,7 @@ namespace sustAInableEducation_backend.Repository
         public DbSet<sustAInableEducation_backend.Models.Story> Story { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.StoryChoice> StoryChoice { get; set; } = default!;
         public DbSet<sustAInableEducation_backend.Models.StoryPart> StoryPart { get; set; } = default!;
+        public DbSet<sustAInableEducation_backend.Models.Setting> Setting { get; set; } = default!;
 
         public IQueryable<Space> SpaceWithStory => Space
                 .Include(e => e.Story)

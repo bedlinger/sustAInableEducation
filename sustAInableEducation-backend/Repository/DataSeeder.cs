@@ -40,6 +40,20 @@ namespace sustAInableEducation_backend.Repository
                 await _userManager.CreateAsync(user, _config["AdminPassword"]!);
                 await _userManager.AddToRoleAsync(user, "Admin");
             }
+
+            if (!await _context.Setting.AnyAsync())
+            {
+                _context.Setting.Add(new Setting
+                {
+                    Id = "AllowRegistration",
+                    Value = "true"
+                });
+                _context.Setting.Add(new Setting
+                {
+                    Id = "AllowSpaceCreation",
+                    Value = "true"
+                });
+            }
         }
     }
 }
