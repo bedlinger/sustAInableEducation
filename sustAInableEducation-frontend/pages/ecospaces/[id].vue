@@ -5,21 +5,24 @@
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="joinExpirationDate"
                 v-on:generateCode="getJoinCode" />
             <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" />
-            <div class="top flex items-center mb-2 w-full relative" :class="[role === 'host' ? 'justify-between' : 'justify-end']">
+            <div class="top flex items-center mb-2 w-full relative"
+                :class="[role === 'host' ? 'justify-between' : 'justify-end']">
                 <Button label="Einladen" @click="showInviteDialog" v-if="role === 'host'">
                     <template #icon>
                         <Icon name="ic:baseline-person-add" class="size-5" />
                     </template>
                 </Button>
-                <div v-if="isVoting" class="font-bold text-xl absolute w-full flex justify-center items-center">Abstimmungszeit</div>
+                <div v-if="isVoting" class="font-bold text-xl absolute w-full flex justify-center items-center">
+                    Abstimmungszeit</div>
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
                 class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-center">
-                <div class="content h-[32rem] mt-4 mx-4 relative overflow-y-scroll" ref="contentDiv">
-                    <div class="hostcontrols w-full flex justify-end absolute" v-if="role === 'host'">
-                        <Button label="Start Voting" @click="startVoting" size="small" />
-                    </div>
+                <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4" v-if="role === 'host'">
+                    <Button label="Abstimmung starten" @click="startVoting" size="small" />
+                </div>
+                <div class="content h-[32rem] mt-4 mx-4 overflow-y-scroll" ref="contentDiv">
+
                     <div v-for="part, index in space?.story.parts" class="p-4">
                         <Divider v-if="index !== 0" />
                         <h2 class="font-bold mb-2">{{ `${index + 1}: ${part.intertitle}` }}</h2>
@@ -32,7 +35,7 @@
                         </ul>
                     </div>
                     <div class="w-full h-full flex justify-center items-center" v-if="parts.length === 0 && !isLoading">
-                        <Button label="Start" @click="generatePart" severity="primary" v-if="role === 'host'"/>
+                        <Button label="Start" @click="generatePart" severity="primary" v-if="role === 'host'" />
                         <span v-else>Warten Sie bis der Host den ersten Teil generiert...</span>
                     </div>
                     <div v-if="isLoading">
