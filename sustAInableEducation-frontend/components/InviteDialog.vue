@@ -1,6 +1,6 @@
 <template>
     <Dialog v-model:visible="model" :draggable="false" modal header="Teilnehmer einladen"
-        class="sm:w-96 m-4 sm:m-0 min-h-96">
+        class="w-96 sm:w-96 m-4 sm:m-0 min-h-96">
         <div v-if="props.joinCode">
             <Panel class="w-full h-full !p-0">
                 <div class="flex justify-center items-center">
@@ -16,7 +16,7 @@
             <Divider />
             <div class="w-full flex justify-between items-center">
                 <span>Läuft ab in {{ codeTimer }}</span>
-                <Button severity="secondary" label="Neu Generieren" @click="emits('generateCode')" />
+                <Button severity="secondary" label="Neu Generieren" @click="generateCode" />
             </div>
         </div>
         <div v-else class="flex justify-center items-center w-full h-96">
@@ -32,13 +32,23 @@ import { QrcodeSvg } from 'qrcode.vue'
 const runtimeConfig = useRuntimeConfig()
 
 const model = defineModel<boolean>();
-const props = defineProps<{ joinCode: string }>();
+const props = defineProps<{ joinCode: string, expirationDate: string }>();
 const emits = defineEmits(['generateCode']);
 
 const codeTimerSeconds = ref<number>(0)
 const interval = ref<NodeJS.Timeout>()
 
 watch(model, (newVal, oldVal) => {
+    if (newVal) {
+        if(props.expirationDate) {
+            setCodeTimer()
+        }
+    } else {
+        clearInterval(interval.value)
+    }
+})
+
+watch(() => props.expirationDate, (newVal, oldVal) => {
     if (newVal) {
         setCodeTimer()
     }
@@ -60,15 +70,13 @@ function copyJoinCode() {
 
 function setCodeTimer() {
     clearInterval(interval.value)
-
-    let expirationDate = new Date().getTime() + 600000
+    console.log(`EXPIRATION: ${props.expirationDate}`)
+    let expirationDate = Date.parse(props.expirationDate)
 
     interval.value = setInterval(function () {
 
         let now = new Date().getTime()
         let distance = expirationDate - now
-
-        //codeTimerSeconds.value = Math.floor((distance % (1000 * 60)) / 1000)
         codeTimerSeconds.value = Math.floor(distance / 1000)
 
         if (codeTimerSeconds.value <= 0) {
@@ -76,6 +84,10 @@ function setCodeTimer() {
         }
 
     }, 1000)
+}
+
+function generateCode() {
+    emits('generateCode')
 }
 
 </script>

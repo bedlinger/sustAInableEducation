@@ -1,0 +1,42 @@
+<script lang="ts" setup>
+const router = useRouter()
+const route = useRoute()
+const code = route.params.code
+
+const requestHeaders = useRequestHeaders(['cookie'])
+
+const runtimeConfig = useRuntimeConfig()
+console.log(code)
+if (import.meta.client) {
+  await $fetch(`${runtimeConfig.public.apiUrl}/spaces/join`, {
+    method: 'POST',
+    credentials: 'include',
+    body: {
+      code: code
+    },
+    headers: requestHeaders,
+    onRequestError: (error) => {
+      if (error) {
+        console.error('Failed to join')
+      }
+    },
+    onResponse: (response) => {
+      if (response.response.ok) {
+        console.error("OK")
+        console.log(response.response._data)
+        router.push(`/ecospaces/${response.response._data.id}`)
+      } else if (response.response.status === 404) {
+        console.error("404")
+        router.push('/')
+      } else if (response.response.status === 401) {
+        console.error("401")
+        router.push('/login')
+      } else {
+        console.error("else")
+      }
+    }
+  })
+}
+</script>
+
+<style></style>
