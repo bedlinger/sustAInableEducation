@@ -152,7 +152,7 @@ namespace sustAInableEducation_backend.Hubs
                 throw new HubException("Unauthorized");
             }
             var space = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!;
-            if (space.Story.IsComplete)
+            if (space.Story.Result != null)
             {
                 throw new HubException("Story is complete");
             }
