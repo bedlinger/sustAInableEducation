@@ -19,7 +19,9 @@
             <div
                 class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-center">
                 <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4" v-if="role === 'host'">
-                    <Button label="Abstimmung starten" @click="startVoting" size="small" />
+                    <div class="bg-white">
+                        <Button label="Abstimmung starten" @click="startVoting" size="small" :disabled="disableStartVoteButton" />
+                    </div>
                 </div>
                 <div class="content h-[32rem] mt-4 mx-4 overflow-y-scroll" ref="contentDiv">
 
@@ -171,8 +173,6 @@ const route = useRoute()
 const router = useRouter()
 const id = route.params.id
 
-
-
 const space = ref<EcoSpace | null>(null)
 
 const hasVoted = ref(false)
@@ -197,6 +197,10 @@ const result = computed(() => {
     if (space.value)
         return space.value?.story.result
     return null
+})
+
+const disableStartVoteButton = computed(() => {
+    return isVoting.value || parts.value.length === 0 || isLoading.value || !!parts.value[parts.value.length - 1].chosenNumber
 })
 
 const cookieHeaders = useRequestHeaders(['cookie'])
