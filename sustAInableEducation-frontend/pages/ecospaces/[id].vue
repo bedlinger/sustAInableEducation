@@ -166,7 +166,7 @@
 
 <script setup lang="ts">
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-import type { Part, EcoSpace, Result, Choice } from '~/types/EcoSpace';
+import type { Part, EcoSpace, Result, Choice, Participant } from '~/types/EcoSpace';
 
 const runtime = useRuntimeConfig()
 const route = useRoute()
@@ -313,6 +313,21 @@ connection.on("ErrorOccured", (msg: string) => {
 
 connection.on("ChoiceSet", (choice: number) => {
     parts.value[parts.value.length - 1].chosenNumber = choice
+})
+
+connection.on("UserJoined", (user: Participant) => {
+    const selectedUser = space.value!.participants.find((participant) => participant.userId === user.userId)
+    if(selectedUser) {
+        selectedUser.isOnline = true
+    } else {
+        space.value!.participants.push(user)
+    }
+})
+
+connection.on("UserLeft", (userId: string) => {
+    console.log("triggered")
+    const selectedUser = space.value!.participants.find((participant) => participant.userId === userId)
+    selectedUser!.isOnline = false
 })
 
 async function startConnection() {
