@@ -44,6 +44,9 @@ export default defineNuxtConfig({
       hostUrl: process.env.HOST_URL
     }
   },
+  routeRules: {
+    '/ecospaces/*': { ssr: false }
+  },
   modules: [
     '@primevue/nuxt-module',
     '@nuxtjs/google-fonts',
