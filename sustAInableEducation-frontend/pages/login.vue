@@ -106,7 +106,7 @@ async function login() {
             onResponse: (response) => {
                 if (response.response.status === 200) {
                     if(redirection) {
-                        navigateTo('/' + redirection);
+                        navigateTo(redirection);
                     } else {
                         navigateTo('/');
                     }
