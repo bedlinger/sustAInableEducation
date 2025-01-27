@@ -17,7 +17,7 @@
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
-                class="panel w-full flex-1 rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-center">
+                class="panel w-full flex-1 rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-start">
                 <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4"
                     v-if="role === 'host'">
                     <div class="bg-white z-10">
@@ -25,7 +25,7 @@
                             :disabled="disableStartVoteButton" />
                     </div>
                 </div>
-                <div class="content h-[32rem] mt-4 mx-4 overflow-y-scroll overflow-x-hidden" ref="contentDiv">
+                <div class="content h-[32rem] mt-4 mx-4 overflow-y-scroll overflow-x-hidden bg-red-500" ref="contentDiv">
 
                     <div v-for="part, index in space?.story.parts" class="px-4 pb-4 pt-0" ref="partsRef">
                         
