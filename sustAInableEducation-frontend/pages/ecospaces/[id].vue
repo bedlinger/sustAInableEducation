@@ -20,7 +20,7 @@
                 class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-center">
                 <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4"
                     v-if="role === 'host'">
-                    <div class="bg-white">
+                    <div class="bg-white z-10">
                         <Button label="Abstimmung starten" @click="startVoting" size="small"
                             :disabled="disableStartVoteButton" />
                     </div>
