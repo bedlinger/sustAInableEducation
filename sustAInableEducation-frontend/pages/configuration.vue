@@ -329,7 +329,7 @@ function isLoggedInRequest() {
         credentials: 'include',
         onResponse: (response) => {
             if (response.response.status === 401) {
-                navigateTo('/login?redirect=configuration')
+                navigateTo('/login?redirect=' + route.fullPath)
             }
         }
     })

@@ -26,7 +26,7 @@ if (import.meta.client) {
       } else if (response.response.status === 404) {
         router.push('/')
       } else if (response.response.status === 401) {
-        router.push('/login?redirect=join/' + code)
+        router.push('/login?redirect=' + route.fullPath)
       } else {
       }
     }
