@@ -194,7 +194,7 @@ await $fetch(`${runtime.public.apiUrl}/account`, {
         if (response.response.ok) {
             myUserId.value = response.response._data.id
         } else {
-            router.push('/login')
+            router.push('/login?redirect=' + route.fullPath)
         }
     },
 })
@@ -357,7 +357,7 @@ async function startConnection() {
         await connection.start();
         console.log("SignalR Connected.");
     } catch (err) {
-        router.push('/login')
+        router.push('/login?redirect=' + route.fullPath)
     }
 };
 if (import.meta.client) {
