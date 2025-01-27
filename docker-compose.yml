@@ -31,6 +31,8 @@ services:
       - 8080
     networks:
       - web
+    volumes:
+      - ./wwwroot:/app/wwwroot
     environment:
       - Db__Host=sus-db
       - Db__User=sa
