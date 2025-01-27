@@ -62,6 +62,7 @@ export default defineNuxtConfig({
   ],
   icon: {
     provider: 'server',
+    localApiEndpoint: '/_nuxt_icon'
   },
   primevue: {
     options: {
