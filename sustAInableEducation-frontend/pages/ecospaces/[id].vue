@@ -25,7 +25,7 @@
                             :disabled="disableStartVoteButton" />
                     </div>
                 </div>
-                <div class="content h-[32rem] mt-4 mx-4 overflow-y-scroll overflow-x-hidden bg-red-500" ref="contentDiv">
+                <div class="content h-[32rem] mt-4 mx-4 overflow-y-scroll overflow-x-hidden" ref="contentDiv">
 
                     <div v-for="part, index in space?.story.parts" class="px-4 pb-4 pt-0" ref="partsRef">
                         
