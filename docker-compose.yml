@@ -40,7 +40,7 @@ services:
       - FrontendHost=https://app.sustainable-edu.at
     restart: always
     depends_on:
-      - sus-database
+      - sus-db
 
   sus-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
