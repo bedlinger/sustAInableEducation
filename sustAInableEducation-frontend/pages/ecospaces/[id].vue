@@ -193,6 +193,8 @@ await $fetch(`${runtime.public.apiUrl}/account`, {
     onResponse: (response) => {
         if (response.response.ok) {
             myUserId.value = response.response._data.id
+        } else {
+            router.push('/login')
         }
     },
 })
@@ -415,6 +417,7 @@ async function getSpace() {
         headers: useRequestHeaders(['cookie']),
         onResponse: (response) => {
             if (response.response.ok) {
+                console.log(response.response._data)
                 space.value = response.response._data
                 if (parts.value.length > 0) {
                     enableStart.value = false
