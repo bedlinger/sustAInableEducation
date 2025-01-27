@@ -233,7 +233,7 @@ const { execute, data: spaces } = await useFetch<EcoSpace[]>(`${runtimeConfig.pu
         headers: useRequestHeaders(['cookie']),
         onResponse: (response) => {
             if (response.response.status === 401) {
-                navigateTo('/login');
+                navigateTo('/login?redirect=ecospaces');
             }
         }
     }
