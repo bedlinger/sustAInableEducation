@@ -55,16 +55,22 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
         RequireUppercase = true,
         RequireNonAlphanumeric = true
     };
-}).AddEntityFrameworkStores<ApplicationDbContext>();
+})
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddTransient<DataSeeder>();
+builder.Services.AddTransient<IUserValidator<ApplicationUser>, ApplicationUserValidator>();
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddTransient<IAIService, AIService>();
 
+builder.Services.AddCoreAdmin("Admin");
+
 var app = builder.Build();
 
 app.UseStaticFiles();
-app.UseRouting();
+app.MapDefaultControllerRoute();
 
 app.UseCors(AllowFrontendOrigin);
 
@@ -73,16 +79,18 @@ app.UseSwaggerUI();
 
 app.UseAuthorization();
 
+app.MapControllers();
+
 using (var Scope = app.Services.CreateScope())
 {
     var context = Scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     context.Database.Migrate();
+
+    var seeder = Scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    await seeder.Seed();
 }
 
-app.MapControllers();
-
 app.MapGroup("/account").MapIdentityApi<ApplicationUser>().WithTags("Account");
-
 
 app.MapHub<SpaceHub>("/spaceHub/{id}");
 
