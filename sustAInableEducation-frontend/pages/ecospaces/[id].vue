@@ -17,7 +17,7 @@
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
-                class="panel w-full h-[45rem] rounded-xl relative border-solid border-slate-300 border-2 flex flex-col justify-center">
+                class="panel w-full flex-1 rounded-xl relative border-solid border-slate-300 pb-72 sm:pb-0 border-2 flex flex-col justify-start">
                 <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4"
                     v-if="role === 'host'">
                     <div class="bg-white z-10">
@@ -118,7 +118,7 @@
                         </Button>
                     </div>
                 </div>
-                <div class="controls flex flex-col m-4" v-if="role === 'host'">
+                <div class="controls absolute w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col" v-if="role === 'host'">
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
@@ -145,7 +145,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="controls flex flex-col m-4 text-xl" v-else>
+                <div class="controls absolute w-full bottom-0 bg-slate-50 flex flex-col p-4 rounded-bl-xl rounded-br-xl text-xl" v-else>
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
