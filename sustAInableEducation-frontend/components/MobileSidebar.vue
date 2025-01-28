@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar-container w-full absolute h-full pt-16 bg-white" v-if="model">
+  <div class="sidebar-container w-full absolute h-full mt-32 bg-white z-10" v-if="model">
     <div class="sidebar w-full h-full flex-col overflow-y-scroll flex">
       <div id="sidebar-header">
         <div class="w-full flex items-center justify-end py-2">
