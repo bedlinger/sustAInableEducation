@@ -1,10 +1,10 @@
 <template>
     <div class="w-full h-full">
-        <div class="w-screen flex items-center h-full bg-slate-50">
+        <div class="w-screen flex items-center h-full bg-slate-50 relative">
             <Toast />
             <ConfirmDialog></ConfirmDialog>
-            <div class="w-80 h-full pt-16 border-solid border-slate-300 border-r-2">
-                <div class="sidebar w-full h-full flex flex-col p-2 overflow-y-scroll">
+            <div class="sidebar-container w-80 h-full pt-16 border-solid border-slate-300 border-r-2 hidden sm:block">
+                <div class="sidebar w-full h-full flex-col p-2 overflow-y-scroll flex">
                     <div id="sidebar-header">
                         <div class="flex items-center">
                             <IconField class="mr-2">
@@ -84,6 +84,12 @@
                     </div>
                 </div>
             </div>
+
+            <MobileSidebar class="sm:hidden" v-model="showSidebar" :searched-spaces="searchedSpaces" :search-input="searchInput" :show-filters="showFilters" :filters="filters"
+                :is-filter-applied="isFilterApplied" :spaces="spaces" :selected-space="selectedSpace" @toggle-filters="toggleShowFilters" :space-refs-by-id="spaceRefsById"
+                @apply-filters="applyFilters" @reset-filters="resetFilters" @open-delete-dialog="openDialog" @select-space="selectSpaceById" @toggle-sidebar="showSidebar = !showSidebar" />
+            />
+
             <div class="content flex-1 h-full overflow-y-scroll">
                 <div v-if="selectedSpace" class="w-full pt-20 p-4">
                     <div class="flex items-start flex-col w-full h-full">
@@ -239,6 +245,8 @@ const { execute, data: spaces } = await useFetch<EcoSpace[]>(`${runtimeConfig.pu
 
 
 const showFilters = ref(false);
+
+const showSidebar = ref(true);
 
 const filters: OverviewFilter = {
     applied: {
