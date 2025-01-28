@@ -87,8 +87,8 @@
 
             <MobileSidebar class="sm:hidden" v-model="showSidebar" :searched-spaces="searchedSpaces" :search-input="searchInput" :show-filters="showFilters" :filters="filters"
                 :is-filter-applied="isFilterApplied" :spaces="spaces" :selected-space="selectedSpace" @toggle-filters="toggleShowFilters" :space-refs-by-id="spaceRefsById"
-                @apply-filters="applyFilters" @reset-filters="resetFilters" @open-delete-dialog="openDialog" @select-space="selectSpaceCloseSidebar" @toggle-sidebar="showSidebar = !showSidebar" />
-            />
+                @apply-filters="applyFilters" @reset-filters="resetFilters" @open-delete-dialog="openDialog" @select-space="selectSpaceCloseSidebar" @toggle-sidebar="showSidebar = !showSidebar"
+                @search-update="updateSearch" />
 
             <div class="content flex-1 h-full overflow-y-scroll">
                 <div v-if="selectedSpace" class="w-full pt-20 p-4">
@@ -414,6 +414,10 @@ function getProgressLabel() {
         return `${selectedSpace.value!.story.parts.length} von ${selectedSpace.value!.story.length} Entscheidungspunkten wurden abgeschlossen`;
     }
     return `Alle ${selectedSpace.value!.story.length} Entscheidungspunkten wurden abgeschlossen`;
+}
+
+function updateSearch(newVal: string) {
+    searchInput.value = newVal;
 }
 
 function toggleShowFilters() {

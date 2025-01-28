@@ -12,7 +12,7 @@
             <InputIcon>
               <Icon name="ic:baseline-search" />
             </InputIcon>
-            <InputText placeholder="Suchen" v-model="props.searchInput" class="w-full" />
+            <InputText placeholder="Suchen" v-model="searchInputRef" class="w-full" />
           </IconField>
           <Button class="!aspect-square !p-0 !" @click="emit('toggleFilters')">
             <template #default>
@@ -94,9 +94,14 @@ import type { OverviewFilter } from '~/types/filter';
 
 const model = defineModel<boolean>(); // opened/closed
 
+const searchInputRef = ref('');
+
+watch(searchInputRef, (newValue) => {
+  emit('searchUpdate', newValue);
+});
+
 const props = defineProps<{
   searchedSpaces: EcoSpace[],
-  searchInput: string,
   showFilters: boolean,
   filters: OverviewFilter,
   isFilterApplied: boolean,
@@ -105,6 +110,6 @@ const props = defineProps<{
   spaceRefsById: Record<string, globalThis.Ref<boolean, boolean>>
 }>();
 
-const emit = defineEmits(['toggleFilters', 'applyFilters', 'resetFilters', 'selectSpace', 'openDeleteDialog', 'toggleSidebar']);
+const emit = defineEmits(['toggleFilters', 'applyFilters', 'resetFilters', 'selectSpace', 'openDeleteDialog', 'toggleSidebar', 'searchUpdate']);
 
 </script>
