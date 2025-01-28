@@ -17,7 +17,7 @@
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
-                class="panel w-full flex-1 rounded-xl relative border-solid border-slate-300 pb-72 sm:pb-0 border-2 flex flex-col justify-start">
+                class="panel w-full flex-1 rounded-xl relative border-solid border-slate-300 sm:pb-0 border-2 flex flex-col justify-start" :class="'pb-['+ controlHeight + 'px]'">
                 <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4"
                     v-if="role === 'host'">
                     <div class="bg-white z-10">
@@ -118,7 +118,7 @@
                         </Button>
                     </div>
                 </div>
-                <div class="controls absolute w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col" v-if="role === 'host'">
+                <div ref="hostControls" class="controls absolute w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col" v-if="role === 'host'">
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
@@ -145,7 +145,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="controls absolute w-full bottom-0 bg-slate-50 flex flex-col p-4 rounded-bl-xl rounded-br-xl text-xl" v-else>
+                <div ref="userControls" class="controls absolute w-full bottom-0 bg-slate-50 flex flex-col p-4 rounded-bl-xl rounded-br-xl text-xl" v-else>
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
@@ -186,6 +186,17 @@ const percentages = ref([0, 0, 0, 0])
 const showPercentages = ref(false)
 
 const myUserId = ref('')
+
+const hostControls = ref<HTMLDivElement | null>(null)
+const userControls = ref<HTMLDivElement | null>(null)
+
+const controlHeight = computed(() => {
+    if (role.value === 'host' && hostControls.value) {
+        return hostControls.value.offsetHeight
+    } else if (userControls.value) {
+        return userControls.value.offsetHeight
+    }   
+}) 
 
 await $fetch(`${runtime.public.apiUrl}/account`, {
     credentials: 'include',
