@@ -1,10 +1,10 @@
 <template>
-  <div class="sidebar-container w-full absolute h-full pt-16 bg-white">
+  <div class="sidebar-container w-full absolute h-full pt-16 bg-white" v-if="model">
     <div class="sidebar w-full h-full flex-col overflow-y-scroll flex">
       <div id="sidebar-header">
         <div class="w-full flex items-center justify-end py-2">
-          <div class="bg-slate-400 flex items-center justify-center p-2 pr-5 cursor-pointer rounded-tl-xl rounded-bl-xl">
-            <Icon name="ic:sharp-keyboard-double-arrow-left" class="size-7" @click="" />
+          <div @click="emit('toggleSidebar')" class="bg-slate-400 flex items-center justify-center p-2 pr-5 cursor-pointer rounded-tl-xl rounded-bl-xl">
+            <Icon name="ic:sharp-keyboard-double-arrow-left" class="size-7"/>
           </div>
         </div>
         <div class="flex items-center mx-2">
@@ -81,11 +81,18 @@
       </div>
     </div>
   </div>
+  <div class="absolute top-[4.5rem]" v-else>
+    <div @click="emit('toggleSidebar')" class="bg-slate-400 flex items-center justify-center p-2 pr-5 cursor-pointer rounded-tr-xl rounded-br-xl">
+      <Icon name="ic:sharp-keyboard-double-arrow-right" class="size-7" @click="" />
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import type { EcoSpace } from '~/types/EcoSpace';
 import type { OverviewFilter } from '~/types/filter';
+
+const model = defineModel<boolean>(); // opened/closed
 
 const props = defineProps<{
   searchedSpaces: EcoSpace[],
@@ -94,14 +101,10 @@ const props = defineProps<{
   filters: OverviewFilter,
   isFilterApplied: boolean,
   spaces: EcoSpace[] | null,
-  selectedSpace: EcoSpace | undefined
+  selectedSpace: EcoSpace | undefined,
+  spaceRefsById: Record<string, globalThis.Ref<boolean, boolean>>
 }>();
 
-const emit = defineEmits(['toggleFilters', 'applyFilters', 'resetFilters', 'selectSpace', 'openDeleteDialog']);
-
-const spaceRefsById = props.spaces ? props.spaces.reduce((acc, space) => {
-  acc[space.id] = ref(false);
-  return acc;
-}, {} as Record<string, Ref<boolean>>) : {};
+const emit = defineEmits(['toggleFilters', 'applyFilters', 'resetFilters', 'selectSpace', 'openDeleteDialog', 'toggleSidebar']);
 
 </script>
