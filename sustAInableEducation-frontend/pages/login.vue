@@ -18,7 +18,7 @@
                     </div>
                     <div>
                         <FloatLabel variant="in" class="flex flex-col">
-                            <InputText v-model="formRefs.password.value" name="password" type="password" fluid />
+                            <Password toggleMask :feedback="false" v-model="formRefs.password.value" name="password" type="password" fluid />
                             <label for="password">Passwort</label>
                         </FloatLabel>
                         <Message v-if="$form.password?.invalid" severity="error" size="small" class="mt-2">{{
