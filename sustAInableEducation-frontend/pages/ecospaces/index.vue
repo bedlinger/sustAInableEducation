@@ -96,12 +96,8 @@
                             </template>
                             <span class="text-md">
                                 Dieser EcoSpace wurde noch nicht beendet. Wenn Sie diesen EcoSpace fortsetzen wollen,
-                                können Sie <Button variant="link" class="!p-0">
-                                    <template #default>
-                                        <span
-                                            class="text-blue-700 hover:text-blue-500 hover:underline font-bold">hier</span>
-                                    </template>
-                                </Button>
+                                können Sie
+                                <NuxtLink class="text-blue-700 hover:text-blue-500 hover:underline font-bold" :to="'/ecospaces/' + selectedSpace.id">hier</NuxtLink>
                                 klicken um diesem beizutreten.
                             </span>
                         </Message>
