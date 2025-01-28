@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full mb-2 p-2 rounded-md cursor-pointer" :class="model ? 'bg-slate-300' : 'bg-slate-200'" @click="clickEvent">
+    <div class=" mb-2 p-2 rounded-md cursor-pointer" :class="model ? 'bg-slate-300' : 'bg-slate-200'" @click="clickEvent">
         <div class="flex justify-between items-center">
             <span>{{ displayTitle() }}</span>
             <Button variant="text" class="!rounded-full aspect-square !p-1" @click="toggleMenu">
