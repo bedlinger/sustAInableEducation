@@ -87,7 +87,7 @@
 
             <MobileSidebar class="sm:hidden" v-model="showSidebar" :searched-spaces="searchedSpaces" :search-input="searchInput" :show-filters="showFilters" :filters="filters"
                 :is-filter-applied="isFilterApplied" :spaces="spaces" :selected-space="selectedSpace" @toggle-filters="toggleShowFilters" :space-refs-by-id="spaceRefsById"
-                @apply-filters="applyFilters" @reset-filters="resetFilters" @open-delete-dialog="openDialog" @select-space="selectSpaceById" @toggle-sidebar="showSidebar = !showSidebar" />
+                @apply-filters="applyFilters" @reset-filters="resetFilters" @open-delete-dialog="openDialog" @select-space="selectSpaceCloseSidebar" @toggle-sidebar="showSidebar = !showSidebar" />
             />
 
             <div class="content flex-1 h-full overflow-y-scroll">
@@ -384,6 +384,11 @@ async function selectSpaceById(id: string) {
             spaceRefsById[key].value = false;
         }
     });
+}
+
+async function selectSpaceCloseSidebar(id: string) {
+    await selectSpaceById(id);
+    showSidebar.value = false;
 }
 
 function formatDate(dateString: string) {
