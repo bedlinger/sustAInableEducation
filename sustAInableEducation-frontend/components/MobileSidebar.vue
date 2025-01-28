@@ -3,7 +3,7 @@
     <div class="sidebar w-full h-full flex-col overflow-y-scroll flex">
       <div id="sidebar-header">
         <div class="w-full flex items-center justify-end py-2">
-          <div @click="emit('toggleSidebar')" class="bg-slate-400 flex items-center justify-center p-2 pr-5 cursor-pointer rounded-tl-xl rounded-bl-xl">
+          <div @click="emit('toggleSidebar')" class="bg-slate-400 flex items-center opacity-80 justify-center p-2 pr-5 cursor-pointer rounded-tl-xl rounded-bl-xl">
             <Icon name="ic:sharp-keyboard-double-arrow-left" class="size-7"/>
           </div>
         </div>
@@ -81,7 +81,7 @@
       </div>
     </div>
   </div>
-  <div class="absolute top-[4.5rem]" v-else>
+  <div class="absolute top-[4.5rem] opacity-80" v-else>
     <div @click="emit('toggleSidebar')" class="bg-slate-400 flex items-center justify-center p-2 pr-5 cursor-pointer rounded-tr-xl rounded-br-xl">
       <Icon name="ic:sharp-keyboard-double-arrow-right" class="size-7" @click="" />
     </div>
