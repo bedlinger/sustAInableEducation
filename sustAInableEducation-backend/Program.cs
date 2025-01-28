@@ -65,12 +65,9 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddTransient<IAIService, AIService>();
 
-builder.Services.AddCoreAdmin("Admin");
-
 var app = builder.Build();
 
 app.UseStaticFiles();
-app.MapDefaultControllerRoute();
 
 app.UseCors(AllowFrontendOrigin);
 
