@@ -121,8 +121,12 @@
                                             {{ selectedSpace.story.length }}
                                         </p>
                                         <p class="mb-2">
+                                            <span class="font-bold">Abstimmungszeit:</span>
+                                            {{ selectedSpace.votingTimeSeconds + ' Sekunden' }}
+                                        </p>
+                                        <p class="mb-2">
                                             <span class="font-bold">Zielgruppe:</span>
-                                            TODO
+                                            {{ getTargetgroup(selectedSpace.story.targetGroup) }}
                                         </p>
                                     </div>
                                     <div class="w-full">
@@ -483,6 +487,17 @@ const openDialog = (id: string) => {
 
         }
     });
+}
+
+function getTargetgroup(targetGroup: number) {
+    switch (targetGroup) {
+        case 0:
+            return 'Volksschule';
+        case 1:
+            return 'Sekundarstufe I';
+        default:
+            return 'Sekundarstufe II';
+    }
 }
 </script>
 

@@ -37,6 +37,7 @@ export interface Story {
     temperature: number,
     topP: number,
     totalImpact: number,
+    targetGroup: number,
     parts: Array<Part>,
     result: Result | null,
 }
