@@ -1,7 +1,7 @@
 <template>
-    <div class="w-full h-full prose-lg">
+    <div class="w-full h-full prose-lg flex">
         <div class="background animate-anim" />
-        <div class="w-screen flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4">
+        <div class="w-screen flex-1 flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4">
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="joinExpirationDate"
                 v-on:generateCode="getJoinCode" />
             <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" :my-user-id="myUserId" />
@@ -17,7 +17,7 @@
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
             <div
-                class="panel w-full flex-1 rounded-xl relative border-solid border-slate-300 sm:pb-0 border-2 flex flex-col justify-start" :class="'pb-['+ controlHeight + 'px]'">
+                class="panel w-full flex-1 min-h-0 rounded-xl relative border-solid border-slate-300 sm:pb-0 border-2 flex flex-col justify-start">
                 <div class="hostcontrols w-full flex justify-end absolute top-0 right-0 mr-8 mt-4"
                     v-if="role === 'host'">
                     <div class="bg-white z-10 rounded-md">
@@ -25,8 +25,7 @@
                             :disabled="disableStartVoteButton" />
                     </div>
                 </div>
-                <div class="content h-[32rem] mt-4 mx-4 overflow-y-scroll overflow-x-hidden" ref="contentDiv">
-
+                <div class="content h-full mt-4 mx-4 overflow-y-scroll overflow-x-hidden" :style="{'padding-bottom': controlHeight + 'px'}" ref="contentDiv">
                     <div v-for="part, index in space?.story.parts" class="px-4 pb-4 pt-0" ref="partsRef">
                         
                         <h2 class="font-bold mb-2" :ref="index === space!.story.parts.length - 1 ? 'lastPart' : ''">{{
