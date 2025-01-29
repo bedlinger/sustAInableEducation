@@ -39,6 +39,8 @@
                                 <span>{{ `${choice.number}: ${choice.text}` }}</span>
                             </li>
                         </ul>
+                        <NuxtImg :src="runtime.public.apiUrl + '/' + part.image" class="w-full mt-4 rounded-xl" v-if="part.image" />
+                        <Skeleton width="100%" height="5rem" class="!h-[5rem] " v-else/>
                         <Divider v-if="index !== space!.story.parts.length-1 || isLoading" />
                     </div>
                     <div class="w-full h-full flex justify-center items-center" v-if="parts.length === 0 && !isLoading">
@@ -262,11 +264,13 @@ async function generatePart() {
     try {
         await connection.invoke("GeneratePart")
     } catch (err) {
+        console.log("ALARM GENERATE" + err)
         isLoading.value = false
         showReloadButton.value = true
     }
 
 }
+
 
 async function selectOption(number: Number) {
     if (space.value !== null) {
@@ -278,7 +282,7 @@ async function selectOption(number: Number) {
             try {
                 await connection.invoke("GeneratePart")
             } catch (err) {
-                console.error("ALARM")
+                console.error("ALARM SELECT" + err)
                 isLoading.value = false
                 showReloadButton.value = true
             }
@@ -337,6 +341,10 @@ connection.on("VotingStarted", async (expirationStr: string) => {
     showPercentages.value = true
     percentages.value = [0, 0, 0, 0]
     startTimer(expirationStr)
+})
+
+connection.on("ImageGenerated", async (image: string) => {
+    parts.value[parts.value.length - 1].image = image
 })
 
 connection.on("ErrorOccured", (msg: string) => {
