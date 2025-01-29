@@ -43,7 +43,8 @@
                                         <Badge :value="getPercentages(part)[choiceIndex] + '%'" />
                                     </div>
                                     <span>{{ `${choice.number}: ${choice.text}` }}</span>
-                                    <Badge class="!hidden sm:!block" :value="getPercentages(part)[choiceIndex] + '%'" v-if="part.chosenNumber" />
+                                    <Badge class="!hidden sm:!block" :value="getPercentages(part)[choiceIndex] + '%'"
+                                        v-if="part.chosenNumber" />
                                 </div>
 
                             </Chip>
@@ -266,6 +267,12 @@ const imageLoading = ref(false)
 const showReloadButton = ref(false)
 
 await getSpace()
+if (parts.value.length > 0) {
+    if (parts.value[parts.value.length - 1].choices.some((choice) => choice.numberVotes > 0)) {
+        percentages.value = parts.value[parts.value.length - 1].choices.map((choice) => Math.round((choice.numberVotes / parts.value[parts.value.length - 1].choices.reduce((a, b) => a + b.numberVotes, 0)) * 100))
+        showPercentages.value = true
+    }
+}
 
 const connection = new HubConnectionBuilder()
     .withUrl(`${runtime.public.apiUrl}/spaceHub/${id}`, {
