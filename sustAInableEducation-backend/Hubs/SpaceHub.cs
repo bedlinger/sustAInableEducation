@@ -131,6 +131,7 @@ namespace sustAInableEducation_backend.Hubs
                 if (space.IsImageGenerationEnabled)
                 {
                     story.Result!.Image = await _ai.GenerateStoryImage(story);
+                    await _context.SaveChangesAsync();
                     await SendMessage(MessageType.ImageGenerated, story.Result!.Image);
                 }
             }
@@ -140,6 +141,7 @@ namespace sustAInableEducation_backend.Hubs
                 if (space.IsImageGenerationEnabled)
                 {
                     story.Parts.Last().Image = await _ai.GenerateStoryImage(story);
+                    await _context.SaveChangesAsync();
                     await SendMessage(MessageType.ImageGenerated, story.Parts.Last().Image);
                 }
             }
