@@ -119,7 +119,7 @@
                         </Button>
                     </div>
                 </div>
-                <div ref="hostControls" class="controls absolute w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col" v-if="role === 'host'">
+                <div ref="hostControls" class="controls absolute w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col z-10" v-if="role === 'host'">
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
@@ -146,7 +146,7 @@
                         </div>
                     </div>
                 </div>
-                <div ref="userControls" class="controls absolute w-full bottom-0 bg-slate-50 flex flex-col p-4 rounded-bl-xl rounded-br-xl text-xl" v-else>
+                <div ref="userControls" class="controls absolute w-full bottom-0 bg-slate-50 flex flex-col p-4 rounded-bl-xl rounded-br-xl text-xl z-10" v-else>
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
