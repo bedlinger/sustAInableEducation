@@ -35,14 +35,20 @@
                             ${part.intertitle}` }}</h2>
                         <p class="mb-4">{{ part.text }}</p>
                         <div class="flex flex-col">
-                            <Chip v-for="choice in part.choices" class="mb-2" :class="part.chosenNumber === choice.number ? '!bg-primary-300' : '!bg-primary-100'">
-                                <div class="flex flex-row items-center">
+                            <Chip v-for="choice, choiceIndex in part.choices" class="mb-2"
+                                :class="part.chosenNumber === choice.number ? '!bg-primary-300' : '!bg-primary-100'">
+
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center sm:w-full">
+                                    <div class="w-full flex justify-end sm:hidden" v-if="part.chosenNumber">
+                                        <Badge :value="getPercentages(part)[choiceIndex] + '%'" />
+                                    </div>
                                     <span>{{ `${choice.number}: ${choice.text}` }}</span>
+                                    <Badge class="!hidden sm:!block" :value="getPercentages(part)[choiceIndex] + '%'" v-if="part.chosenNumber" />
                                 </div>
-                                
+
                             </Chip>
                         </div>
-                        
+
                         <NuxtImg :src="runtime.public.apiUrl + '/' + part.image" class="w-full mt-4 rounded-xl"
                             v-if="part.image" />
                         <Skeleton width="100%" height="5rem" class="!h-[5rem] " v-else />
@@ -557,5 +563,10 @@ const scrollToResult = () => {
 
 function printLogs() {
     console.table(parts.value)
+}
+
+function getPercentages(part: Part) {
+    let sum = part.choices.reduce((a, b) => a + b.numberVotes, 0)
+    return part.choices.map((choice) => Math.round((choice.numberVotes / sum) * 100))
 }
 </script>
