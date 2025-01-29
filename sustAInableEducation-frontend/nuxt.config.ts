@@ -59,6 +59,7 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts',
     '@nuxtjs/google-fonts',
     '@nuxt/icon',
+    '@nuxt/image'
   ],
   icon: {
     provider: 'server',
