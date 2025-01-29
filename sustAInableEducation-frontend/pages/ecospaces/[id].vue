@@ -220,7 +220,7 @@ const parts = computed(() => {
 
 const disableOptionButtons = computed(() => {
     if (role.value === 'host') {
-        return !!space.value?.story.result || isLoading.value || parts.value.length === 0 || isVoting.value
+        return !!space.value?.story.result || isLoading.value || parts.value.length === 0 || isVoting.value || imageLoading.value
     }
     return !isVoting.value || hasVoted.value
 })
@@ -232,7 +232,7 @@ const result = computed(() => {
 })
 
 const disableStartVoteButton = computed(() => {
-    return isVoting.value || parts.value.length === 0 || isLoading.value || !!parts.value[parts.value.length - 1].chosenNumber
+    return isVoting.value || parts.value.length === 0 || isLoading.value || !!parts.value[parts.value.length - 1].chosenNumber || imageLoading.value
 })
 
 const cookieHeaders = useRequestHeaders(['cookie'])
@@ -246,6 +246,7 @@ const loadingAnimation = ref<HTMLDivElement | null>(null);
 const enableStart = ref(true)
 
 const isLoading = ref(false)
+const imageLoading = ref(false)
 
 const showReloadButton = ref(false)
 
@@ -316,6 +317,7 @@ connection.on("PartGenerating", async () => {
     }
     showPercentages.value = false
     isLoading.value = true
+    imageLoading.value = true
     await nextTick()
     scrollToAnimation()
 })
@@ -345,6 +347,7 @@ connection.on("VotingStarted", async (expirationStr: string) => {
 
 connection.on("ImageGenerated", async (image: string) => {
     parts.value[parts.value.length - 1].image = image
+    imageLoading.value = false
 })
 
 connection.on("ErrorOccured", (msg: string) => {
