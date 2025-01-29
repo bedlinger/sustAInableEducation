@@ -418,6 +418,8 @@ function startTimer(expirationStr: string) {
         timerValue.value.percent = Math.round((timerValue.value.time / timerValue.value.initialValue) * 100)
 
         if (timerValue.value.time <= 0) {
+            timerValue.value.time = 0
+            timerValue.value.percent = Math.round((timerValue.value.time / timerValue.value.initialValue) * 100)
             isVoting.value = false
             clearInterval(timerInterval)
         }
