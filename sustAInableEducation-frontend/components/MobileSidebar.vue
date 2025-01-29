@@ -1,6 +1,6 @@
 <template>
-  <div class="sidebar-container w-full absolute h-full mt-32 bg-white z-10" v-if="model">
-    <div class="sidebar w-full h-full flex-col overflow-y-scroll flex">
+  <div class="sidebar-container w-full flex absolute h-full pt-16 pb-3 bg-red-500  z-10" v-if="model">
+    <div class="sidebar flex-1 w-full bg-blue-200 flex-col overflow-y-scroll flex">
       <div id="sidebar-header">
         <div class="w-full flex items-center justify-end py-2">
           <div @click="emit('toggleSidebar')" class="bg-slate-400 flex items-center opacity-80 justify-center p-2 pr-5 cursor-pointer rounded-tl-xl rounded-bl-xl">
