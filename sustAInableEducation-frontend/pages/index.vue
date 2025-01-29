@@ -2,8 +2,8 @@
     <div class="w-full h-full">
         <div class="background animate-anim" />
         <Toast/>
-        <div class="w-screen flex justify-center items-center h-full ">
-            <div class="bg-slate-50 shadow-xl flex justify-between flex-col rounded-xl items-center p-8">
+        <div class="w-screen flex justify-center items-center h-full">
+            <div class="bg-slate-50 shadow-xl flex justify-between flex-col rounded-xl items-center p-8 mx-4">
                 <h1 class="text-3xl font-bold mb-4">EcoSpace beitreten</h1>
                 <p class="mb-4">
                     Bitte gib den 6-stelligen Code ein, um dem Space beizutreten.
