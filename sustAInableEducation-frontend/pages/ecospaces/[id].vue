@@ -12,7 +12,8 @@
                         <Icon name="ic:baseline-person-add" class="size-5" />
                     </template>
                 </Button>
-                <div v-if="isVoting" class="font-bold text-xl absolute w-full flex justify-start sm:justify-center items-center">
+                <div v-if="isVoting"
+                    class="font-bold text-xl absolute w-full flex justify-start sm:justify-center items-center">
                     Abstimmungszeit</div>
                 <Button label="Teilnehmer" :badge="space?.participants.length.toString()" @click="showUserDialog" />
             </div>
@@ -25,22 +26,33 @@
                             :disabled="disableStartVoteButton" />
                     </div>
                 </div>
-                <div class="content h-full mt-4 mx-4 overflow-y-scroll overflow-x-hidden" :style="{'padding-bottom': controlHeight + 'px'}" ref="contentDiv">
+                <div class="content h-full mt-4 mx-4 overflow-y-scroll overflow-x-hidden"
+                    :style="{ 'padding-bottom': controlHeight + 'px' }" ref="contentDiv">
                     <div v-for="part, index in space?.story.parts" class="px-4 pb-4 pt-0" ref="partsRef">
-                        
+
                         <h2 class="font-bold mb-2" :ref="index === space!.story.parts.length - 1 ? 'lastPart' : ''">{{
                             `${index + 1}:
                             ${part.intertitle}` }}</h2>
                         <p class="mb-4">{{ part.text }}</p>
-                        <ul class="list-disc">
-                            <li v-for="choice in part.choices"
-                                :class="{ 'font-bold bg-primary-200 rounded-lg p-1': choice.number === part.chosenNumber }">
-                                <span>{{ `${choice.number}: ${choice.text}` }}</span>
-                            </li>
-                        </ul>
-                        <NuxtImg :src="runtime.public.apiUrl + '/' + part.image" class="w-full mt-4 rounded-xl" v-if="part.image" />
-                        <Skeleton width="100%" height="5rem" class="!h-[5rem] " v-else/>
-                        <Divider v-if="index !== space!.story.parts.length-1 || isLoading" />
+                        <div class="flex flex-col">
+                            <Chip v-for="choice, choiceIndex in part.choices" class="mb-2"
+                                :class="part.chosenNumber === choice.number ? '!bg-primary-300' : '!bg-primary-100'">
+
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center sm:w-full">
+                                    <div class="w-full flex justify-end sm:hidden" v-if="part.chosenNumber">
+                                        <Badge :value="getPercentages(part)[choiceIndex] + '%'" />
+                                    </div>
+                                    <span>{{ `${choice.number}: ${choice.text}` }}</span>
+                                    <Badge class="!hidden sm:!block" :value="getPercentages(part)[choiceIndex] + '%'" v-if="part.chosenNumber" />
+                                </div>
+
+                            </Chip>
+                        </div>
+
+                        <NuxtImg :src="runtime.public.apiUrl + '/' + part.image" class="w-full mt-4 rounded-xl"
+                            v-if="part.image" />
+                        <Skeleton width="100%" height="5rem" class="!h-[5rem] " v-else />
+                        <Divider v-if="index !== space!.story.parts.length - 1 || isLoading" />
                     </div>
                     <div class="w-full h-full flex justify-center items-center" v-if="parts.length === 0 && !isLoading">
                         <Button label="Start" @click="generatePart" severity="primary" v-if="role === 'host'" />
@@ -119,7 +131,9 @@
                         </Button>
                     </div>
                 </div>
-                <div ref="hostControls" class="controls absolute w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col z-10" v-if="role === 'host'">
+                <div ref="hostControls"
+                    class="controls absolute w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col z-10"
+                    v-if="role === 'host'">
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
@@ -146,7 +160,9 @@
                         </div>
                     </div>
                 </div>
-                <div ref="userControls" class="controls absolute w-full bottom-0 bg-slate-50 flex flex-col p-4 rounded-bl-xl rounded-br-xl text-xl z-10" v-else>
+                <div ref="userControls"
+                    class="controls absolute w-full bottom-0 bg-slate-50 flex flex-col p-4 rounded-bl-xl rounded-br-xl text-xl z-10"
+                    v-else>
                     <Divider />
                     <div class="timer">
                         <Timer class="sm:hidden" v-model="timerValue" />
@@ -196,8 +212,8 @@ const controlHeight = computed(() => {
         return hostControls.value.offsetHeight
     } else if (userControls.value) {
         return userControls.value.offsetHeight
-    }   
-}) 
+    }
+})
 
 await $fetch(`${runtime.public.apiUrl}/account`, {
     credentials: 'include',
@@ -420,7 +436,8 @@ function startTimer(expirationStr: string) {
         timerValue.value.time -= 1
         timerValue.value.percent = Math.round((timerValue.value.time / timerValue.value.initialValue) * 100)
 
-        if (timerValue.value.time <= 0) {2
+        if (timerValue.value.time <= 0) {
+            2
             timerValue.value.time = 0
             timerValue.value.percent = Math.round((timerValue.value.time / timerValue.value.initialValue) * 100)
             isVoting.value = false
@@ -546,5 +563,10 @@ const scrollToResult = () => {
 
 function printLogs() {
     console.table(parts.value)
+}
+
+function getPercentages(part: Part) {
+    let sum = part.choices.reduce((a, b) => a + b.numberVotes, 0)
+    return part.choices.map((choice) => Math.round((choice.numberVotes / sum) * 100))
 }
 </script>
