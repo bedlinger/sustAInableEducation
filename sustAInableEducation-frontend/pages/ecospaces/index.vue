@@ -121,6 +121,10 @@
                                             {{ selectedSpace.story.length }}
                                         </p>
                                         <p class="mb-2">
+                                            <span class="font-bold">Abstimmungszeit:</span>
+                                            {{ selectedSpace.votingTimeSeconds + ' Sekunden' }}
+                                        </p>
+                                        <p class="mb-2">
                                             <span class="font-bold">Zielgruppe:</span>
                                             {{ getTargetgroup(selectedSpace.story.targetGroup) }}
                                         </p>
