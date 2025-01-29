@@ -18,7 +18,7 @@ export interface Part {
     votingEndAt: string,
     chosenNumber: number,
     choices: Array<Choice>,
-    
+    image: string
 }
 
 export interface Result {
