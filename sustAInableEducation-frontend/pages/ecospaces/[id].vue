@@ -411,13 +411,19 @@ function startTimer(expirationStr: string) {
     let expirationDate = Date.parse(expirationStr)
 
     timerInterval = setInterval(function () {
-
+        /*
         let now = new Date().getTime()
         let distance = expirationDate - now
         timerValue.value.time = Math.floor(distance / 1000)
         timerValue.value.percent = Math.round((timerValue.value.time / timerValue.value.initialValue) * 100)
+        */
 
-        if (timerValue.value.time <= 0) {
+        timerValue.value.time -= 1
+        timerValue.value.percent = Math.round((timerValue.value.time / timerValue.value.initialValue) * 100)
+
+        if (timerValue.value.time <= 0) {2
+            timerValue.value.time = 0
+            timerValue.value.percent = Math.round((timerValue.value.time / timerValue.value.initialValue) * 100)
             isVoting.value = false
             clearInterval(timerInterval)
         }
