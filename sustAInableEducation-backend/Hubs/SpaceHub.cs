@@ -50,7 +50,7 @@ namespace sustAInableEducation_backend.Hubs
             }
 
             await Groups.AddToGroupAsync(Context!.ConnectionId, _spaceId.ToString());
-            var participtant = _context.SpaceParticipant.Find(_spaceId, _userId)!;
+            var participtant = _context.SpaceParticipant.Include(p => p.User).FirstOrDefault(p => p.UserId == _userId && p.SpaceId == _spaceId)!;
             participtant.IsOnline = true;
             await _context.SaveChangesAsync();
 
