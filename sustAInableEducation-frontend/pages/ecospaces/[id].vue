@@ -134,51 +134,62 @@
                 <div ref="hostControls"
                     class="controls w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col z-10"
                     v-if="role === 'host'">
-                    <Divider />
-                    <div class="timer">
-                        <Timer class="sm:hidden" v-model="timerValue" />
+                    <div class="flex items-center">
+                        <Divider />
+                        <Icon :name="!hideControls ? 'ic:twotone-keyboard-arrow-down' : 'ic:twotone-keyboard-arrow-up'" class="size-10 bg-gray-400 cursor-pointer" @click="hideControls = !hideControls"/>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between w-full">
-                        <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
-                            <HostButton label="Option 1" :disabled="disableOptionButtons" :percentage="percentages[0]"
-                                @click="selectOption(1)" :voting="showPercentages" />
+                    <div v-if="!hideControls">
+                        <div class="timer">
+                            <Timer class="sm:hidden" v-model="timerValue" />
                         </div>
-                        <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
-                            <HostButton label="Option 2" :disabled="disableOptionButtons" :percentage="percentages[1]"
-                                @click="selectOption(2)" :voting="showPercentages" />
-                        </div>
-                        <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
-                            :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
-                        </Knob>
-                        <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
-                            <HostButton label="Option 3" :disabled="disableOptionButtons" :percentage="percentages[2]"
-                                @click="selectOption(3)" :voting="showPercentages" />
-                        </div>
-                        <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
-                            <HostButton label="Option 4" :disabled="disableOptionButtons" :percentage="percentages[3]"
-                                @click="selectOption(4)" :voting="showPercentages" />
+                        <div class="flex flex-col sm:flex-row sm:justify-between w-full">
+                            <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
+                                <HostButton label="Option 1" :disabled="disableOptionButtons"
+                                    :percentage="percentages[0]" @click="selectOption(1)" :voting="showPercentages" />
+                            </div>
+                            <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
+                                <HostButton label="Option 2" :disabled="disableOptionButtons"
+                                    :percentage="percentages[1]" @click="selectOption(2)" :voting="showPercentages" />
+                            </div>
+                            <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
+                                :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
+                            </Knob>
+                            <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
+                                <HostButton label="Option 3" :disabled="disableOptionButtons"
+                                    :percentage="percentages[2]" @click="selectOption(3)" :voting="showPercentages" />
+                            </div>
+                            <div class="w-full mb-2 sm:mb-0 sm:mx-5 flex-1">
+                                <HostButton label="Option 4" :disabled="disableOptionButtons"
+                                    :percentage="percentages[3]" @click="selectOption(4)" :voting="showPercentages" />
+                            </div>
                         </div>
                     </div>
+
                 </div>
                 <div ref="userControls"
                     class="controls absolute w-full bottom-0 bg-slate-50 flex flex-col p-4 rounded-bl-xl rounded-br-xl text-xl z-10"
                     v-else>
-                    <Divider />
-                    <div class="timer">
-                        <Timer class="sm:hidden" v-model="timerValue" />
+                    <div class="flex items-center">
+                        <Divider />
+                        <Icon :name="!hideControls ? 'ic:twotone-keyboard-arrow-down' : 'ic:twotone-keyboard-arrow-up'" class="size-10 bg-gray-400 cursor-pointer" @click="hideControls = !hideControls"/>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:justify-between w-full">
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1" @click="voteOption(1)"
-                            :disabled="disableOptionButtons" />
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 2" @click="voteOption(2)"
-                            :disabled="disableOptionButtons" />
-                        <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
-                            :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
-                        </Knob>
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 3" @click="voteOption(3)"
-                            :disabled="disableOptionButtons" />
-                        <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 4" @click="voteOption(4)"
-                            :disabled="disableOptionButtons" />
+                    <div v-if="!hideControls">
+                        <div class="timer"> 
+                            <Timer class="sm:hidden" v-model="timerValue" />
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between w-full">
+                            <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 1" @click="voteOption(1)"
+                                :disabled="disableOptionButtons" />
+                            <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 2" @click="voteOption(2)"
+                                :disabled="disableOptionButtons" />
+                            <Knob class="hidden sm:block mx-5" v-model="timerValue.percent"
+                                :valueTemplate="(number) => { return `${timerValue.time}` }" disabled :size="100">
+                            </Knob>
+                            <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 3" @click="voteOption(3)"
+                                :disabled="disableOptionButtons" />
+                            <Button class="mb-2 sm:mb-0 sm:mr-5 flex-1 sm:!text-2xl" label="Option 4" @click="voteOption(4)"
+                                :disabled="disableOptionButtons" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -206,6 +217,8 @@ const myUserId = ref('')
 
 const hostControls = ref<HTMLDivElement | null>(null)
 const userControls = ref<HTMLDivElement | null>(null)
+
+const hideControls = ref(false)
 
 const controlHeight = computed(() => {
     if (role.value === 'host' && hostControls.value) {
