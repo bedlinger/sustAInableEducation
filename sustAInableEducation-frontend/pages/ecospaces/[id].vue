@@ -1,7 +1,7 @@
 <template>
-    <div class="w-full h-full prose-lg flex">
+    <div class="w-full h-[100dvh] prose-lg flex">
         <div class="background animate-anim" />
-        <div class="w-screen flex-1 flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4">
+        <div class="w-screen flex-1 flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4 overflow-hidden">
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="joinExpirationDate"
                 v-on:generateCode="getJoinCode" />
             <UserDialog v-model="userDialogIsVisible" :participants="space!.participants" :my-user-id="myUserId" />
@@ -26,8 +26,7 @@
                             :disabled="disableStartVoteButton" />
                     </div>
                 </div>
-                <div class="content h-full mt-4 mx-4 overflow-y-scroll overflow-x-hidden"
-                    :style="{ 'padding-bottom': controlHeight + 'px' }" ref="contentDiv">
+                <div class="content h-full mt-4 mx-4 overflow-y-scroll overflow-x-hidden" ref="contentDiv">
                     <div v-for="part, index in space?.story.parts" class="px-4 pb-4 pt-0" ref="partsRef">
 
                         <h2 class="font-bold mb-2" :ref="index === space!.story.parts.length - 1 ? 'lastPart' : ''">{{
@@ -133,7 +132,7 @@
                     </div>
                 </div>
                 <div ref="hostControls"
-                    class="controls absolute w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col z-10"
+                    class="controls w-full bottom-0 bg-slate-50 p-4 rounded-bl-xl rounded-br-xl flex flex-col z-10"
                     v-if="role === 'host'">
                     <Divider />
                     <div class="timer">
