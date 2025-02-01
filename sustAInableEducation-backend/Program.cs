@@ -8,10 +8,6 @@ using Serilog;
 
 var AllowFrontendOrigin = "_allowFrontendOrigin";
 
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .CreateLogger();
-
 try
 {
     Log.Information("Starting sustAIanableEducation Backend");
