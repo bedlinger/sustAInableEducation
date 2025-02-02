@@ -476,12 +476,13 @@ namespace sustAInableEducation_backend.Repository
         /// <param name="chatMessages">The chat messages to fetch the assistant content for</param>
         /// <param name="temperature">The temperature for the assistant content</param>
         /// <param name="topP">The topP for the assistant content</param>
+        /// <param name="isJsonResponse">If the response should be a json object</param>
         /// <returns>The assistant content</returns>
         /// <exception cref="ArgumentException">If the chat messages are empty, the temperature is invalid or the topP is invalid</exception>
         /// <exception cref="HttpRequestException">If the request failed</exception>
         /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
         /// <exception cref="JsonException">If the response content could not be deserialized</exception>
-        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
+        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP, bool isJsonResponse = true)
         {
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(chatMessages);
@@ -489,16 +490,31 @@ namespace sustAInableEducation_backend.Repository
             if (temperature < 0 || temperature > 1) throw new ArgumentException("Invalid temperature");
             if (topP < 0 || topP > 1) throw new ArgumentException("Invalid topP");
 
-            HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
+            object requestBody;
+            if (isJsonResponse)
             {
-                Content = new StringContent(JsonSerializer.Serialize(new
+                requestBody = new
                 {
                     model = "meta-llama/Llama-3.3-70B-Instruct",
                     messages = chatMessages,
                     response_format = new { type = "json_object" },
                     temperature,
                     top_p = topP
-                }), Encoding.UTF8, "application/json")
+                };
+            }
+            else
+            {
+                requestBody = new
+                {
+                    model = "meta-llama/Llama-3.3-70B-Instruct",
+                    messages = chatMessages,
+                    temperature,
+                    top_p = topP
+                };
+            }
+            HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
             };
 
             HttpResponseMessage response = null!;
@@ -551,7 +567,7 @@ namespace sustAInableEducation_backend.Repository
             string imagePrompt;
             try
             {
-                imagePrompt = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                imagePrompt = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP, false);
             }
             catch (Exception e)
             {
