@@ -22,12 +22,19 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(logger);
             _config = config;
             _logger = logger;
-            _client = new()
+            try
             {
-                BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
-                Timeout = TimeSpan.FromMinutes(5)
-            };
-            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
+                _client = new()
+                {
+                    BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
+                    Timeout = TimeSpan.FromMinutes(5)
+                };
+                _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Failed to initialise AI service: {Exception}", e);
+            }
         }
 
         // Benjamin Edlinger
