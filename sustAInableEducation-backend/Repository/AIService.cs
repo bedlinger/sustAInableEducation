@@ -11,20 +11,32 @@ namespace sustAInableEducation_backend.Repository
     {
         // Benjamin Edlinger
         private readonly IConfiguration _config;
-        private static HttpClient? _client;
+        private readonly ILogger _logger;
+        private readonly HttpClient _client;
         const int MAX_RETRY_ATTEMPTS = 2; // Maximum number of retry attempts for a failed request or deserialization
 
         // Benjamin Edlinger
-        public AIService(IConfiguration config)
+        public AIService(IConfiguration config, ILogger<AIService> logger)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(logger);
             _config = config;
-            _client = new()
+            _logger = logger;
+            try
             {
-                BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
-                Timeout = TimeSpan.FromMinutes(5)
-            };
-            _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
+                _client = new HttpClient
+                {
+                    BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
+                    Timeout = TimeSpan.FromMinutes(5)
+                };
+                _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Failed to initialise AI service: {Exception}", e);
+                throw;
+            }
+            _logger.LogInformation("AI service initialised");
         }
 
         // Benjamin Edlinger
@@ -39,6 +51,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
+            _logger.LogInformation("Starting new story with title {Title}", story.Title);
             List<ChatMessage> chatMessages;
             try
             {
@@ -46,6 +59,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
+                _logger.LogError("Failed to rebuild chat messages because of error in story object: {Exception}", e);
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
@@ -60,9 +74,11 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to start story", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
+                        throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -73,13 +89,16 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
+                    _logger.LogInformation("Successfully started story with title {Title}", story.Title);
                     return GetStoryPart(assistantContent);
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to start story", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
+                        throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -100,6 +119,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
+            _logger.LogInformation("Generating next part of story with title {Title}", story.Title);
             List<ChatMessage> chatMessages;
             try
             {
@@ -107,6 +127,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
+                _logger.LogError("Failed to rebuild chat messages because of error in story object: {Exception}", e);
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
@@ -121,9 +142,11 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate next part", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
+                        throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -134,13 +157,16 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
+                    _logger.LogInformation("Successfully generated next part of story with title {Title}", story.Title);
                     return GetStoryPart(assistantContent).Item1;
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate next part", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
+                        throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -161,6 +187,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
+            _logger.LogInformation("Generating result of story with title {Title}", story.Title);
             List<ChatMessage> chatMessages;
             try
             {
@@ -168,6 +195,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
+                _logger.LogError("Failed to rebuild chat messages because of error in story object: {Exception}", e);
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
@@ -182,9 +210,11 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate result", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
+                        throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -201,9 +231,11 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate result", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
+                        throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -216,7 +248,8 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
-                throw new ArgumentException("Failed to rebuild chat messages", e);
+                _logger.LogError("Failed to rebuild chat messages for result because of error in story object: {Exception}", e);
+                throw new ArgumentException("Failed to rebuild chat messages for result because of error in story object", e);
             }
 
             attempt = 0;
@@ -229,9 +262,11 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to fetch the assistant content for result: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate result", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for result");
+                        throw new AIException("Failed to fetch the assistant content for result", e);
                     }
                     attempt++;
                 }
@@ -242,13 +277,16 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
+                    _logger.LogInformation("Successfully generated result of story with title {Title}", story.Title);
                     return GetStoryResult(assistantContent, end);
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to deserialize the assistant content for result: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate result", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for result");
+                        throw new AIException("Failed to deserialize the assistant content for result", e);
                     }
                     attempt++;
                 }
@@ -256,63 +294,6 @@ namespace sustAInableEducation_backend.Repository
 
             throw new AIException("Failed to generate result after maximum retry attempts");
         }
-
-/// <summary>
-        /// Kacper Bohaczyk ----------------------------------------------------------------------------------------------------------------------
-        /// </summary>
-        /// <param name="story"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="ArgumentNullException"></exception>
-
-        private static List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config, List<ChatMessage> chatMessages)
-        {
-
-
-
-            ArgumentNullException.ThrowIfNull(story);
-
-            string targetGroupString = story.TargetGroup switch
-            {
-                TargetGroup.PrimarySchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Volksschüler im Alter von 6 bis 10 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende einfache Sprache mit kurzen und klaren Sätzen.",
-                TargetGroup.MiddleSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe eins im Alter von 11 bis 14 Jahren. Pass deinen Stil an diese Zielgruppe und verwende einen passend anspruchsvollen Wortschatz und Satzbau.",
-                TargetGroup.HighSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe zwei im Alter von 15 bis 19 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende eine anspruchsvollere Sprache mit komplexeren Satzstrukturen und Fachbegriffen.",
-                _ => throw new ArgumentException("Invalid target group")
-            };
-            // Der Teil drüber soll zusätylich in den SystemPromt reinkommen
-
-            string systemPrompt = "Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit." +
-                                   "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
-                                   "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
-                                   "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
-                                   $"Formatierungsrichtlinien: {targetGroupString} " +
-                                  "{'Title': 'Der Titel des ganzen Quizes', 'NumberQuestions': 'Anzahl an Questions', 'Questions': {'Text': 'Der Titel der jeweiligen Frage','Text': 'Der Titel der jeweiligen Frage', 'Number': 'Die Nummer der Frage', 'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit', 'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', 'IsCorrect': 'Ein Wahrheitswert, der angibt, ob die Auswahl korrekt ist'}]}} " +
-                                   $"Das Quiz soll aus" +
-                                   string.Join(", ", config.Types.Select(t =>
-                                   {
-                                       return t switch
-                                       {
-                                           QuizType.MultipleResponse => "Multiple response-",
-                                           QuizType.SingleResponse => "Single response-",
-                                           QuizType.TrueFalse => "True/False-",
-                                           _ => throw new ArgumentException("Invalid quiz type")
-                                       };
-                                   })) +
-                                   $"Fragen bestehen und soll {config.NumberQuestions} Fragen lang sein";
-            ;
-            string userPrompt = "Generiere das Quiz auf Basis der durchlebten Story.";
-
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
-
-            return chatMessages;
-        }
-
-
-
-
-        // --------------------------------------------------------------------------------------------------------------------------------------------
-
 
         // Benjamin Edlinger
         /// <summary>
@@ -365,7 +346,7 @@ namespace sustAInableEducation_backend.Repository
 
                 if (!part.value.ChosenNumber.HasValue || part.value.ChosenNumber < 1 || part.value.ChosenNumber > 4)
                 {
-                    throw new ArgumentException("Story part has invalid choice number");
+                    throw new ArgumentException($"Story part with id {part.value.Id} has invalid choice number");
                 }
                 else if (story.Length == part.index + 1)
                 {
@@ -389,11 +370,13 @@ namespace sustAInableEducation_backend.Repository
         /// <param name="end">The end of the story</param>
         /// <returns>The rebuilt chat messages</returns>
         /// <exception cref="ArgumentNullException">If the story object is null, the chat messages are null or the end is null</exception>
+        /// <exception cref="ArgumentException">If the chat messages list is empty</exception>
         private static List<ChatMessage> RebuildChatMessagesResult(Story story, List<ChatMessage> chatMessages, string end)
         {
             ArgumentNullException.ThrowIfNull(story);
             ArgumentNullException.ThrowIfNull(chatMessages);
             ArgumentNullException.ThrowIfNull(end);
+            if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
 
             chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = end });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = "Du schlüpfst in die Rolle einer Lehrkraft, welche die durchlebte Geschichte mit den Teilnehmern bespricht. Deine Aufgabe besteht nicht darin, die Handlung der Geschichte selbst zu analysieren, sondern das nachhaltige Thema zu beleuchten, das die Geschichte behandelt. Präsentiere die zentralen Aspekte faktenbasiert und leicht verständlich, um den Teilnehmern einen klaren Zugang zum Thema zu ermöglichen. Gleichzeitig sollst du die Teilnehmer dazu anregen, ihr eigenes Handeln und ihre Einstellungen kritisch zu hinterfragen. Schaffe Raum für eine offene und respektvolle Diskussion, in der unterschiedliche Perspektiven ausgetauscht werden können. Stelle gezielte Fragen, die zum Nachdenken anregen, und nutze klare Erklärungen sowie passende Beispiele, um komplexe Zusammenhänge greifbar zu machen. Die folgenden Inhalte sollen alle Teil deiner Analyse sein: - Erstelle eine umfassende Analyse der Geschichte, die sich aus mehreren klar strukturierten Teilen zusammensetzt. Beginne mit einer kurzen und prägnanten Zusammenfassung der Geschichte, die den Verlauf verständlich darstellt und die zentralen Ereignisse hervorhebt. Anschließend analysiere den Verlauf und arbeite heraus, wie sich die Entscheidungen und Handlungen der Figuren auf den Verlauf ausgewirkt haben. - Erstelle danach eine Liste mit positiven Entscheidungen, die innerhalb der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv auf den Verlauf ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind. Im Anschluss folgt eine Liste mit negativen Entscheidungen, die getroffen wurden. Erkläre hier ebenfalls, warum diese Entscheidungen negative Konsequenzen hatten und wie sie den Verlauf der Geschichte beeinflusst haben. - Ziehe daraus abgeleitete Erkenntnisse und übertrage sie auf die reale Welt. Erstelle eine Liste von praktischen Lehren, die aus der Geschichte gezogen werden können, und zeige auf, wie diese Erkenntnisse im Alltag oder in konkreten Situationen angewendet werden könnten. - Abschließend präsentiere eine Liste mit gezielten Fragen, die als Grundlage für eine tiefere Diskussion in der Gruppe dienen sollen. Diese Fragen sollten sowohl zum Nachdenken anregen als auch Raum für unterschiedliche Perspektiven schaffen und eine lebendige Diskussion ermöglichen. Antworte ausschließlich im gültigen JSON-Format, um sicherzustellen, dass deine Analyse korrekt dargestellt wird. Jede Antwort folgt exakt dieser Struktur: {\"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\",\"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\",\"Weitere positive Entscheidungen je nach Bedarf\"],\"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\",\"Weitere negative Entscheidungen je nach Bedarf\"],\"learnings\": [\"Erkenntnis 1\",\"Weitere Erkenntnisse je nach Bedarf\"],\"discussion_questions\": [\"Frage 1\",\"Weitere Fragen je nach Bedarf\"]}" });
@@ -498,7 +481,7 @@ namespace sustAInableEducation_backend.Repository
         /// <exception cref="HttpRequestException">If the request failed</exception>
         /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
         /// <exception cref="JsonException">If the response content could not be deserialized</exception>
-        private static async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
+        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(chatMessages);
@@ -534,6 +517,7 @@ namespace sustAInableEducation_backend.Repository
             try
             {
                 Response responseObject = JsonSerializer.Deserialize<Response>(responseString) ?? throw new InvalidOperationException("Response object is null");
+                _logger.LogDebug("Assistant response: {Response}", responseObject.Choices[0].Message.Content);
                 return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
             }
             catch (JsonException e)
@@ -581,6 +565,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (HttpRequestException e)
             {
+                _logger.LogError("Request for generating prompt failed with status code {StatusCode}", responsePrompt?.StatusCode);
                 throw new AIException($"Request for generating prompt failed with status code {responsePrompt?.StatusCode}", e);
             }
             string imagePrompt = null!;
@@ -591,6 +576,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (JsonException e)
             {
+                _logger.LogError("Failed to deserialize response content: {Exception}", e);
                 throw new AIException("Failed to deserialize response content", e);
             }
 
@@ -614,6 +600,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (HttpRequestException e)
             {
+                _logger.LogError("Request for image generation failed with status code {StatusCode}", responseImage?.StatusCode);
                 throw new AIException($"Request for image generation failed with status code {responseImage?.StatusCode}", e);
             }
             string base64String;
@@ -627,11 +614,13 @@ namespace sustAInableEducation_backend.Repository
                 }
                 else
                 {
+                    _logger.LogError("Image content is not a base64 string");
                     throw new InvalidOperationException("Image content is not a base64 string");
                 }
             }
             catch (JsonException e)
             {
+                _logger.LogError("Failed to deserialize response content: {Exception}", e);
                 throw new AIException("Failed to deserialize response content", e);
             }
             string folderName, fileName;
@@ -657,13 +646,64 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
+                _logger.LogError("Failed to save image: {Exception}", e);
                 throw new AIException("Failed to save image", e);
             }
 
             return Path.Combine("/", folderName, fileName).Replace("\\", "/");
         }
 
-/// <summary>
+        /// <summary>
+        /// Kacper Bohaczyk
+        /// </summary>
+        /// <param name="story"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        private static List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config, List<ChatMessage> chatMessages)
+        {
+
+
+
+            ArgumentNullException.ThrowIfNull(story);
+
+            string targetGroupString = story.TargetGroup switch
+            {
+                TargetGroup.PrimarySchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Volksschüler im Alter von 6 bis 10 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende einfache Sprache mit kurzen und klaren Sätzen.",
+                TargetGroup.MiddleSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe eins im Alter von 11 bis 14 Jahren. Pass deinen Stil an diese Zielgruppe und verwende einen passend anspruchsvollen Wortschatz und Satzbau.",
+                TargetGroup.HighSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe zwei im Alter von 15 bis 19 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende eine anspruchsvollere Sprache mit komplexeren Satzstrukturen und Fachbegriffen.",
+                _ => throw new ArgumentException("Invalid target group")
+            };
+            // Der Teil drüber soll zusätylich in den SystemPromt reinkommen
+
+            string systemPrompt = "Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit." +
+                                   "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
+                                   "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
+                                   "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
+                                   $"Formatierungsrichtlinien: {targetGroupString} " +
+                                  "{'Title': 'Der Titel des ganzen Quizes', 'NumberQuestions': 'Anzahl an Questions', 'Questions': {'Text': 'Der Titel der jeweiligen Frage','Text': 'Der Titel der jeweiligen Frage', 'Number': 'Die Nummer der Frage', 'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit', 'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', 'IsCorrect': 'Ein Wahrheitswert, der angibt, ob die Auswahl korrekt ist'}]}} " +
+                                   $"Das Quiz soll aus" +
+                                   string.Join(", ", config.Types.Select(t =>
+                                   {
+                                       return t switch
+                                       {
+                                           QuizType.MultipleResponse => "Multiple response-",
+                                           QuizType.SingleResponse => "Single response-",
+                                           QuizType.TrueFalse => "True/False-",
+                                           _ => throw new ArgumentException("Invalid quiz type")
+                                       };
+                                   })) +
+                                   $"Fragen bestehen und soll {config.NumberQuestions} Fragen lang sein";
+            ;
+            string userPrompt = "Generiere das Quiz auf Basis der durchlebten Story.";
+
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
+
+            return chatMessages;
+        }
+
+        /// <summary>
         /// Kacper Bohaczyk
         /// </summary>
         /// <param name="assistantContent"></param>
@@ -704,8 +744,8 @@ namespace sustAInableEducation_backend.Repository
         }
 
 
-       /// <summary>
-        /// Kacper Bohaczyk -----------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Kacper Bohaczyk
         /// </summary>
         /// <param name="story"></param>
         /// <param name="config"></param>
@@ -737,14 +777,12 @@ namespace sustAInableEducation_backend.Repository
             {
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             };
-                
+
 
             return erg;
             throw new NotImplementedException();
         }
     }
-
-    // ----------------------------------------------------------------------------------------------------------------------------
 
     // Benjamin Edlinger
     /// <summary>
@@ -982,13 +1020,13 @@ public class Questions
     [JsonPropertyName("Number")]
     public int Number { get; set; }
 
-     [JsonPropertyName("IsMultipleResponse")]
+    [JsonPropertyName("IsMultipleResponse")]
     public Boolean IsMultipleResponse { get; set; }
 
     [JsonPropertyName("Choices")]
     public List<Choices> Choices { get; set; } = null!;
 
-   
+
 
 
 }
