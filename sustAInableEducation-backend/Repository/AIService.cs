@@ -565,6 +565,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (HttpRequestException e)
             {
+                _logger.LogError("Request for generating prompt failed with status code {StatusCode}", responsePrompt?.StatusCode);
                 throw new AIException($"Request for generating prompt failed with status code {responsePrompt?.StatusCode}", e);
             }
             string imagePrompt = null!;
@@ -575,6 +576,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (JsonException e)
             {
+                _logger.LogError("Failed to deserialize response content: {Exception}", e);
                 throw new AIException("Failed to deserialize response content", e);
             }
 
@@ -598,6 +600,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (HttpRequestException e)
             {
+                _logger.LogError("Request for image generation failed with status code {StatusCode}", responseImage?.StatusCode);
                 throw new AIException($"Request for image generation failed with status code {responseImage?.StatusCode}", e);
             }
             string base64String;
@@ -611,11 +614,13 @@ namespace sustAInableEducation_backend.Repository
                 }
                 else
                 {
+                    _logger.LogError("Image content is not a base64 string");
                     throw new InvalidOperationException("Image content is not a base64 string");
                 }
             }
             catch (JsonException e)
             {
+                _logger.LogError("Failed to deserialize response content: {Exception}", e);
                 throw new AIException("Failed to deserialize response content", e);
             }
             string folderName, fileName;
@@ -641,6 +646,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
+                _logger.LogError("Failed to save image: {Exception}", e);
                 throw new AIException("Failed to save image", e);
             }
 
