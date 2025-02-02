@@ -476,12 +476,13 @@ namespace sustAInableEducation_backend.Repository
         /// <param name="chatMessages">The chat messages to fetch the assistant content for</param>
         /// <param name="temperature">The temperature for the assistant content</param>
         /// <param name="topP">The topP for the assistant content</param>
+        /// <param name="isJsonResponse">If the response should be a json object</param>
         /// <returns>The assistant content</returns>
         /// <exception cref="ArgumentException">If the chat messages are empty, the temperature is invalid or the topP is invalid</exception>
         /// <exception cref="HttpRequestException">If the request failed</exception>
         /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
         /// <exception cref="JsonException">If the response content could not be deserialized</exception>
-        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
+        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP, bool isJsonResponse = true)
         {
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(chatMessages);
@@ -489,16 +490,31 @@ namespace sustAInableEducation_backend.Repository
             if (temperature < 0 || temperature > 1) throw new ArgumentException("Invalid temperature");
             if (topP < 0 || topP > 1) throw new ArgumentException("Invalid topP");
 
-            HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
+            object requestBody;
+            if (isJsonResponse)
             {
-                Content = new StringContent(JsonSerializer.Serialize(new
+                requestBody = new
                 {
                     model = "meta-llama/Llama-3.3-70B-Instruct",
                     messages = chatMessages,
                     response_format = new { type = "json_object" },
                     temperature,
                     top_p = topP
-                }), Encoding.UTF8, "application/json")
+                };
+            }
+            else
+            {
+                requestBody = new
+                {
+                    model = "meta-llama/Llama-3.3-70B-Instruct",
+                    messages = chatMessages,
+                    temperature,
+                    top_p = topP
+                };
+            }
+            HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
             };
 
             HttpResponseMessage response = null!;
@@ -547,37 +563,16 @@ namespace sustAInableEducation_backend.Repository
                 new ChatMessage { Role = ValidRoles.System, Content = "You are a professional prompt engineer specializing in creating highly detailed and consistent image descriptions for AI-based image generation systems. Your primary objective is to craft prompts that result in visually harmonious and stylistically coherent images. Always ensure the description is vivid and specific, including details about the setting, characters, lighting, colors, mood, and artistic style. All elements in the prompt must align with the tone and narrative of the story, avoiding any contradictions or conflicting stylistic elements. Clearly define the artistic style, specifying an era, medium, or technique if necessary, such as \"a surreal oil painting from the 19th century\" or \"a cinematic, photorealistic scene with soft lighting.\" Focus on clarity and precision, ensuring the AI can interpret and render the intended image accurately. Your goal is to deliver high-quality, concise prompts that balance creativity and precision to produce visually stunning and cohesive outputs." },
                 new ChatMessage { Role = ValidRoles.User, Content = $"Create a vivid and detailed prompt for another AI to generate an image based on the following story: {text}. Ensure all elements, including setting, characters, lighting, mood, colors, and artistic style, align with the narrative and are stylistically consistent. Use clear and precise language to guide the image generation AI effectively." },
             ];
-            HttpRequestMessage requestPrompt = new(HttpMethod.Post, "/v1/openai/chat/completions")
-            {
-                Content = new StringContent(JsonSerializer.Serialize(new
-                {
-                    model = "meta-llama/Llama-3.3-70B-Instruct",
-                    messages = chatMessages,
-                }), Encoding.UTF8, "application/json")
-            };
-            HttpResponseMessage responsePrompt = null!;
-            string responseStringPrompt;
+
+            string imagePrompt;
             try
             {
-                responsePrompt = await _client.SendAsync(requestPrompt);
-                responsePrompt.EnsureSuccessStatusCode();
-                responseStringPrompt = await responsePrompt.Content.ReadAsStringAsync();
+                imagePrompt = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP, false);
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
-                _logger.LogError("Request for generating prompt failed with status code {StatusCode}", responsePrompt?.StatusCode);
-                throw new AIException($"Request for generating prompt failed with status code {responsePrompt?.StatusCode}", e);
-            }
-            string imagePrompt = null!;
-            try
-            {
-                Response responseObjectPrompt = JsonSerializer.Deserialize<Response>(responseStringPrompt) ?? throw new InvalidOperationException("Response object is null");
-                imagePrompt = responseObjectPrompt.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
-            }
-            catch (JsonException e)
-            {
-                _logger.LogError("Failed to deserialize response content: {Exception}", e);
-                throw new AIException("Failed to deserialize response content", e);
+                _logger.LogError("Failed to fetch the image prompt: {Exception}", e);
+                throw new AIException("Failed to fetch the image prompt", e);
             }
 
             HttpRequestMessage requestImage = new(HttpMethod.Post, "/v1/inference/black-forest-labs/FLUX-1-dev")
