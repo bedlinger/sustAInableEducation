@@ -72,9 +72,10 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
                         throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
@@ -90,9 +91,10 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
                         throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
@@ -136,9 +138,10 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
                         throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
@@ -154,9 +157,10 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
                         throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
@@ -200,9 +204,10 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
                         throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
@@ -220,9 +225,10 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
                         throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
@@ -250,9 +256,10 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to fetch the assistant content for result: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Failed to fetch the assistant content for result: {Exception}", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for result");
                         throw new AIException("Failed to fetch the assistant content for result", e);
                     }
                     attempt++;
@@ -268,9 +275,10 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
+                    _logger.LogError("Failed to deserialize the assistant content for result: {Exception}", e);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Failed to deserialize the assistant content for result: {Exception}", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for result");
                         throw new AIException("Failed to deserialize the assistant content for result", e);
                     }
                     attempt++;
