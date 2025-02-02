@@ -36,6 +36,7 @@ namespace sustAInableEducation_backend.Repository
                 _logger.LogError("Failed to initialise AI service: {Exception}", e);
                 throw;
             }
+            _logger.LogInformation("AI service initialised");
         }
 
         // Benjamin Edlinger
@@ -50,6 +51,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
+            _logger.LogInformation("Starting new story with title {Title}", story.Title);
             List<ChatMessage> chatMessages;
             try
             {
@@ -87,6 +89,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
+                    _logger.LogInformation("Successfully started story with title {Title}", story.Title);
                     return GetStoryPart(assistantContent);
                 }
                 catch (Exception e)
@@ -116,6 +119,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
+            _logger.LogInformation("Generating next part of story with title {Title}", story.Title);
             List<ChatMessage> chatMessages;
             try
             {
@@ -153,6 +157,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
+                    _logger.LogInformation("Successfully generated next part of story with title {Title}", story.Title);
                     return GetStoryPart(assistantContent).Item1;
                 }
                 catch (Exception e)
@@ -182,6 +187,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
+            _logger.LogInformation("Generating result of story with title {Title}", story.Title);
             List<ChatMessage> chatMessages;
             try
             {
@@ -271,6 +277,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
+                    _logger.LogInformation("Successfully generated result of story with title {Title}", story.Title);
                     return GetStoryResult(assistantContent, end);
                 }
                 catch (Exception e)
@@ -510,6 +517,7 @@ namespace sustAInableEducation_backend.Repository
             try
             {
                 Response responseObject = JsonSerializer.Deserialize<Response>(responseString) ?? throw new InvalidOperationException("Response object is null");
+                _logger.LogDebug("Assistant response: {Response}", responseObject.Choices[0].Message.Content);
                 return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
             }
             catch (JsonException e)
