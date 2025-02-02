@@ -11,14 +11,17 @@ namespace sustAInableEducation_backend.Repository
     {
         // Benjamin Edlinger
         private readonly IConfiguration _config;
+        private readonly ILogger _logger;
         private static HttpClient? _client;
         const int MAX_RETRY_ATTEMPTS = 2; // Maximum number of retry attempts for a failed request or deserialization
 
         // Benjamin Edlinger
-        public AIService(IConfiguration config)
+        public AIService(IConfiguration config, ILogger<AIService> logger)
         {
             ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(logger);
             _config = config;
+            _logger = logger;
             _client = new()
             {
                 BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
