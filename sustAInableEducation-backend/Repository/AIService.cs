@@ -267,63 +267,6 @@ namespace sustAInableEducation_backend.Repository
             throw new AIException("Failed to generate result after maximum retry attempts");
         }
 
-/// <summary>
-        /// Kacper Bohaczyk ----------------------------------------------------------------------------------------------------------------------
-        /// </summary>
-        /// <param name="story"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="ArgumentNullException"></exception>
-
-        private static List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config, List<ChatMessage> chatMessages)
-        {
-
-
-
-            ArgumentNullException.ThrowIfNull(story);
-
-            string targetGroupString = story.TargetGroup switch
-            {
-                TargetGroup.PrimarySchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Volksschüler im Alter von 6 bis 10 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende einfache Sprache mit kurzen und klaren Sätzen.",
-                TargetGroup.MiddleSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe eins im Alter von 11 bis 14 Jahren. Pass deinen Stil an diese Zielgruppe und verwende einen passend anspruchsvollen Wortschatz und Satzbau.",
-                TargetGroup.HighSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe zwei im Alter von 15 bis 19 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende eine anspruchsvollere Sprache mit komplexeren Satzstrukturen und Fachbegriffen.",
-                _ => throw new ArgumentException("Invalid target group")
-            };
-            // Der Teil drüber soll zusätylich in den SystemPromt reinkommen
-
-            string systemPrompt = "Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit." +
-                                   "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
-                                   "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
-                                   "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
-                                   $"Formatierungsrichtlinien: {targetGroupString} " +
-                                  "{'Title': 'Der Titel des ganzen Quizes', 'NumberQuestions': 'Anzahl an Questions', 'Questions': {'Text': 'Der Titel der jeweiligen Frage','Text': 'Der Titel der jeweiligen Frage', 'Number': 'Die Nummer der Frage', 'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit', 'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', 'IsCorrect': 'Ein Wahrheitswert, der angibt, ob die Auswahl korrekt ist'}]}} " +
-                                   $"Das Quiz soll aus" +
-                                   string.Join(", ", config.Types.Select(t =>
-                                   {
-                                       return t switch
-                                       {
-                                           QuizType.MultipleResponse => "Multiple response-",
-                                           QuizType.SingleResponse => "Single response-",
-                                           QuizType.TrueFalse => "True/False-",
-                                           _ => throw new ArgumentException("Invalid quiz type")
-                                       };
-                                   })) +
-                                   $"Fragen bestehen und soll {config.NumberQuestions} Fragen lang sein";
-            ;
-            string userPrompt = "Generiere das Quiz auf Basis der durchlebten Story.";
-
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
-
-            return chatMessages;
-        }
-
-
-
-
-        // --------------------------------------------------------------------------------------------------------------------------------------------
-
-
         // Benjamin Edlinger
         /// <summary>
         /// Rebuilds the chat messages of the story for the given story object
@@ -673,7 +616,57 @@ namespace sustAInableEducation_backend.Repository
             return Path.Combine("/", folderName, fileName).Replace("\\", "/");
         }
 
-/// <summary>
+        /// <summary>
+        /// Kacper Bohaczyk
+        /// </summary>
+        /// <param name="story"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        private static List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config, List<ChatMessage> chatMessages)
+        {
+
+
+
+            ArgumentNullException.ThrowIfNull(story);
+
+            string targetGroupString = story.TargetGroup switch
+            {
+                TargetGroup.PrimarySchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Volksschüler im Alter von 6 bis 10 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende einfache Sprache mit kurzen und klaren Sätzen.",
+                TargetGroup.MiddleSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe eins im Alter von 11 bis 14 Jahren. Pass deinen Stil an diese Zielgruppe und verwende einen passend anspruchsvollen Wortschatz und Satzbau.",
+                TargetGroup.HighSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe zwei im Alter von 15 bis 19 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende eine anspruchsvollere Sprache mit komplexeren Satzstrukturen und Fachbegriffen.",
+                _ => throw new ArgumentException("Invalid target group")
+            };
+            // Der Teil drüber soll zusätylich in den SystemPromt reinkommen
+
+            string systemPrompt = "Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit." +
+                                   "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
+                                   "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
+                                   "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
+                                   $"Formatierungsrichtlinien: {targetGroupString} " +
+                                  "{'Title': 'Der Titel des ganzen Quizes', 'NumberQuestions': 'Anzahl an Questions', 'Questions': {'Text': 'Der Titel der jeweiligen Frage','Text': 'Der Titel der jeweiligen Frage', 'Number': 'Die Nummer der Frage', 'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit', 'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', 'IsCorrect': 'Ein Wahrheitswert, der angibt, ob die Auswahl korrekt ist'}]}} " +
+                                   $"Das Quiz soll aus" +
+                                   string.Join(", ", config.Types.Select(t =>
+                                   {
+                                       return t switch
+                                       {
+                                           QuizType.MultipleResponse => "Multiple response-",
+                                           QuizType.SingleResponse => "Single response-",
+                                           QuizType.TrueFalse => "True/False-",
+                                           _ => throw new ArgumentException("Invalid quiz type")
+                                       };
+                                   })) +
+                                   $"Fragen bestehen und soll {config.NumberQuestions} Fragen lang sein";
+            ;
+            string userPrompt = "Generiere das Quiz auf Basis der durchlebten Story.";
+
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
+
+            return chatMessages;
+        }
+
+        /// <summary>
         /// Kacper Bohaczyk
         /// </summary>
         /// <param name="assistantContent"></param>
@@ -714,8 +707,8 @@ namespace sustAInableEducation_backend.Repository
         }
 
 
-       /// <summary>
-        /// Kacper Bohaczyk -----------------------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Kacper Bohaczyk
         /// </summary>
         /// <param name="story"></param>
         /// <param name="config"></param>
@@ -747,14 +740,12 @@ namespace sustAInableEducation_backend.Repository
             {
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             };
-                
+
 
             return erg;
             throw new NotImplementedException();
         }
     }
-
-    // ----------------------------------------------------------------------------------------------------------------------------
 
     // Benjamin Edlinger
     /// <summary>
@@ -992,13 +983,13 @@ public class Questions
     [JsonPropertyName("Number")]
     public int Number { get; set; }
 
-     [JsonPropertyName("IsMultipleResponse")]
+    [JsonPropertyName("IsMultipleResponse")]
     public Boolean IsMultipleResponse { get; set; }
 
     [JsonPropertyName("Choices")]
     public List<Choices> Choices { get; set; } = null!;
 
-   
+
 
 
 }
