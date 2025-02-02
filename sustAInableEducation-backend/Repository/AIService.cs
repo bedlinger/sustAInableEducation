@@ -12,7 +12,7 @@ namespace sustAInableEducation_backend.Repository
         // Benjamin Edlinger
         private readonly IConfiguration _config;
         private readonly ILogger _logger;
-        private static HttpClient? _client;
+        private readonly HttpClient _client;
         const int MAX_RETRY_ATTEMPTS = 2; // Maximum number of retry attempts for a failed request or deserialization
 
         // Benjamin Edlinger
@@ -24,7 +24,7 @@ namespace sustAInableEducation_backend.Repository
             _logger = logger;
             try
             {
-                _client = new()
+                _client = new HttpClient
                 {
                     BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
                     Timeout = TimeSpan.FromMinutes(5)
@@ -34,6 +34,7 @@ namespace sustAInableEducation_backend.Repository
             catch (Exception e)
             {
                 _logger.LogError("Failed to initialise AI service: {Exception}", e);
+                throw;
             }
         }
 
@@ -56,6 +57,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
+                _logger.LogError("Failed to rebuild chat messages because of error in story object: {Exception}", e);
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
@@ -72,7 +74,8 @@ namespace sustAInableEducation_backend.Repository
                 {
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to start story", e);
+                        _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
+                        throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -89,7 +92,8 @@ namespace sustAInableEducation_backend.Repository
                 {
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to start story", e);
+                        _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                        throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -117,6 +121,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
+                _logger.LogError("Failed to rebuild chat messages because of error in story object: {Exception}", e);
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
@@ -133,7 +138,8 @@ namespace sustAInableEducation_backend.Repository
                 {
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate next part", e);
+                        _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
+                        throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -150,7 +156,8 @@ namespace sustAInableEducation_backend.Repository
                 {
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate next part", e);
+                        _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                        throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -178,6 +185,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
+                _logger.LogError("Failed to rebuild chat messages because of error in story object: {Exception}", e);
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
@@ -194,7 +202,8 @@ namespace sustAInableEducation_backend.Repository
                 {
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate result", e);
+                        _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
+                        throw new AIException("Failed to fetch the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -213,7 +222,8 @@ namespace sustAInableEducation_backend.Repository
                 {
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate result", e);
+                        _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                        throw new AIException("Failed to deserialize the assistant content for story part", e);
                     }
                     attempt++;
                 }
@@ -226,7 +236,8 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
-                throw new ArgumentException("Failed to rebuild chat messages", e);
+                _logger.LogError("Failed to rebuild chat messages for result because of error in story object: {Exception}", e);
+                throw new ArgumentException("Failed to rebuild chat messages for result because of error in story object", e);
             }
 
             attempt = 0;
@@ -241,7 +252,8 @@ namespace sustAInableEducation_backend.Repository
                 {
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate result", e);
+                        _logger.LogError("Failed to fetch the assistant content for result: {Exception}", e);
+                        throw new AIException("Failed to fetch the assistant content for result", e);
                     }
                     attempt++;
                 }
@@ -258,7 +270,8 @@ namespace sustAInableEducation_backend.Repository
                 {
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        throw new AIException("Failed to generate result", e);
+                        _logger.LogError("Failed to deserialize the assistant content for result: {Exception}", e);
+                        throw new AIException("Failed to deserialize the assistant content for result", e);
                     }
                     attempt++;
                 }
@@ -318,7 +331,7 @@ namespace sustAInableEducation_backend.Repository
 
                 if (!part.value.ChosenNumber.HasValue || part.value.ChosenNumber < 1 || part.value.ChosenNumber > 4)
                 {
-                    throw new ArgumentException("Story part has invalid choice number");
+                    throw new ArgumentException($"Story part with id {part.value.Id} has invalid choice number");
                 }
                 else if (story.Length == part.index + 1)
                 {
@@ -342,11 +355,13 @@ namespace sustAInableEducation_backend.Repository
         /// <param name="end">The end of the story</param>
         /// <returns>The rebuilt chat messages</returns>
         /// <exception cref="ArgumentNullException">If the story object is null, the chat messages are null or the end is null</exception>
+        /// <exception cref="ArgumentException">If the chat messages list is empty</exception>
         private static List<ChatMessage> RebuildChatMessagesResult(Story story, List<ChatMessage> chatMessages, string end)
         {
             ArgumentNullException.ThrowIfNull(story);
             ArgumentNullException.ThrowIfNull(chatMessages);
             ArgumentNullException.ThrowIfNull(end);
+            if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
 
             chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = end });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = "Du schlüpfst in die Rolle einer Lehrkraft, welche die durchlebte Geschichte mit den Teilnehmern bespricht. Deine Aufgabe besteht nicht darin, die Handlung der Geschichte selbst zu analysieren, sondern das nachhaltige Thema zu beleuchten, das die Geschichte behandelt. Präsentiere die zentralen Aspekte faktenbasiert und leicht verständlich, um den Teilnehmern einen klaren Zugang zum Thema zu ermöglichen. Gleichzeitig sollst du die Teilnehmer dazu anregen, ihr eigenes Handeln und ihre Einstellungen kritisch zu hinterfragen. Schaffe Raum für eine offene und respektvolle Diskussion, in der unterschiedliche Perspektiven ausgetauscht werden können. Stelle gezielte Fragen, die zum Nachdenken anregen, und nutze klare Erklärungen sowie passende Beispiele, um komplexe Zusammenhänge greifbar zu machen. Die folgenden Inhalte sollen alle Teil deiner Analyse sein: - Erstelle eine umfassende Analyse der Geschichte, die sich aus mehreren klar strukturierten Teilen zusammensetzt. Beginne mit einer kurzen und prägnanten Zusammenfassung der Geschichte, die den Verlauf verständlich darstellt und die zentralen Ereignisse hervorhebt. Anschließend analysiere den Verlauf und arbeite heraus, wie sich die Entscheidungen und Handlungen der Figuren auf den Verlauf ausgewirkt haben. - Erstelle danach eine Liste mit positiven Entscheidungen, die innerhalb der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv auf den Verlauf ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind. Im Anschluss folgt eine Liste mit negativen Entscheidungen, die getroffen wurden. Erkläre hier ebenfalls, warum diese Entscheidungen negative Konsequenzen hatten und wie sie den Verlauf der Geschichte beeinflusst haben. - Ziehe daraus abgeleitete Erkenntnisse und übertrage sie auf die reale Welt. Erstelle eine Liste von praktischen Lehren, die aus der Geschichte gezogen werden können, und zeige auf, wie diese Erkenntnisse im Alltag oder in konkreten Situationen angewendet werden könnten. - Abschließend präsentiere eine Liste mit gezielten Fragen, die als Grundlage für eine tiefere Diskussion in der Gruppe dienen sollen. Diese Fragen sollten sowohl zum Nachdenken anregen als auch Raum für unterschiedliche Perspektiven schaffen und eine lebendige Diskussion ermöglichen. Antworte ausschließlich im gültigen JSON-Format, um sicherzustellen, dass deine Analyse korrekt dargestellt wird. Jede Antwort folgt exakt dieser Struktur: {\"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\",\"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\",\"Weitere positive Entscheidungen je nach Bedarf\"],\"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\",\"Weitere negative Entscheidungen je nach Bedarf\"],\"learnings\": [\"Erkenntnis 1\",\"Weitere Erkenntnisse je nach Bedarf\"],\"discussion_questions\": [\"Frage 1\",\"Weitere Fragen je nach Bedarf\"]}" });
@@ -451,7 +466,7 @@ namespace sustAInableEducation_backend.Repository
         /// <exception cref="HttpRequestException">If the request failed</exception>
         /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
         /// <exception cref="JsonException">If the response content could not be deserialized</exception>
-        private static async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
+        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP)
         {
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(chatMessages);
