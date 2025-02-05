@@ -660,13 +660,41 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(story);
 
+            string systemPrompt = "Du bist ein professioneller Prompt Engineer, der sich auf die Erstellung hochdetaillierter und konsistenter Bildbeschreibungen für KI-basierte Bildgenerierungssysteme spezialisiert hat. Deine Aufgabe ist es, Prompts zu entwerfen, die zu visuell harmonischen und stilistisch kohärenten Bildern führen. Achte darauf, dass die Beschreibung lebendig und spezifisch ist und alle relevanten Details umfasst – dazu gehören:"
+                + "- Setting: Ort, Umgebung und atmosphärische Details"
+                + "- Charaktere: Aussehen, Mimik, Kleidung und Ausdruck"
+                + "- Beleuchtung und Farben: Lichtverhältnisse, Farbschema, Stimmung"
+                + "- Stimmung und Atmosphäre: Emotionale Wirkung und erzählerischer Ton"
+                + "- Künstlerischer Stil: Angabe von Technik, Epoche oder Medium (z.B. „ein surrealistisches Ölgemälde des 19. Jahrhunderts“ oder „eine cinematische, photorealistische Szene mit weichem Licht“)"
+                + "Wichtig: Alle Elemente müssen im Einklang mit der Erzählung der Geschichte stehen, ohne widersprüchliche oder unpassende Stilmittel."
+                + "Zusätzlich ist der künstlerische Stil an die Zielgruppe anzupassen:"
+                + "- Volksschüler (6-10 Jahre): Verwende einen cartoonhaften, verspielten Stil mit kräftigen Primärfarben, einfachen Formen und freundlichen, fantasievollen Charakteren."
+                + "- Schüler der Sekundarstufe eins (11-14 Jahre): Wähle einen halb-realistischen oder stilisierten Stil mit lebendigen, klaren Farben und dynamischen Kompositionen, der Abenteuer und leichte Dramatik vermittelt."
+                + "- Schüler der Sekundarstufe zwei (15-19 Jahre): Setze auf einen detaillierten, photorealistischen Stil mit anspruchsvoller Beleuchtung, realistischen Texturen und einer ernsten, nachdenklichen Atmosphäre."
+                + "Dein Ziel ist es, prägnante, kreative und präzise Prompts zu erstellen, die die KI optimal anleiten, beeindruckende Bilder zu generieren.";
             string text = story.Result != null ? story.Result.Text : story.Parts.Last().Text;
             ArgumentException.ThrowIfNullOrEmpty(text);
+            string targetStyle = story.TargetGroup switch
+            {
+                TargetGroup.PrimarySchool => "- Für Volksschüler: cartoonhaft, verspielt und mit kräftigen Primärfarben.",
+                TargetGroup.MiddleSchool => "- Für Sekundarstufe eins: halb-realistischer/stilisierter Stil, lebendig und dynamisch.",
+                TargetGroup.HighSchool => "- Für Sekundarstufe zwei: detailliert, photorealistisch und ernst.",
+                _ => throw new ArgumentException("Invalid target group")
+            };
+            string userPrompt = $"Erstelle einen detaillierten und lebendigen Prompt für ein KI-basiertes Bildgenerierungssystem basierend auf folgendem Storypart: \"{text}\"."
+                + "Bitte stelle sicher, dass:"
+                + "- Alle relevanten Details wie Setting, Charaktere, Beleuchtung, Farben, Stimmung und künstlerischer Stil in der Bildbeschreibung enthalten sind."
+                + "- Die Bildbeschreibung vollständig mit der Erzählung übereinstimmt und alle Elemente stilistisch harmonisch aufeinander abgestimmt sind."
+                + "- Der künstlerische Stil passgenau an die Zielgruppe angepasst wird:"
+                + targetStyle
+                + "- Du eine klare, präzise und bildhafte Sprache verwendest, um die KI optimal anzuleiten."
+                + "Nutze diese Anweisungen, um einen hochwertigen, zielgruppenspezifischen Bildprompt zu generieren."
+                + "Antworte nur auf Englisch!";
 
             List<ChatMessage> chatMessages =
             [
-                new ChatMessage { Role = ValidRoles.System, Content = "You are a professional prompt engineer specializing in creating highly detailed and consistent image descriptions for AI-based image generation systems. Your primary objective is to craft prompts that result in visually harmonious and stylistically coherent images. Always ensure the description is vivid and specific, including details about the setting, characters, lighting, colors, mood, and artistic style. All elements in the prompt must align with the tone and narrative of the story, avoiding any contradictions or conflicting stylistic elements. Clearly define the artistic style, specifying an era, medium, or technique if necessary, such as \"a surreal oil painting from the 19th century\" or \"a cinematic, photorealistic scene with soft lighting.\" Focus on clarity and precision, ensuring the AI can interpret and render the intended image accurately. Your goal is to deliver high-quality, concise prompts that balance creativity and precision to produce visually stunning and cohesive outputs." },
-                new ChatMessage { Role = ValidRoles.User, Content = $"Create a vivid and detailed prompt for another AI to generate an image based on the following story: {text}. Ensure all elements, including setting, characters, lighting, mood, colors, and artistic style, align with the narrative and are stylistically consistent. Use clear and precise language to guide the image generation AI effectively." },
+                new ChatMessage { Role = ValidRoles.System, Content = systemPrompt },
+                new ChatMessage { Role = ValidRoles.User, Content = userPrompt }
             ];
 
             string imagePrompt;
