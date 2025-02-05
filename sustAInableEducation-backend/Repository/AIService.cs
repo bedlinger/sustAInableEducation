@@ -309,24 +309,64 @@ namespace sustAInableEducation_backend.Repository
 
             string targetGroupString = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Die Teilnehmer, welche deine Geschichte lesen, sind Volksschüler im Alter von 6 bis 10 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende einfache Sprache mit kurzen und klaren Sätzen. Achte darauf, dass die Geschichte einen direkten Bezug auf die Lebenswelt der Schüler hat, damit diese sich leicht in diese versetzen können.",
-                TargetGroup.MiddleSchool => "Die Teilnehmer, welche deine Geschichte lesen, sind Schüler der Sekundarstufe eins im Alter von 11 bis 14 Jahren. Pass deinen Stil an diese Zielgruppe und verwende einen passend anspruchsvollen Wortschatz und Satzbau. Die Entscheidungspunkte sollen moralische Dilemmas und praxisnahe Probleme beschreiben.",
-                TargetGroup.HighSchool => "Die Teilnehmer, welche deine Geschichte lesen, sind Schüler der Sekundarstufe zwei im Alter von 15 bis 19 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende eine anspruchsvollere Sprache mit komplexeren Satzstrukturen und Fachbegriffen. Die Geschichte soll die globale und wissenschaftliche Relevanz von Nachhaltigkeit aufzeigen. Entscheidungspunkte sollen kritisches Denken und die Analyse verschiedener Perspektiven fördern.",
+                TargetGroup.PrimarySchool => "Die Geschichte wird für Volksschüler (6-10 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                    + "- **Volksschüler:** Verwende einfache Sprache, kurze Sätze und erkläre schwierige Begriffe mit Alltagsbeispielen.",
+                TargetGroup.MiddleSchool => "Die Geschichte wird für Schüler der Sekundarstufe eins (10-14 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                    + "- **Sekundarstufe eins:** Nutze lebendige, verständliche Sprache und integriere moralische Konflikte, die greifbar sind.",
+                TargetGroup.HighSchool => "Die Geschichte wird für Schüler der Sekundarstufe zwei (15-19 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                    + "- **Sekundarstufe zwei:** Verwende komplexere Satzstrukturen, Fachbegriffe und beleuchte globale Zusammenhänge der Nachhaltigkeit.",
                 _ => throw new ArgumentException("Invalid target group")
             };
-            string systemPrompt = "Du bist ein Geschichtenerzähler, welcher eine interaktive und textbasierte Geschichte erstellt. Deine Geschichte ist immersiv, spannend und soll Teilnehmer zum Nachdenken über das Thema Nachhaltigkeit anstoßen. " +
-                "Deine Geschichte wird interaktiv über Entscheidungspunkte gesteuert. " +
-                $"Deine Geschichte umfasst genau {story.Length} Entscheidungspunkte. " +
-                "Entscheidungspunkte sind essenziell, denn sie bestimmen, wie die Geschichte weiter verläuft. Über Entscheidungspunkte stimmt immer eine Gruppe an Teilnehmer ab. Ein Entscheidungspunkt besteht aus vier Optionen, wie die Geschichte verlaufen wird. Nicht jede Option muss einen positiven Einfluss, sondern kann auch einen negativen Einfluss auf die Geschichte haben und soll die Teilnehmer vor diversen Aufgaben und Problemen stellen, welche die Teilnehmer durch ihre Entscheidungen lösen müssen. Der Einfluss einer Option wird mittels eines Werts zwischen -1 (negativer Einfluss) und 1 (positiver Einfluss) angegeben. Eine Option mit negativem Einfluss liegt näher an -1, und eine Option mit positivem Einfluss liegt näher an 1. Die Summe aller Einflüsse der vier Optionen in einen Entscheidungspunkt muss immer 0 ergeben. Wenn du bei einem Entscheidungspunkt in der Geschichte angelangt bist, präsentiere die vier Optionen und warte auf die Entscheidung der Teilnehmer." +
-                targetGroupString +
-                "Ebenso benötigt jede Geschichte einen Titel. Der Titel deiner Geschichte soll die Teilnehmer fesseln und Lust auf die kommende Geschichte machen, aber achte auch darauf, dass der Titel die Geschichte passend beschreibt. Füge zu jedem Abschnitt einen Zwischentitel hinzu, dieser soll den folgenden Abschnitt beschreiben." +
-                story.Topic +
-                "Antworte ausschließlich im gültigen JSON-Format, damit deine Antworten den Teilnehmern richtig dargestellt werden können. Jede deiner Antworten hat den identen JSON-Aufbau. Erstens den Titel der Geschichte, dieser bleibt immer gleich und der Zwischentitel des Abschnittes. Darauf folgt die Geschichte, also der Abschnitt der Geschichte, welchen du geschrieben hast. Dann die vier Optionen und jeweiligen Einfluss des Entscheidungspunkts in einem Array. Wenn es der letzte Teil der Geschichte ist, befülle das Array, mit den Optionen, mit leeren Inhalten, welche trotzdem valide sind. Hier ist die JSON-Struktur, welche immer geliefert werden soll: { \"title\": \"Titel der Geschichte\", \"intertitle\": \"Zwischentitel des Abschnitt\", \"story\": \"Aktueller Teil der Geschichte basierend auf den bisherigen Entscheidungen.\", \"options\": [ { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 1 Beschreibung\" }, { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 2 Beschreibung\" } , { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 3 Beschreibung\" } , { \"impact\": \"Wert zwischen -1 und 1\", \"text \": \"Option 4 Beschreibung\" } ] }";
+            string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
+                + "[Thema]"
+                + story.Topic
+                + "[Zielgruppe]"
+                + targetGroupString
+                + "[Interaktivität]"
+                + "Die Geschichte ist in mehrere Abschnitte unterteilt und enthält an jedem Entscheidungspunkt vier Optionen. Beachte:"
+                + "- Jede Option hat einen Einflusswert zwischen -1 (starker negativer Einfluss) und 1 (starker positiver Einfluss)."
+                + "- Die Summe der Einflusswerte der vier Optionen muss immer 0 ergeben."
+                + "- Bei jedem Entscheidungspunkt präsentiere die vier Optionen und warte auf die Wahl der Teilnehmer."
+                + "- Bei Erreichen des letzten Entscheidungspunkts, setze den Abschluss der Geschichte um."
+                + "[Formatierung]"
+                + "Antworte ausschließlich im folgenden JSON-Format:"
+                + "{"
+                + "  \"title\": \"Titel der Geschichte\","
+                + "  \"intertitle\": \"Zwischentitel des Abschnitts\","
+                + "  \"story\": \"Text des aktuellen Abschnitts.\","
+                + "  \"options\": ["
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+                + "  ]"
+                + "}"
+                + "Stelle sicher, dass das JSON fehlerfrei geparst werden kann."
+                + "[Kontext und Fortführung]"
+                + "Berücksichtige alle bisherigen Entscheidungen und ihre Konsequenzen. Jeder Abschnitt sollte nahtlos an den vorherigen anschließen und die Geschichte weiterentwickeln.";
+            string userPrompt = "Alle Teilnehmer sind bereit. Beginne bitte mit dem ersten Abschnitt deiner Geschichte zum Thema Nachhaltigkeit. "
+                + $"Die Geschichte umfasst insgesamt {story.Length} Entscheidungspunkte."
+                + "Bitte beachte:"
+                + "- Verwende den vorgegebenen Sprachstil für die jeweilige Zielgruppe."
+                + "- Erstelle den ersten Abschnitt inklusive eines Entscheidungspunkts, bei dem vier Optionen (mit jeweiligen Einflusswerten zwischen -1 und 1, deren Summe 0 ergeben muss) eingebaut werden."
+                + "- Die Antwort muss exakt im folgenden JSON-Format erfolgen:"
+                + "{"
+                + "  \"title\": \"Titel der Geschichte\","
+                + "  \"intertitle\": \"Zwischentitel des Abschnitts\","
+                + "  \"story\": \"Text des aktuellen Abschnitts.\","
+                + "  \"options\": ["
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+                + "  ]"
+                + "}"
+                + "Bitte beginne jetzt mit dem ersten Abschnitt.";
 
             List<ChatMessage> chatMessages =
             [
                 new() { Role = ValidRoles.System, Content = systemPrompt },
-                new() { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
+                new() { Role = ValidRoles.User, Content = userPrompt }
             ];
 
             foreach (var part in story.Parts.Select((value, index) => new { value, index }))
@@ -350,11 +390,44 @@ namespace sustAInableEducation_backend.Repository
                 }
                 else if (story.Length == part.index + 1)
                 {
-                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = $"Die Option {part.value.ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, nachdem es der letzte Entscheidungspunkt war, kommt nun der Schluss der Geschichte." });
+                    userPrompt = $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\" wurde gewählt. Du hast nun den letzten Entscheidungspunkt erreicht. Bitte schreibe den abschließenden Teil der Geschichte."
+                        + "Achte darauf:"
+                        + "- Führe die Geschichte konsequent zu einem runden Abschluss, indem du alle vorherigen Ereignisse berücksichtigst."
+                        + "- Im letzten Abschnitt soll es keinen weiteren Entscheidungspunkt mehr geben. Daher müssen die Optionen im JSON-Array als leere, aber valide Einträge erscheinen (z. B. leere Strings)."
+                        + "- Die Antwort muss weiterhin exakt im folgenden JSON-Format erfolgen:"
+                        + "{"
+                        + "  \"title\": \"Titel der Geschichte\","
+                        + "  \"intertitle\": \"Zwischentitel des Schlussabschnitts\","
+                        + "  \"story\": \"Abschließender Text der Geschichte, der alle Handlungsstränge zusammenführt.\","
+                        + "  \"options\": ["
+                        + "    { \"impact\": \"\", \"text\": \"\" },"
+                        + "    { \"impact\": \"\", \"text\": \"\" },"
+                        + "    { \"impact\": \"\", \"text\": \"\" },"
+                        + "    { \"impact\": \"\", \"text\": \"\" }"
+                        + "  ]"
+                        + "}"
+                        + "Bitte beende jetzt die Geschichte.";
+                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
                 }
                 else
                 {
-                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = $"Die Option {part.value.ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt." });
+                    userPrompt = $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\"  wurde gewählt. Bitte fahre mit dem nächsten Abschnitt der Geschichte fort. Achte darauf:"
+                        + "- Den bisherigen Kontext und die Konsequenzen der getroffenen Entscheidungen nahtlos einzubauen."
+                        + "- Einen neuen Entscheidungspunkt zu integrieren, der wieder vier Optionen enthält (mit den Einflusswerten, deren Summe exakt 0 beträgt)."
+                        + "- Den neuen Abschnitt im vorgegebenen JSON-Format auszugeben:"
+                        + "{"
+                        + "  \"title\": \"Titel der Geschichte\","
+                        + "  \"intertitle\": \"Zwischentitel des neuen Abschnitts\","
+                        + "  \"story\": \"Text des aktuellen Abschnitts, der auf den bisherigen Ereignissen aufbaut.\","
+                        + "  \"options\": ["
+                        + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
+                        + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
+                        + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
+                        + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+                        + "  ]"
+                        + "}"
+                        + "Bitte setze die Geschichte an dieser Stelle fort.";
+                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
                 }
             }
 
