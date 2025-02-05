@@ -317,6 +317,13 @@ namespace sustAInableEducation_backend.Repository
                     + "- Sekundarstufe zwei: Verwende komplexere Satzstrukturen, Fachbegriffe und beleuchte globale Zusammenhänge der Nachhaltigkeit.",
                 _ => throw new ArgumentException("Invalid target group")
             };
+            string lengthRequirement = story.TargetGroup switch
+            {
+                TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 60 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
+                TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 125 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
+                TargetGroup.HighSchool => "Jeder Abschnitt soll mindestens 160 Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
+                _ => throw new ArgumentException("Invalid target group")
+            };
             string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
                 + "[Thema]"
                 + story.Topic
@@ -328,6 +335,8 @@ namespace sustAInableEducation_backend.Repository
                 + "- Die Summe der Einflusswerte der vier Optionen muss immer 0 ergeben."
                 + "- Bei jedem Entscheidungspunkt präsentiere die vier Optionen und warte auf die Wahl der Teilnehmer."
                 + "- Bei Erreichen des letzten Entscheidungspunkts, setze den Abschluss der Geschichte um."
+                + "[Länge und Detailtiefe]"
+                + lengthRequirement
                 + "[Formatierung]"
                 + "Antworte ausschließlich im folgenden JSON-Format:"
                 + "{"
