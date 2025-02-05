@@ -310,11 +310,11 @@ namespace sustAInableEducation_backend.Repository
             string targetGroupString = story.TargetGroup switch
             {
                 TargetGroup.PrimarySchool => "Die Geschichte wird für Volksschüler (6-10 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
-                    + "- **Volksschüler:** Verwende einfache Sprache, kurze Sätze und erkläre schwierige Begriffe mit Alltagsbeispielen.",
+                    + "- Volksschüler: Verwende einfache Sprache, kurze Sätze und erkläre schwierige Begriffe mit Alltagsbeispielen.",
                 TargetGroup.MiddleSchool => "Die Geschichte wird für Schüler der Sekundarstufe eins (10-14 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
-                    + "- **Sekundarstufe eins:** Nutze lebendige, verständliche Sprache und integriere moralische Konflikte, die greifbar sind.",
+                    + "- Sekundarstufe eins: Nutze lebendige, verständliche Sprache und integriere moralische Konflikte, die greifbar sind.",
                 TargetGroup.HighSchool => "Die Geschichte wird für Schüler der Sekundarstufe zwei (15-19 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
-                    + "- **Sekundarstufe zwei:** Verwende komplexere Satzstrukturen, Fachbegriffe und beleuchte globale Zusammenhänge der Nachhaltigkeit.",
+                    + "- Sekundarstufe zwei: Verwende komplexere Satzstrukturen, Fachbegriffe und beleuchte globale Zusammenhänge der Nachhaltigkeit.",
                 _ => throw new ArgumentException("Invalid target group")
             };
             string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
@@ -452,8 +452,40 @@ namespace sustAInableEducation_backend.Repository
             if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
 
             chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = end });
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = "Du schlüpfst in die Rolle einer Lehrkraft, welche die durchlebte Geschichte mit den Teilnehmern bespricht. Deine Aufgabe besteht nicht darin, die Handlung der Geschichte selbst zu analysieren, sondern das nachhaltige Thema zu beleuchten, das die Geschichte behandelt. Präsentiere die zentralen Aspekte faktenbasiert und leicht verständlich, um den Teilnehmern einen klaren Zugang zum Thema zu ermöglichen. Gleichzeitig sollst du die Teilnehmer dazu anregen, ihr eigenes Handeln und ihre Einstellungen kritisch zu hinterfragen. Schaffe Raum für eine offene und respektvolle Diskussion, in der unterschiedliche Perspektiven ausgetauscht werden können. Stelle gezielte Fragen, die zum Nachdenken anregen, und nutze klare Erklärungen sowie passende Beispiele, um komplexe Zusammenhänge greifbar zu machen. Die folgenden Inhalte sollen alle Teil deiner Analyse sein: - Erstelle eine umfassende Analyse der Geschichte, die sich aus mehreren klar strukturierten Teilen zusammensetzt. Beginne mit einer kurzen und prägnanten Zusammenfassung der Geschichte, die den Verlauf verständlich darstellt und die zentralen Ereignisse hervorhebt. Anschließend analysiere den Verlauf und arbeite heraus, wie sich die Entscheidungen und Handlungen der Figuren auf den Verlauf ausgewirkt haben. - Erstelle danach eine Liste mit positiven Entscheidungen, die innerhalb der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv auf den Verlauf ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind. Im Anschluss folgt eine Liste mit negativen Entscheidungen, die getroffen wurden. Erkläre hier ebenfalls, warum diese Entscheidungen negative Konsequenzen hatten und wie sie den Verlauf der Geschichte beeinflusst haben. - Ziehe daraus abgeleitete Erkenntnisse und übertrage sie auf die reale Welt. Erstelle eine Liste von praktischen Lehren, die aus der Geschichte gezogen werden können, und zeige auf, wie diese Erkenntnisse im Alltag oder in konkreten Situationen angewendet werden könnten. - Abschließend präsentiere eine Liste mit gezielten Fragen, die als Grundlage für eine tiefere Diskussion in der Gruppe dienen sollen. Diese Fragen sollten sowohl zum Nachdenken anregen als auch Raum für unterschiedliche Perspektiven schaffen und eine lebendige Diskussion ermöglichen. Antworte ausschließlich im gültigen JSON-Format, um sicherzustellen, dass deine Analyse korrekt dargestellt wird. Jede Antwort folgt exakt dieser Struktur: {\"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\",\"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\",\"Weitere positive Entscheidungen je nach Bedarf\"],\"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\",\"Weitere negative Entscheidungen je nach Bedarf\"],\"learnings\": [\"Erkenntnis 1\",\"Weitere Erkenntnisse je nach Bedarf\"],\"discussion_questions\": [\"Frage 1\",\"Weitere Fragen je nach Bedarf\"]}" });
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Die Geschichte ist soeben vorbei. Du kannst jetzt die Analyse der durchlebten Geschichte erstellen." });
+            string targetGroupString = story.TargetGroup switch
+            {
+                TargetGroup.PrimarySchool => "Für Volksschüler (6-10 Jahre): Verwende einfache, bildhafte Sprache, kurze Sätze und anschauliche Beispiele, die aus dem Alltag der Kinder stammen.",
+                TargetGroup.MiddleSchool => "- Für Schüler der Sekundarstufe eins (11-14 Jahre): Nutze einen lebendigen, verständlichen Sprachstil und integriere altersgerechte Erklärungen und Beispiele. Baue moralische Konflikte ein, die für diesen Altersbereich nachvollziehbar sind.",
+                TargetGroup.HighSchool => "- Für Schüler der Sekundarstufe zwei (15-19 Jahre): Verwende einen anspruchsvolleren Sprachstil mit komplexeren Satzstrukturen und gegebenenfalls Fachbegriffen, um tiefere Zusammenhänge und globale Perspektiven zu beleuchten.",
+                _ => throw new ArgumentException("Invalid target group")
+            };
+            string systemPrompt = "Du übernimmst die Rolle einer Lehrkraft, die gemeinsam mit den Teilnehmern die gerade durchlebte Geschichte zum Thema Nachhaltigkeit reflektiert."
+                + "Bitte beachte dabei, dass du deinen Sprachstil, die Beispiele und die Diskussionsfragen an die jeweilige Zielgruppe anpasst:"
+                + targetGroupString
+                + "Deine Aufgabe besteht darin, den thematischen Kontext und die getroffenen Entscheidungen faktenbasiert und verständlich zu analysieren. Bitte folge diesen Schritten:"
+                + "[Zusammenfassung und Analyse]"
+                + "- Fasse die Geschichte in einem kurzen, prägnanten Fließtext zusammen. Stelle den Verlauf und die zentralen Ereignisse übersichtlich dar."
+                + "- Analysiere, wie die Entscheidungen und Handlungen der Charaktere den Verlauf der Geschichte beeinflusst haben."
+                + "[Positive und negative Entscheidungen]"
+                + "- Erstelle eine Liste der positiven Entscheidungen, die in der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind."
+                + "- Erstelle eine Liste der negativen Entscheidungen. Beschreibe jeweils, welche negativen Konsequenzen daraus resultierten und wie sie den Verlauf der Geschichte beeinflusst haben."
+                + "[Praktische Lehren]"
+                + "- Ziehe konkrete Lehren aus der Geschichte und übertrage diese Erkenntnisse auf die reale Welt. Zeige auf, wie diese praktischen Erkenntnisse im Alltag oder in spezifischen Situationen angewendet werden können."
+                + "[Diskussionsfragen]"
+                + "- Formuliere gezielte Fragen, die zu einer offenen und respektvollen Diskussion anregen. Passe die Komplexität der Fragen an die Zielgruppe an, sodass sie zum Nachdenken anregen und unterschiedliche Perspektiven einbeziehen."
+                + "Wichtig: Deine Analyse muss den nachhaltigen Kontext der Geschichte widerspiegeln und gleichzeitig sprachlich sowie inhaltlich auf die Zielgruppe abgestimmt sein."
+                + "Bitte antworte ausschließlich im gültigen JSON-Format, damit deine Antwort korrekt dargestellt wird."
+                + "Das erwartete JSON-Format lautet:"
+                + "{"
+                + "  \"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\","
+                + "  \"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\", \"Weitere positive Entscheidungen je nach Bedarf\"],"
+                + "  \"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\", \"Weitere negative Entscheidungen je nach Bedarf\"],"
+                + "  \"learnings\": [\"Erkenntnis 1\", \"Weitere Erkenntnisse je nach Bedarf\"],"
+                + "  \"discussion_questions\": [\"Frage 1\", \"Weitere Fragen je nach Bedarf\"]"
+                + "}";
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
+            string userPrompt = "Die Geschichte ist soeben beendet. Du kannst nun die Analyse der durchlebten Geschichte erstellen. Denke daran, deinen Sprachstil, deine Beispiele und Diskussionsfragen an die Zielgruppe anzupassen. Bitte folge dabei genau den genannten Anweisungen und dem vorgegebenen JSON-Format.";
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
 
             if (story.Result != null)
             {
