@@ -309,24 +309,73 @@ namespace sustAInableEducation_backend.Repository
 
             string targetGroupString = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Die Teilnehmer, welche deine Geschichte lesen, sind Volksschüler im Alter von 6 bis 10 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende einfache Sprache mit kurzen und klaren Sätzen. Achte darauf, dass die Geschichte einen direkten Bezug auf die Lebenswelt der Schüler hat, damit diese sich leicht in diese versetzen können.",
-                TargetGroup.MiddleSchool => "Die Teilnehmer, welche deine Geschichte lesen, sind Schüler der Sekundarstufe eins im Alter von 11 bis 14 Jahren. Pass deinen Stil an diese Zielgruppe und verwende einen passend anspruchsvollen Wortschatz und Satzbau. Die Entscheidungspunkte sollen moralische Dilemmas und praxisnahe Probleme beschreiben.",
-                TargetGroup.HighSchool => "Die Teilnehmer, welche deine Geschichte lesen, sind Schüler der Sekundarstufe zwei im Alter von 15 bis 19 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende eine anspruchsvollere Sprache mit komplexeren Satzstrukturen und Fachbegriffen. Die Geschichte soll die globale und wissenschaftliche Relevanz von Nachhaltigkeit aufzeigen. Entscheidungspunkte sollen kritisches Denken und die Analyse verschiedener Perspektiven fördern.",
+                TargetGroup.PrimarySchool => "Die Geschichte wird für Volksschüler (6-10 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                    + "- Volksschüler: Verwende einfache Sprache, kurze Sätze und erkläre schwierige Begriffe mit Alltagsbeispielen.",
+                TargetGroup.MiddleSchool => "Die Geschichte wird für Schüler der Sekundarstufe eins (10-14 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                    + "- Sekundarstufe eins: Nutze lebendige, verständliche Sprache und integriere moralische Konflikte, die greifbar sind.",
+                TargetGroup.HighSchool => "Die Geschichte wird für Schüler der Sekundarstufe zwei (15-19 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                    + "- Sekundarstufe zwei: Verwende komplexere Satzstrukturen, Fachbegriffe und beleuchte globale Zusammenhänge der Nachhaltigkeit.",
                 _ => throw new ArgumentException("Invalid target group")
             };
-            string systemPrompt = "Du bist ein Geschichtenerzähler, welcher eine interaktive und textbasierte Geschichte erstellt. Deine Geschichte ist immersiv, spannend und soll Teilnehmer zum Nachdenken über das Thema Nachhaltigkeit anstoßen. " +
-                "Deine Geschichte wird interaktiv über Entscheidungspunkte gesteuert. " +
-                $"Deine Geschichte umfasst genau {story.Length} Entscheidungspunkte. " +
-                "Entscheidungspunkte sind essenziell, denn sie bestimmen, wie die Geschichte weiter verläuft. Über Entscheidungspunkte stimmt immer eine Gruppe an Teilnehmer ab. Ein Entscheidungspunkt besteht aus vier Optionen, wie die Geschichte verlaufen wird. Nicht jede Option muss einen positiven Einfluss, sondern kann auch einen negativen Einfluss auf die Geschichte haben und soll die Teilnehmer vor diversen Aufgaben und Problemen stellen, welche die Teilnehmer durch ihre Entscheidungen lösen müssen. Der Einfluss einer Option wird mittels eines Werts zwischen -1 (negativer Einfluss) und 1 (positiver Einfluss) angegeben. Eine Option mit negativem Einfluss liegt näher an -1, und eine Option mit positivem Einfluss liegt näher an 1. Die Summe aller Einflüsse der vier Optionen in einen Entscheidungspunkt muss immer 0 ergeben. Wenn du bei einem Entscheidungspunkt in der Geschichte angelangt bist, präsentiere die vier Optionen und warte auf die Entscheidung der Teilnehmer." +
-                targetGroupString +
-                "Ebenso benötigt jede Geschichte einen Titel. Der Titel deiner Geschichte soll die Teilnehmer fesseln und Lust auf die kommende Geschichte machen, aber achte auch darauf, dass der Titel die Geschichte passend beschreibt. Füge zu jedem Abschnitt einen Zwischentitel hinzu, dieser soll den folgenden Abschnitt beschreiben." +
-                story.Topic +
-                "Antworte ausschließlich im gültigen JSON-Format, damit deine Antworten den Teilnehmern richtig dargestellt werden können. Jede deiner Antworten hat den identen JSON-Aufbau. Erstens den Titel der Geschichte, dieser bleibt immer gleich und der Zwischentitel des Abschnittes. Darauf folgt die Geschichte, also der Abschnitt der Geschichte, welchen du geschrieben hast. Dann die vier Optionen und jeweiligen Einfluss des Entscheidungspunkts in einem Array. Wenn es der letzte Teil der Geschichte ist, befülle das Array, mit den Optionen, mit leeren Inhalten, welche trotzdem valide sind. Hier ist die JSON-Struktur, welche immer geliefert werden soll: { \"title\": \"Titel der Geschichte\", \"intertitle\": \"Zwischentitel des Abschnitt\", \"story\": \"Aktueller Teil der Geschichte basierend auf den bisherigen Entscheidungen.\", \"options\": [ { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 1 Beschreibung\" }, { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 2 Beschreibung\" } , { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Option 3 Beschreibung\" } , { \"impact\": \"Wert zwischen -1 und 1\", \"text \": \"Option 4 Beschreibung\" } ] }";
+            string lengthRequirement = story.TargetGroup switch
+            {
+                TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 60 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
+                TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 125 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
+                TargetGroup.HighSchool => "Jeder Abschnitt soll mindestens 160 Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
+                _ => throw new ArgumentException("Invalid target group")
+            };
+            string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
+                + "[Thema]"
+                + story.Topic
+                + "[Zielgruppe]"
+                + targetGroupString
+                + "[Interaktivität]"
+                + "Die Geschichte ist in mehrere Abschnitte unterteilt und enthält an jedem Entscheidungspunkt vier Optionen. Beachte:"
+                + "- Jede Option hat einen Einflusswert zwischen -1 (starker negativer Einfluss) und 1 (starker positiver Einfluss)."
+                + "- Die Summe der Einflusswerte der vier Optionen muss immer 0 ergeben."
+                + "- Bei jedem Entscheidungspunkt präsentiere die vier Optionen und warte auf die Wahl der Teilnehmer."
+                + "- Bei Erreichen des letzten Entscheidungspunkts, setze den Abschluss der Geschichte um."
+                + "[Länge und Detailtiefe]"
+                + lengthRequirement
+                + "[Formatierung]"
+                + "Antworte ausschließlich im folgenden JSON-Format:"
+                + "{"
+                + "  \"title\": \"Titel der Geschichte\","
+                + "  \"intertitle\": \"Zwischentitel des Abschnitts\","
+                + "  \"story\": \"Text des aktuellen Abschnitts.\","
+                + "  \"options\": ["
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+                + "  ]"
+                + "}"
+                + "Stelle sicher, dass das JSON fehlerfrei geparst werden kann."
+                + "[Kontext und Fortführung]"
+                + "Berücksichtige alle bisherigen Entscheidungen und ihre Konsequenzen. Jeder Abschnitt sollte nahtlos an den vorherigen anschließen und die Geschichte weiterentwickeln.";
+            string userPrompt = "Alle Teilnehmer sind bereit. Beginne bitte mit dem ersten Abschnitt deiner Geschichte zum Thema Nachhaltigkeit. "
+                + $"Die Geschichte umfasst insgesamt {story.Length} Entscheidungspunkte."
+                + "Bitte beachte:"
+                + "- Verwende den vorgegebenen Sprachstil für die jeweilige Zielgruppe."
+                + "- Erstelle den ersten Abschnitt inklusive eines Entscheidungspunkts, bei dem vier Optionen (mit jeweiligen Einflusswerten zwischen -1 und 1, deren Summe 0 ergeben muss) eingebaut werden."
+                + "- Die Antwort muss exakt im folgenden JSON-Format erfolgen:"
+                + "{"
+                + "  \"title\": \"Titel der Geschichte\","
+                + "  \"intertitle\": \"Zwischentitel des Abschnitts\","
+                + "  \"story\": \"Text des aktuellen Abschnitts.\","
+                + "  \"options\": ["
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
+                + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+                + "  ]"
+                + "}"
+                + "Bitte beginne jetzt mit dem ersten Abschnitt.";
 
             List<ChatMessage> chatMessages =
             [
                 new() { Role = ValidRoles.System, Content = systemPrompt },
-                new() { Role = ValidRoles.User, Content = "Alle Teilnehmer sind bereit, beginne mit dem ersten Teil der Geschichte." }
+                new() { Role = ValidRoles.User, Content = userPrompt }
             ];
 
             foreach (var part in story.Parts.Select((value, index) => new { value, index }))
@@ -350,11 +399,44 @@ namespace sustAInableEducation_backend.Repository
                 }
                 else if (story.Length == part.index + 1)
                 {
-                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = $"Die Option {part.value.ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, nachdem es der letzte Entscheidungspunkt war, kommt nun der Schluss der Geschichte." });
+                    userPrompt = $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\" wurde gewählt. Du hast nun den letzten Entscheidungspunkt erreicht. Bitte schreibe den abschließenden Teil der Geschichte."
+                        + "Achte darauf:"
+                        + "- Führe die Geschichte konsequent zu einem runden Abschluss, indem du alle vorherigen Ereignisse berücksichtigst."
+                        + "- Im letzten Abschnitt soll es keinen weiteren Entscheidungspunkt mehr geben. Daher müssen die Optionen im JSON-Array als leere, aber valide Einträge erscheinen (z. B. leere Strings)."
+                        + "- Die Antwort muss weiterhin exakt im folgenden JSON-Format erfolgen:"
+                        + "{"
+                        + "  \"title\": \"Titel der Geschichte\","
+                        + "  \"intertitle\": \"Zwischentitel des Schlussabschnitts\","
+                        + "  \"story\": \"Abschließender Text der Geschichte, der alle Handlungsstränge zusammenführt.\","
+                        + "  \"options\": ["
+                        + "    { \"impact\": \"\", \"text\": \"\" },"
+                        + "    { \"impact\": \"\", \"text\": \"\" },"
+                        + "    { \"impact\": \"\", \"text\": \"\" },"
+                        + "    { \"impact\": \"\", \"text\": \"\" }"
+                        + "  ]"
+                        + "}"
+                        + "Bitte beende jetzt die Geschichte.";
+                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
                 }
                 else
                 {
-                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = $"Die Option {part.value.ChosenNumber} wurde gewählt. Führe die Geschichte mit dieser Option weiter fort, bis zum nächsten Entscheidungspunkt." });
+                    userPrompt = $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\"  wurde gewählt. Bitte fahre mit dem nächsten Abschnitt der Geschichte fort. Achte darauf:"
+                        + "- Den bisherigen Kontext und die Konsequenzen der getroffenen Entscheidungen nahtlos einzubauen."
+                        + "- Einen neuen Entscheidungspunkt zu integrieren, der wieder vier Optionen enthält (mit den Einflusswerten, deren Summe exakt 0 beträgt)."
+                        + "- Den neuen Abschnitt im vorgegebenen JSON-Format auszugeben:"
+                        + "{"
+                        + "  \"title\": \"Titel der Geschichte\","
+                        + "  \"intertitle\": \"Zwischentitel des neuen Abschnitts\","
+                        + "  \"story\": \"Text des aktuellen Abschnitts, der auf den bisherigen Ereignissen aufbaut.\","
+                        + "  \"options\": ["
+                        + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
+                        + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
+                        + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
+                        + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+                        + "  ]"
+                        + "}"
+                        + "Bitte setze die Geschichte an dieser Stelle fort.";
+                    chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
                 }
             }
 
@@ -379,8 +461,40 @@ namespace sustAInableEducation_backend.Repository
             if (chatMessages.Count == 0) throw new ArgumentException("No messages to send");
 
             chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = end });
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = "Du schlüpfst in die Rolle einer Lehrkraft, welche die durchlebte Geschichte mit den Teilnehmern bespricht. Deine Aufgabe besteht nicht darin, die Handlung der Geschichte selbst zu analysieren, sondern das nachhaltige Thema zu beleuchten, das die Geschichte behandelt. Präsentiere die zentralen Aspekte faktenbasiert und leicht verständlich, um den Teilnehmern einen klaren Zugang zum Thema zu ermöglichen. Gleichzeitig sollst du die Teilnehmer dazu anregen, ihr eigenes Handeln und ihre Einstellungen kritisch zu hinterfragen. Schaffe Raum für eine offene und respektvolle Diskussion, in der unterschiedliche Perspektiven ausgetauscht werden können. Stelle gezielte Fragen, die zum Nachdenken anregen, und nutze klare Erklärungen sowie passende Beispiele, um komplexe Zusammenhänge greifbar zu machen. Die folgenden Inhalte sollen alle Teil deiner Analyse sein: - Erstelle eine umfassende Analyse der Geschichte, die sich aus mehreren klar strukturierten Teilen zusammensetzt. Beginne mit einer kurzen und prägnanten Zusammenfassung der Geschichte, die den Verlauf verständlich darstellt und die zentralen Ereignisse hervorhebt. Anschließend analysiere den Verlauf und arbeite heraus, wie sich die Entscheidungen und Handlungen der Figuren auf den Verlauf ausgewirkt haben. - Erstelle danach eine Liste mit positiven Entscheidungen, die innerhalb der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv auf den Verlauf ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind. Im Anschluss folgt eine Liste mit negativen Entscheidungen, die getroffen wurden. Erkläre hier ebenfalls, warum diese Entscheidungen negative Konsequenzen hatten und wie sie den Verlauf der Geschichte beeinflusst haben. - Ziehe daraus abgeleitete Erkenntnisse und übertrage sie auf die reale Welt. Erstelle eine Liste von praktischen Lehren, die aus der Geschichte gezogen werden können, und zeige auf, wie diese Erkenntnisse im Alltag oder in konkreten Situationen angewendet werden könnten. - Abschließend präsentiere eine Liste mit gezielten Fragen, die als Grundlage für eine tiefere Diskussion in der Gruppe dienen sollen. Diese Fragen sollten sowohl zum Nachdenken anregen als auch Raum für unterschiedliche Perspektiven schaffen und eine lebendige Diskussion ermöglichen. Antworte ausschließlich im gültigen JSON-Format, um sicherzustellen, dass deine Analyse korrekt dargestellt wird. Jede Antwort folgt exakt dieser Struktur: {\"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\",\"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\",\"Weitere positive Entscheidungen je nach Bedarf\"],\"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\",\"Weitere negative Entscheidungen je nach Bedarf\"],\"learnings\": [\"Erkenntnis 1\",\"Weitere Erkenntnisse je nach Bedarf\"],\"discussion_questions\": [\"Frage 1\",\"Weitere Fragen je nach Bedarf\"]}" });
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = "Die Geschichte ist soeben vorbei. Du kannst jetzt die Analyse der durchlebten Geschichte erstellen." });
+            string targetGroupString = story.TargetGroup switch
+            {
+                TargetGroup.PrimarySchool => "Für Volksschüler (6-10 Jahre): Verwende einfache, bildhafte Sprache, kurze Sätze und anschauliche Beispiele, die aus dem Alltag der Kinder stammen.",
+                TargetGroup.MiddleSchool => "- Für Schüler der Sekundarstufe eins (11-14 Jahre): Nutze einen lebendigen, verständlichen Sprachstil und integriere altersgerechte Erklärungen und Beispiele. Baue moralische Konflikte ein, die für diesen Altersbereich nachvollziehbar sind.",
+                TargetGroup.HighSchool => "- Für Schüler der Sekundarstufe zwei (15-19 Jahre): Verwende einen anspruchsvolleren Sprachstil mit komplexeren Satzstrukturen und gegebenenfalls Fachbegriffen, um tiefere Zusammenhänge und globale Perspektiven zu beleuchten.",
+                _ => throw new ArgumentException("Invalid target group")
+            };
+            string systemPrompt = "Du übernimmst die Rolle einer Lehrkraft, die gemeinsam mit den Teilnehmern die gerade durchlebte Geschichte zum Thema Nachhaltigkeit reflektiert."
+                + "Bitte beachte dabei, dass du deinen Sprachstil, die Beispiele und die Diskussionsfragen an die jeweilige Zielgruppe anpasst:"
+                + targetGroupString
+                + "Deine Aufgabe besteht darin, den thematischen Kontext und die getroffenen Entscheidungen faktenbasiert und verständlich zu analysieren. Bitte folge diesen Schritten:"
+                + "[Zusammenfassung und Analyse]"
+                + "- Fasse die Geschichte in einem kurzen, prägnanten Fließtext zusammen. Stelle den Verlauf und die zentralen Ereignisse übersichtlich dar."
+                + "- Analysiere, wie die Entscheidungen und Handlungen der Charaktere den Verlauf der Geschichte beeinflusst haben."
+                + "[Positive und negative Entscheidungen]"
+                + "- Erstelle eine Liste der positiven Entscheidungen, die in der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind."
+                + "- Erstelle eine Liste der negativen Entscheidungen. Beschreibe jeweils, welche negativen Konsequenzen daraus resultierten und wie sie den Verlauf der Geschichte beeinflusst haben."
+                + "[Praktische Lehren]"
+                + "- Ziehe konkrete Lehren aus der Geschichte und übertrage diese Erkenntnisse auf die reale Welt. Zeige auf, wie diese praktischen Erkenntnisse im Alltag oder in spezifischen Situationen angewendet werden können."
+                + "[Diskussionsfragen]"
+                + "- Formuliere gezielte Fragen, die zu einer offenen und respektvollen Diskussion anregen. Passe die Komplexität der Fragen an die Zielgruppe an, sodass sie zum Nachdenken anregen und unterschiedliche Perspektiven einbeziehen."
+                + "Wichtig: Deine Analyse muss den nachhaltigen Kontext der Geschichte widerspiegeln und gleichzeitig sprachlich sowie inhaltlich auf die Zielgruppe abgestimmt sein."
+                + "Bitte antworte ausschließlich im gültigen JSON-Format, damit deine Antwort korrekt dargestellt wird."
+                + "Das erwartete JSON-Format lautet:"
+                + "{"
+                + "  \"summary\": \"Zusammenfassung und Analyse der Geschichte als Fließtext\","
+                + "  \"positive_choices\": [\"Beschreibung der positiven Entscheidung 1\", \"Weitere positive Entscheidungen je nach Bedarf\"],"
+                + "  \"negative_choices\": [\"Beschreibung der negativen Entscheidung 1\", \"Weitere negative Entscheidungen je nach Bedarf\"],"
+                + "  \"learnings\": [\"Erkenntnis 1\", \"Weitere Erkenntnisse je nach Bedarf\"],"
+                + "  \"discussion_questions\": [\"Frage 1\", \"Weitere Fragen je nach Bedarf\"]"
+                + "}";
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
+            string userPrompt = "Die Geschichte ist soeben beendet. Du kannst nun die Analyse der durchlebten Geschichte erstellen. Denke daran, deinen Sprachstil, deine Beispiele und Diskussionsfragen an die Zielgruppe anzupassen. Bitte folge dabei genau den genannten Anweisungen und dem vorgegebenen JSON-Format.";
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
 
             if (story.Result != null)
             {
@@ -555,13 +669,41 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(story);
 
+            string systemPrompt = "Du bist ein professioneller Prompt Engineer, der sich auf die Erstellung hochdetaillierter und konsistenter Bildbeschreibungen für KI-basierte Bildgenerierungssysteme spezialisiert hat. Deine Aufgabe ist es, Prompts zu entwerfen, die zu visuell harmonischen und stilistisch kohärenten Bildern führen. Achte darauf, dass die Beschreibung lebendig und spezifisch ist und alle relevanten Details umfasst – dazu gehören:"
+                + "- Setting: Ort, Umgebung und atmosphärische Details"
+                + "- Charaktere: Aussehen, Mimik, Kleidung und Ausdruck"
+                + "- Beleuchtung und Farben: Lichtverhältnisse, Farbschema, Stimmung"
+                + "- Stimmung und Atmosphäre: Emotionale Wirkung und erzählerischer Ton"
+                + "- Künstlerischer Stil: Angabe von Technik, Epoche oder Medium (z.B. „ein surrealistisches Ölgemälde des 19. Jahrhunderts“ oder „eine cinematische, photorealistische Szene mit weichem Licht“)"
+                + "Wichtig: Alle Elemente müssen im Einklang mit der Erzählung der Geschichte stehen, ohne widersprüchliche oder unpassende Stilmittel."
+                + "Zusätzlich ist der künstlerische Stil an die Zielgruppe anzupassen:"
+                + "- Volksschüler (6-10 Jahre): Verwende einen cartoonhaften, verspielten Stil mit kräftigen Primärfarben, einfachen Formen und freundlichen, fantasievollen Charakteren."
+                + "- Schüler der Sekundarstufe eins (11-14 Jahre): Wähle einen halb-realistischen oder stilisierten Stil mit lebendigen, klaren Farben und dynamischen Kompositionen, der Abenteuer und leichte Dramatik vermittelt."
+                + "- Schüler der Sekundarstufe zwei (15-19 Jahre): Setze auf einen detaillierten, photorealistischen Stil mit anspruchsvoller Beleuchtung, realistischen Texturen und einer ernsten, nachdenklichen Atmosphäre."
+                + "Dein Ziel ist es, prägnante, kreative und präzise Prompts zu erstellen, die die KI optimal anleiten, beeindruckende Bilder zu generieren.";
             string text = story.Result != null ? story.Result.Text : story.Parts.Last().Text;
             ArgumentException.ThrowIfNullOrEmpty(text);
+            string targetStyle = story.TargetGroup switch
+            {
+                TargetGroup.PrimarySchool => "- Für Volksschüler: cartoonhaft, verspielt und mit kräftigen Primärfarben.",
+                TargetGroup.MiddleSchool => "- Für Sekundarstufe eins: halb-realistischer/stilisierter Stil, lebendig und dynamisch.",
+                TargetGroup.HighSchool => "- Für Sekundarstufe zwei: detailliert, photorealistisch und ernst.",
+                _ => throw new ArgumentException("Invalid target group")
+            };
+            string userPrompt = $"Erstelle einen detaillierten und lebendigen Prompt für ein KI-basiertes Bildgenerierungssystem basierend auf folgendem Storypart: \"{text}\"."
+                + "Bitte stelle sicher, dass:"
+                + "- Alle relevanten Details wie Setting, Charaktere, Beleuchtung, Farben, Stimmung und künstlerischer Stil in der Bildbeschreibung enthalten sind."
+                + "- Die Bildbeschreibung vollständig mit der Erzählung übereinstimmt und alle Elemente stilistisch harmonisch aufeinander abgestimmt sind."
+                + "- Der künstlerische Stil passgenau an die Zielgruppe angepasst wird:"
+                + targetStyle
+                + "- Du eine klare, präzise und bildhafte Sprache verwendest, um die KI optimal anzuleiten."
+                + "Nutze diese Anweisungen, um einen hochwertigen, zielgruppenspezifischen Bildprompt zu generieren."
+                + "Antworte nur auf Englisch!";
 
             List<ChatMessage> chatMessages =
             [
-                new ChatMessage { Role = ValidRoles.System, Content = "You are a professional prompt engineer specializing in creating highly detailed and consistent image descriptions for AI-based image generation systems. Your primary objective is to craft prompts that result in visually harmonious and stylistically coherent images. Always ensure the description is vivid and specific, including details about the setting, characters, lighting, colors, mood, and artistic style. All elements in the prompt must align with the tone and narrative of the story, avoiding any contradictions or conflicting stylistic elements. Clearly define the artistic style, specifying an era, medium, or technique if necessary, such as \"a surreal oil painting from the 19th century\" or \"a cinematic, photorealistic scene with soft lighting.\" Focus on clarity and precision, ensuring the AI can interpret and render the intended image accurately. Your goal is to deliver high-quality, concise prompts that balance creativity and precision to produce visually stunning and cohesive outputs." },
-                new ChatMessage { Role = ValidRoles.User, Content = $"Create a vivid and detailed prompt for another AI to generate an image based on the following story: {text}. Ensure all elements, including setting, characters, lighting, mood, colors, and artistic style, align with the narrative and are stylistically consistent. Use clear and precise language to guide the image generation AI effectively." },
+                new ChatMessage { Role = ValidRoles.System, Content = systemPrompt },
+                new ChatMessage { Role = ValidRoles.User, Content = userPrompt }
             ];
 
             string imagePrompt;
