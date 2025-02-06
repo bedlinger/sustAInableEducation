@@ -55,16 +55,16 @@
                                             class="h-full w-full">
                                             <Panel class="w-full h-full max-h-[375px]">
                                                 <div class="text-xl flex w-full">
-                                                    <div class="flex flex-col">
+                                                    <div class="flex flex-col w-full">
                                                         <div class="flex flex-col">
                                                             <div class="flex items-center">
                                                                 <div class="flex flex-col items-start sm:flex-row sm:items-center">
-                                                                    <span class="flex">
+                                                                    <span class="flex flex-wrap w-full">
                                                                         Das Thema, welches die Geschichte behandeln soll,
                                                                         ist das
                                                                         <Button class="!text-xl !p-0 sm:!hidden" @click="focusTextareaMobile"
                                                                             label="Thema" variant="link" />
-                                                                        <Button class="!text-xl !p-0 !mx-1 hidden sm:!block" @click="focusTextarea"
+                                                                        <Button class="!text-xl !p-0 !mx-1 !hidden sm:!block" @click="focusTextarea"
                                                                             label="Thema" variant="link" />
                                                                     </span>
                                                                     <Textarea id="descriptionMobile" class="block my-2 resize-none max-h-[175px] sm:hidden"
