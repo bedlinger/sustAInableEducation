@@ -155,7 +155,7 @@
                                                                 v-tooltip.bottom="{ value: 'Host', showDelay: 50 }"
                                                                 v-if="data.isHost" />
                                                         </div>
-                                                        <span>{{ data.userName }}</span>
+                                                        <span :class="data.userId === myUserId ? 'underline decoration-2 font-bold' : ''">{{ data.userName }}</span>
                                                     </div>
                                                 </template>
                                             </Column>
@@ -231,6 +231,7 @@ const confirmDialog = useConfirm();
 const toast = useToast();
 
 const route = useRoute();
+const router = useRouter();
 
 
 const { execute, data: spaces } = await useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`,
@@ -283,6 +284,10 @@ const filters: OverviewFilter = {
         ]
     }
 };
+
+const myUserId = ref('')
+
+await getUser()
 
 const spaceRefsById = spaces.value ? spaces.value.reduce((acc, space) => {
     acc[space.id] = ref(false);
@@ -498,6 +503,20 @@ function getTargetgroup(targetGroup: number) {
         default:
             return 'Sekundarstufe II';
     }
+}
+
+function getUser() {
+    $fetch(`${runtimeConfig.public.apiUrl}/account`, {
+        method: 'GET',
+        credentials: 'include',
+        onResponse: (response) => {
+            if (response.response.ok) {
+                myUserId.value = response.response._data.id;
+            } else if (response.response.status === 401) {
+                router.push('/login?redirect=' + route.fullPath);
+            }
+        } 
+    });
 }
 </script>
 
