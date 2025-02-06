@@ -146,7 +146,7 @@
                                                 </div>
                                             </Message>
                                             <Dialog v-model:visible="showEstimatedTimeDialog" modal
-                                                header="Berechnung der Zeitschätzung" class="w-full max-w-[45 0px]">
+                                                header="Berechnung der Zeitschätzung" class="w-full max-w-[650px] mx-4">
                                                 <div class="flex flex-col">
                                                     <p>Die Zeitschätzung gibt einen groben Richtwert für die Dauer eines
                                                         EcoSpaces an.
