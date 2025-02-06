@@ -53,23 +53,20 @@
                                         </TabPanel>
                                         <TabPanel value="1"
                                             class="flex flex-wrap flex-col justify-between h-full w-full">
-                                            <Panel class="w-full h-full max-h-[240px]">
+                                            <Panel class="w-full h-full max-h-[375px]">
                                                 <div class="text-xl flex flex-col w-full">
                                                     <div>
                                                         <div class="flex items-center">
-                                                            <div class="flex items-center">
+                                                            <div class="flex flex-col items-start">
                                                                 <span>
                                                                     Das Thema, welches die Geschichte behandeln soll,
                                                                     ist das
-                                                                </span>
-
-                                                                <div class="flex ml-1 items-center">
                                                                     <Button class="!text-xl !p-0" @click="focusTextarea"
                                                                         label="Thema" variant="link" />
-                                                                    <Textarea id="description" class="ml-2 resize-none"
-                                                                        v-model="customTopic" rows="1" cols="20"
-                                                                        autoResize />
-                                                                </div>
+                                                                </span>
+                                                                <Textarea id="description" class="my-2 resize-none max-h-[175px]"
+                                                                    v-model="customTopic" rows="1" cols="20"
+                                                                    autoResize />
                                                             </div>
                                                         </div>
                                                         <span>
@@ -166,7 +163,8 @@
                                                 @click="activateCallback('1')" />
                                             <Button label="EcoSpace erstellen"
                                                 v-tooltip.bottom="{ value: configurationTooltip }"
-                                                :disabled="!configFilledOut || createButtonDisabled" @click="createSpace()" />
+                                                :disabled="!configFilledOut || createButtonDisabled"
+                                                @click="createSpace()" />
                                         </div>
                                     </div>
                                 </div>
@@ -303,7 +301,7 @@ function removeBulletPoint(index: number) {
 
 function createSpace() {
     let targetGroupNum = 0
-    switch(selectedZielgruppe.value) {
+    switch (selectedZielgruppe.value) {
         case 'Volksschule (6-10 Jahre)':
             targetGroupNum = 0
             break
@@ -353,7 +351,7 @@ function createSpaceFromSdg(targetGroup: number) {
             }
         },
         onResponse: (response) => {
-            if(response.response.ok) {
+            if (response.response.ok) {
                 navigateTo(`/ecospaces/${response.response._data.id}`)
             } else {
                 console.error(response.error)
@@ -380,7 +378,7 @@ function createSpaceFromTopic(targetGroup: number) {
             }
         },
         onResponse: (response) => {
-            if(response.response.ok) {
+            if (response.response.ok) {
                 navigateTo(`/ecospaces/${response.response._data.id}`)
             } else {
                 console.error(response.error)
