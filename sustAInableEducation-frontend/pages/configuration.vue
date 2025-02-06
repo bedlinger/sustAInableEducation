@@ -52,19 +52,19 @@
                                             </div>
                                         </TabPanel>
                                         <TabPanel value="1"
-                                            class="flex flex-wrap flex-col justify-between h-full w-full">
+                                            class="h-full w-full">
                                             <Panel class="w-full h-full max-h-[375px]">
                                                 <div class="text-xl flex flex-col w-full">
                                                     <div>
                                                         <div class="flex items-center">
-                                                            <div class="flex flex-col items-start">
+                                                            <div class="flex flex-col items-start sm:flex-row sm:items-center">
                                                                 <span>
                                                                     Das Thema, welches die Geschichte behandeln soll,
                                                                     ist das
                                                                     <Button class="!text-xl !p-0" @click="focusTextarea"
                                                                         label="Thema" variant="link" />
                                                                 </span>
-                                                                <Textarea id="description" class="my-2 resize-none max-h-[175px]"
+                                                                <Textarea id="description" class="my-2 resize-none max-h-[175px] sm:m-0 sm:ml-2"
                                                                     v-model="customTopic" rows="1" cols="20"
                                                                     autoResize />
                                                             </div>
