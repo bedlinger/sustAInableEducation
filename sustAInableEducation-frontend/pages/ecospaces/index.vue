@@ -67,6 +67,7 @@
                     </div>
                     <div id="sidebar-content">
                         <EcoSpaceListEntry v-for="ecoSpace in searchedSpaces" :ecoSpace="ecoSpace"
+                            :show-delete="myUserId === ecoSpace.participants.find(participant => participant.isHost)?.userId"
                             v-on:delete="openDialog" v-model="spaceRefsById[ecoSpace.id].value"
                             v-on:click="selectSpaceById(ecoSpace.id)" />
                         <NuxtLink to="/configuration">
