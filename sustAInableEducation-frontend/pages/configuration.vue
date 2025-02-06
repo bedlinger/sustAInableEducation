@@ -54,46 +54,54 @@
                                         <TabPanel value="1"
                                             class="h-full w-full">
                                             <Panel class="w-full h-full max-h-[375px]">
-                                                <div class="text-xl flex flex-col w-full">
-                                                    <div>
-                                                        <div class="flex items-center">
-                                                            <div class="flex flex-col items-start sm:flex-row sm:items-center">
-                                                                <span>
-                                                                    Das Thema, welches die Geschichte behandeln soll,
-                                                                    ist das
-                                                                    <Button class="!text-xl !p-0" @click="focusTextarea"
-                                                                        label="Thema" variant="link" />
-                                                                </span>
-                                                                <Textarea id="description" class="my-2 resize-none max-h-[175px] sm:m-0 sm:ml-2"
-                                                                    v-model="customTopic" rows="1" cols="20"
-                                                                    autoResize />
-                                                            </div>
-                                                        </div>
-                                                        <span>
-                                                            und dieses Thema soll folgende Punkte
-                                                            thematisieren:
-                                                        </span>
-                                                    </div>
-                                                    <ul class="list-decimal ml-10 flex flex-col max-w-96 mt-2">
-                                                        <li v-for="ref, index in bulletPoints" class="mb-2">
-                                                            <div class="flex items-center justify-between">
-                                                                <Textarea class="w-fit" v-model="ref.value" rows="1"
-                                                                    cols="50" autoResize />
-                                                                <div v-if="bulletPoints.length != 1"
-                                                                    @click="removeBulletPoint(index)"
-                                                                    class="ml-2 rounded-full border-2 border-solid border-red-500 size-fit flex justify-center cursor-pointer">
-                                                                    <Icon name="ic:baseline-minus"
-                                                                        class="bg-red-500 size-5" />
+                                                <div class="text-xl flex w-full">
+                                                    <div class="flex flex-col">
+                                                        <div class="flex flex-col">
+                                                            <div class="flex items-center">
+                                                                <div class="flex flex-col items-start sm:flex-row sm:items-center">
+                                                                    <span class="flex">
+                                                                        Das Thema, welches die Geschichte behandeln soll,
+                                                                        ist das
+                                                                        <Button class="!text-xl !p-0 sm:!hidden" @click="focusTextareaMobile"
+                                                                            label="Thema" variant="link" />
+                                                                        <Button class="!text-xl !p-0 !mx-1 hidden sm:!block" @click="focusTextarea"
+                                                                            label="Thema" variant="link" />
+                                                                    </span>
+                                                                    <Textarea id="descriptionMobile" class="block my-2 resize-none max-h-[175px] sm:hidden"
+                                                                        v-model="customTopic" rows="1" cols="20"
+                                                                        autoResize />
                                                                 </div>
-
                                                             </div>
-                                                        </li>
-                                                        <Button class="!p-0" rounded @click="addBulletPoint()"
-                                                            v-if="bulletPoints.length < 3">
-                                                            <Icon name="ic:baseline-plus"
-                                                                class="bg-white mx-4 size-6" />
-                                                        </Button>
-                                                    </ul>
+                                                            <span>
+                                                                und dieses Thema soll folgende Punkte
+                                                                thematisieren:
+                                                            </span>
+                                                        </div>
+                                                        <ul class="list-decimal ml-10 flex flex-col max-w-96 mt-2">
+                                                            <li v-for="ref, index in bulletPoints" class="mb-2">
+                                                                <div class="flex items-center justify-between">
+                                                                    <Textarea class="w-fit" v-model="ref.value" rows="1"
+                                                                        cols="50" autoResize />
+                                                                    <div v-if="bulletPoints.length != 1"
+                                                                        @click="removeBulletPoint(index)"
+                                                                        class="ml-2 rounded-full border-2 border-solid border-red-500 size-fit flex justify-center cursor-pointer">
+                                                                        <Icon name="ic:baseline-minus"
+                                                                            class="bg-red-500 size-5" />
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                            <Button class="!p-0" rounded @click="addBulletPoint()"
+                                                                v-if="bulletPoints.length < 3">
+                                                                <Icon name="ic:baseline-plus"
+                                                                    class="bg-white mx-4 size-6" />
+                                                            </Button>
+                                                        </ul>
+                                                    </div>
+                                                    <div>
+                                                        <Textarea id="description" class="my-2 resize-none max-h-[175px] hidden sm:block sm:m-0 sm:ml-2"
+                                                            v-model="customTopic" rows="1" cols="20"
+                                                            autoResize />
+                                                    </div>
                                                 </div>
                                             </Panel>
                                             <div class="w-full">
@@ -288,6 +296,10 @@ function selectSdg(newSdg: number) {
 
 function focusTextarea() {
     const textarea = document.getElementById('description') as HTMLTextAreaElement
+    textarea.focus()
+}
+function focusTextareaMobile() {
+    const textarea = document.getElementById('descriptionMobile') as HTMLTextAreaElement
     textarea.focus()
 }
 
