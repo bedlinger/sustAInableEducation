@@ -55,7 +55,7 @@
                                             class="h-full w-full">
                                             <Panel class="w-full h-full max-h-[375px]">
                                                 <div class="text-xl flex w-full">
-                                                    <div class="flex flex-col w-full">
+                                                    <div class="flex flex-col w-full sm:w-fit">
                                                         <div class="flex flex-col">
                                                             <div class="flex items-center">
                                                                 <div class="flex flex-col items-start sm:flex-row sm:items-center">
@@ -97,7 +97,7 @@
                                                             </Button>
                                                         </ul>
                                                     </div>
-                                                    <div>
+                                                    <div class="flex-1">
                                                         <Textarea id="description" class="my-2 resize-none max-h-[175px] hidden sm:block sm:m-0 sm:ml-2"
                                                             v-model="customTopic" rows="1" cols="20"
                                                             autoResize />
