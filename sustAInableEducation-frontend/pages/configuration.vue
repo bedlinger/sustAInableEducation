@@ -52,51 +52,56 @@
                                             </div>
                                         </TabPanel>
                                         <TabPanel value="1"
-                                            class="flex flex-wrap flex-col justify-between h-full w-full">
-                                            <Panel class="w-full h-full max-h-[240px]">
-                                                <div class="text-xl flex flex-col w-full">
-                                                    <div>
-                                                        <div class="flex items-center">
+                                            class="h-full w-full">
+                                            <Panel class="w-full h-full max-h-[375px]">
+                                                <div class="text-xl flex w-full">
+                                                    <div class="flex flex-col w-full sm:w-fit">
+                                                        <div class="flex flex-col">
                                                             <div class="flex items-center">
-                                                                <span>
-                                                                    Das Thema, welches die Geschichte behandeln soll,
-                                                                    ist das
-                                                                </span>
-
-                                                                <div class="flex ml-1 items-center">
-                                                                    <Button class="!text-xl !p-0" @click="focusTextarea"
-                                                                        label="Thema" variant="link" />
-                                                                    <Textarea id="description" class="ml-2 resize-none"
+                                                                <div class="flex flex-col items-start sm:flex-row sm:items-center">
+                                                                    <span class="flex flex-wrap w-full">
+                                                                        Das Thema, welches die Geschichte behandeln soll,
+                                                                        ist das
+                                                                        <Button class="!text-xl !p-0 sm:!hidden" @click="focusTextareaMobile"
+                                                                            label="Thema" variant="link" />
+                                                                        <Button class="!text-xl !p-0 !mx-1 !hidden sm:!block" @click="focusTextarea"
+                                                                            label="Thema" variant="link" />
+                                                                    </span>
+                                                                    <Textarea id="descriptionMobile" class="block my-2 resize-none max-h-[175px] sm:hidden"
                                                                         v-model="customTopic" rows="1" cols="20"
                                                                         autoResize />
                                                                 </div>
                                                             </div>
+                                                            <span>
+                                                                und dieses Thema soll folgende Punkte
+                                                                thematisieren:
+                                                            </span>
                                                         </div>
-                                                        <span>
-                                                            und dieses Thema soll folgende Punkte
-                                                            thematisieren:
-                                                        </span>
-                                                    </div>
-                                                    <ul class="list-decimal ml-10 flex flex-col max-w-96 mt-2">
-                                                        <li v-for="ref, index in bulletPoints" class="mb-2">
-                                                            <div class="flex items-center justify-between">
-                                                                <Textarea class="w-fit" v-model="ref.value" rows="1"
-                                                                    cols="50" autoResize />
-                                                                <div v-if="bulletPoints.length != 1"
-                                                                    @click="removeBulletPoint(index)"
-                                                                    class="ml-2 rounded-full border-2 border-solid border-red-500 size-fit flex justify-center cursor-pointer">
-                                                                    <Icon name="ic:baseline-minus"
-                                                                        class="bg-red-500 size-5" />
+                                                        <ul class="list-decimal ml-10 flex flex-col max-w-96 mt-2">
+                                                            <li v-for="ref, index in bulletPoints" class="mb-2">
+                                                                <div class="flex items-center justify-between">
+                                                                    <Textarea class="w-fit" v-model="ref.value" rows="1"
+                                                                        cols="50" autoResize />
+                                                                    <div v-if="bulletPoints.length != 1"
+                                                                        @click="removeBulletPoint(index)"
+                                                                        class="ml-2 rounded-full border-2 border-solid border-red-500 size-fit flex justify-center cursor-pointer">
+                                                                        <Icon name="ic:baseline-minus"
+                                                                            class="bg-red-500 size-5" />
+                                                                    </div>
                                                                 </div>
-
-                                                            </div>
-                                                        </li>
-                                                        <Button class="!p-0" rounded @click="addBulletPoint()"
-                                                            v-if="bulletPoints.length < 3">
-                                                            <Icon name="ic:baseline-plus"
-                                                                class="bg-white mx-4 size-6" />
-                                                        </Button>
-                                                    </ul>
+                                                            </li>
+                                                            <Button class="!p-0" rounded @click="addBulletPoint()"
+                                                                v-if="bulletPoints.length < 3">
+                                                                <Icon name="ic:baseline-plus"
+                                                                    class="bg-white mx-4 size-6" />
+                                                            </Button>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <Textarea id="description" class="my-2 resize-none max-h-[175px] hidden sm:block sm:m-0 sm:ml-2"
+                                                            v-model="customTopic" rows="1" cols="20"
+                                                            autoResize />
+                                                    </div>
                                                 </div>
                                             </Panel>
                                             <div class="w-full">
@@ -166,7 +171,8 @@
                                                 @click="activateCallback('1')" />
                                             <Button label="EcoSpace erstellen"
                                                 v-tooltip.bottom="{ value: configurationTooltip }"
-                                                :disabled="!configFilledOut || createButtonDisabled" @click="createSpace()" />
+                                                :disabled="!configFilledOut || createButtonDisabled"
+                                                @click="createSpace()" />
                                         </div>
                                     </div>
                                 </div>
@@ -292,6 +298,10 @@ function focusTextarea() {
     const textarea = document.getElementById('description') as HTMLTextAreaElement
     textarea.focus()
 }
+function focusTextareaMobile() {
+    const textarea = document.getElementById('descriptionMobile') as HTMLTextAreaElement
+    textarea.focus()
+}
 
 function addBulletPoint() {
     bulletPoints.value.push(ref(''))
@@ -303,7 +313,7 @@ function removeBulletPoint(index: number) {
 
 function createSpace() {
     let targetGroupNum = 0
-    switch(selectedZielgruppe.value) {
+    switch (selectedZielgruppe.value) {
         case 'Volksschule (6-10 Jahre)':
             targetGroupNum = 0
             break
@@ -353,7 +363,7 @@ function createSpaceFromSdg(targetGroup: number) {
             }
         },
         onResponse: (response) => {
-            if(response.response.ok) {
+            if (response.response.ok) {
                 navigateTo(`/ecospaces/${response.response._data.id}`)
             } else {
                 console.error(response.error)
@@ -380,7 +390,7 @@ function createSpaceFromTopic(targetGroup: number) {
             }
         },
         onResponse: (response) => {
-            if(response.response.ok) {
+            if (response.response.ok) {
                 navigateTo(`/ecospaces/${response.response._data.id}`)
             } else {
                 console.error(response.error)
