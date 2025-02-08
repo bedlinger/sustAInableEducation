@@ -208,6 +208,10 @@ const id = route.params.id
 
 const space = ref<EcoSpace | null>(null)
 
+const pageTitle = computed(() => {
+    return `${space.value?.story.title ? space.value?.story.title : 'Neuer EcoSpace'} - sustAInableEducation`
+})
+
 const hasVoted = ref(false)
 const isVoting = ref(false)
 const percentages = ref([0, 0, 0, 0])
@@ -279,6 +283,11 @@ const imageLoading = ref(false)
 const showReloadButton = ref(false)
 
 await getSpace()
+
+useHead({
+    title: pageTitle 
+})
+
 if (parts.value.length > 0) {
     if (parts.value[parts.value.length - 1].choices.some((choice) => choice.numberVotes > 0)) {
         percentages.value = parts.value[parts.value.length - 1].choices.map((choice) => Math.round((choice.numberVotes / parts.value[parts.value.length - 1].choices.reduce((a, b) => a + b.numberVotes, 0)) * 100))
