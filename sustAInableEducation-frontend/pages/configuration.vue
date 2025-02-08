@@ -365,7 +365,7 @@ function createSpaceFromSdg(targetGroup: number) {
         },
         onResponse: (response) => {
             if (response.response.ok) {
-                navigateTo(`/ecospaces/${response.response._data.id}`)
+                navigateTo(`/spaces/${response.response._data.id}`)
             } else {
                 loading.value = false;
                 console.error(response.error)
@@ -393,7 +393,7 @@ function createSpaceFromTopic(targetGroup: number) {
         },
         onResponse: (response) => {
             if (response.response.ok) {
-                navigateTo(`/ecospaces/${response.response._data.id}`)
+                navigateTo(`/spaces/${response.response._data.id}`)
             } else {
                 loading.value = false;
                 console.error(response.error)

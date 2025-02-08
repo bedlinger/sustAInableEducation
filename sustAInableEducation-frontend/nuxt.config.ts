@@ -52,7 +52,7 @@ export default defineNuxtConfig({
     }
   },
   routeRules: {
-    '/ecospaces/*': { ssr: false }
+    '/spaces/*': { ssr: false }
   },
   modules: [
     '@primevue/nuxt-module',
