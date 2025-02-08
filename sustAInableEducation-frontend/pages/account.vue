@@ -1,7 +1,8 @@
 <template>
   
   <div class="w-full h-full flex justify-center items-center mt-16">
-    <ChangePasswordDialog v-model:visible="showChangePasswordDialog" />
+    <Toast />
+    <ChangePasswordDialog v-model:visible="showChangePasswordDialog" @success="passSuccess" @fail="passFail" />
     <div class="background animate-anim" />
     <div class="bg-white relative flex justify-center p-5 rounded-lg shadow-xl w-full mx-4 sm:mx-0 sm:w-fit">
       <div
@@ -40,7 +41,7 @@ useHead({
   title: 'Kontoübersicht - sustAInableEducation'
 })
 
-
+const toast = useToast()
 const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 
@@ -54,6 +55,13 @@ const email = ref('EMAIL@EMAIL.COM')
 
 await getAccountData()
 
+const passSuccess = () => {
+  toast.add({ severity: 'success', summary: 'Passwort geändert', detail: 'Das Passwort wurde erfolgreich geändert', life: 5000 })
+}
+
+const passFail  = () => {
+  toast.add({ severity: 'error', summary: 'Fehler', detail: 'Das Passwort konnte nicht geändert werden', life: 5000 })
+}
 
 async function getAccountData() {
   await $fetch(`${runtimeConfig.public.apiUrl}/account`, {
