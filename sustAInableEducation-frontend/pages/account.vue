@@ -1,4 +1,24 @@
 <template>
+  <Dialog v-model:visible="showChangePasswordDialog" header="Passwort ändern" modal :draggable="false" dismissable-mask>
+    <div class="flex flex-col gap-4">
+      <div>
+        <p class="text-lg">Altes Passwort</p>
+        <InputText id="oldPassword" type="password" />
+      </div>
+      <div>
+        <p class="text-lg">Neues Passwort</p>
+        <InputText id="newPassword" type="password" />
+      </div>
+      <div>
+        <p class="text-lg">Neues Passwort wiederholen</p>
+        <InputText id="newPasswordRepeat" type="password" />
+      </div>
+      <div class="flex justify-between">
+        <Button label="Abbrechen" @click="showChangePasswordDialog = false" outlined/>
+        <Button label="Speichern" @click="" :loading="passwordLoading"/>
+      </div>
+    </div>
+  </Dialog>
   <div class="w-full h-full flex justify-center items-center mt-16">
     <div class="background animate-anim" />
     <div class="bg-white relative flex justify-center p-5 rounded-lg shadow-xl w-full mx-4 sm:mx-0 sm:w-fit">
@@ -26,7 +46,7 @@
         <div class="flex flex-col gap-2">
           <Divider />
           <Button label="Email ändern" outlined @click="" />
-          <Button label="Passwort ändern" outlined @click="" />
+          <Button label="Passwort ändern" outlined @click="showChangePasswordDialog = true" />
         </div>
       </div>
     </div>
@@ -44,6 +64,13 @@ const runtimeConfig = useRuntimeConfig()
 
 const headers = useRequestHeaders(['cookie'])
 
+// Change password dialog
+const showChangePasswordDialog = ref(false)
+const oldPassword = ref('')
+const newPassword = ref('')
+const newPasswordRepeat = ref('')
+const passwordLoading = ref(false)
+
 const username = ref('USERNAME')
 const email = ref('EMAIL@EMAIL.COM')
 
@@ -56,8 +83,8 @@ async function getAccountData() {
     credentials: 'include',
     headers: headers,
     onResponse: (response) => {
-      if(response.response.ok) {
-        username.value = response.response._data.anonUserName 
+      if (response.response.ok) {
+        username.value = response.response._data.anonUserName
         email.value = response.response._data.email
       } else if (response.response.status === 401) {
         router.push('/login')
