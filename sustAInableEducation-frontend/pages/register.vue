@@ -49,6 +49,10 @@
 <script setup lang="ts">
 import type { Register, RegisterError } from '~/types/register'
 
+useHead({
+    title: 'Registrierung - sustAInableEducation'
+})
+
 const runtimeConfig = useRuntimeConfig();
 
 const route = useRoute();
