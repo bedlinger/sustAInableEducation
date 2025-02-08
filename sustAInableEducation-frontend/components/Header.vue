@@ -28,7 +28,7 @@ const items = ref([
         label: 'Sie sind eingeloggt',
         items: [
             {
-                label: 'Logout',
+                label: 'Abmelden',
                 command: () => logout()
             }
         ]
