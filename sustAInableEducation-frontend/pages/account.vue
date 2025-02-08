@@ -1,6 +1,7 @@
 <template>
-  <ChangePasswordDialog v-model:visible="showChangePasswordDialog" />
+  
   <div class="w-full h-full flex justify-center items-center mt-16">
+    <ChangePasswordDialog v-model:visible="showChangePasswordDialog" />
     <div class="background animate-anim" />
     <div class="bg-white relative flex justify-center p-5 rounded-lg shadow-xl w-full mx-4 sm:mx-0 sm:w-fit">
       <div
