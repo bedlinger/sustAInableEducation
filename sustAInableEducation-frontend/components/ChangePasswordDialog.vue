@@ -3,17 +3,17 @@
     <div class="w-full flex flex-col gap-4">
       <div>
         <p class="text-lg">Altes Passwort</p>
-        <Password v-model="oldPassword" type="password" fluid/>
+        <Password v-model="oldPassword" type="password" fluid toggle-mask :feedback="false"/>
         <Message v-if="validator.oldPassword" severity="error" size="small" class="mt-2">{{ validator.oldPassword }}</Message>
       </div>
       <div>
         <p class="text-lg">Neues Passwort</p>
-        <Password v-model="newPassword" type="password" fluid/>
+        <Password v-model="newPassword" type="password" fluid toggle-mask :feedback="false"/>
         <Message v-if="validator.newPassword" severity="error" size="small" class="mt-2">{{ validator.newPassword }}</Message>
       </div>
       <div>
         <p class="text-lg">Neues Passwort wiederholen</p>
-        <Password v-model="newPasswordRepeat" type="password" fluid/>
+        <Password v-model="newPasswordRepeat" type="password" fluid toggle-mask :feedback="false"/>
         <Message v-if="validator.newPasswordRepeat" severity="error" size="small" class="mt-2">{{ validator.newPasswordRepeat }}</Message>
       </div>
       <div class="flex justify-between">
