@@ -28,6 +28,14 @@
 const model = defineModel('visible', { required: true, type: Boolean });
 const emit = defineEmits(['success', 'fail']);
 
+watch(() => model.value, (value) => {
+  if(value) {
+    oldPassword.value = '';
+    newPassword.value = '';
+    newPasswordRepeat.value = '';
+  }
+});
+
 const runtimeConfig = useRuntimeConfig();
 
 const oldPassword = ref('');
