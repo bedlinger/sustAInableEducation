@@ -45,6 +45,10 @@
 <script setup lang="ts">
 import type { Login, LoginError } from '~/types/login'
 
+useHead({
+    title: 'Anmeldung - sustAInableEducation'
+})
+
 const runtimeConfig = useRuntimeConfig();
 
 const route = useRoute();
