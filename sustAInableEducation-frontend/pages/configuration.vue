@@ -190,6 +190,10 @@
 import { Configuration } from '~/types/configuration';
 import { SdgAsset } from '~/types/sdgs';
 
+useHead({
+    title: 'EcoSpace erstellen - sustAInableEducation'
+})
+
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 
