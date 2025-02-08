@@ -18,7 +18,8 @@
                     </div>
                     <div>
                         <FloatLabel variant="in" class="flex flex-col">
-                            <Password toggleMask :feedback="false" v-model="formRefs.password.value" name="password" type="password" fluid />
+                            <Password toggleMask :feedback="false" v-model="formRefs.password.value" name="password"
+                                type="password" fluid />
                             <label for="password">Passwort</label>
                         </FloatLabel>
                         <Message v-if="$form.password?.invalid" severity="error" size="small" class="mt-2">{{
@@ -32,7 +33,8 @@
                     <Button type="submit" label="Login" :loading="loading" />
                 </Form>
                 <p class="mt-4">oder</p>
-                <NuxtLink :to="redirection ? '/register?redirect=' + redirection : '/register'" class="text-white mx-4 text-xl">
+                <NuxtLink :to="redirection ? '/register?redirect=' + redirection : '/register'"
+                    class="text-white mx-4 text-xl">
                     <Button variant="link" label="Registrieren" text />
                 </NuxtLink>
             </div>
@@ -113,7 +115,7 @@ async function login() {
             credentials: 'include',
             onResponse: (response) => {
                 if (response.response.status === 200) {
-                    if(redirection) {
+                    if (redirection) {
                         navigateTo(redirection);
                     } else {
                         navigateTo('/');
@@ -128,15 +130,17 @@ async function login() {
 }
 
 async function isLoggedInRequest() {
-    await $fetch(`${runtimeConfig.public.apiUrl}/account`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: cookieHeaders,
-        onResponse: (response) => {
-            if (response.response.status === 200) {
-                router.push('/');
+    try {
+        await $fetch(`${runtimeConfig.public.apiUrl}/account`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: cookieHeaders,
+            onResponse: (response) => {
+                if (response.response.status === 200) {
+                    router.push('/');
+                }
             }
-        }
-    })
+        })
+    } catch (e) { }
 }
 </script>
