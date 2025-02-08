@@ -147,7 +147,7 @@
                                 <Fieldset legend="Teilnehmer" class="max-h-64 overflow-scroll">
                                     <div class="h-full w-full">
                                         <DataTable :value="selectedSpace.participants">
-                                            <Column field="userName" header="Username">
+                                            <Column field="userName" header="Benutzername">
                                                 <template #body="{ data }">
                                                     <div class="flex items-center">
                                                         <div class="size-5 mr-1">
@@ -160,7 +160,7 @@
                                                     </div>
                                                 </template>
                                             </Column>
-                                            <Column field="impact" header="Impact">
+                                            <Column field="impact" header="Einfluss">
                                                 <template #body="{ data }">
                                                     <div class="flex items-center justify-center">
                                                         <span v-if="ecoSpaceIsFinished(selectedSpace)">{{ data.impact
