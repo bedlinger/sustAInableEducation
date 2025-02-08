@@ -82,11 +82,11 @@ const resolver = ({ values }: { values: Login }) => {
     };
 
     if (!values.email) {
-        errors.email = [{ message: 'Email is required.' }];
+        errors.email = [{ message: 'Eine E-Mail wird benötigt.' }];
     }
 
     if (!values.password) {
-        errors.password = [{ message: 'Password is required.' }];
+        errors.password = [{ message: 'Ein Passwort wird benötigt.' }];
     }
 
     return {
