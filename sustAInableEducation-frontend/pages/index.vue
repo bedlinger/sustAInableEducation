@@ -25,6 +25,10 @@
 
 <script setup lang="ts">
 
+useHead({
+    title: 'sustAInableEducation'
+})
+
 const runtimeConfig = useRuntimeConfig()
 const toast = useToast()
 
