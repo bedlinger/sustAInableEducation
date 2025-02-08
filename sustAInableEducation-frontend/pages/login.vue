@@ -46,10 +46,15 @@ import type { Login, LoginError } from '~/types/login'
 const runtimeConfig = useRuntimeConfig();
 
 const route = useRoute();
+const router = useRouter();
 
 const toast = useToast();
 
 const redirection = route.query.redirect as string | undefined;
+
+const cookieHeaders = useRequestHeaders(['cookie']);
+
+await isLoggedInRequest();
 
 const formRefs = {
     email: ref<string>(''),
@@ -120,5 +125,18 @@ async function login() {
             }
         })
     } catch (e) { }
+}
+
+async function isLoggedInRequest() {
+    await $fetch(`${runtimeConfig.public.apiUrl}/account`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: cookieHeaders,
+        onResponse: (response) => {
+            if (response.response.status === 200) {
+                router.push('/');
+            }
+        }
+    })
 }
 </script>

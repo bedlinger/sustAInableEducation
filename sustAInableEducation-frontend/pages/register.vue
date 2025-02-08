@@ -50,8 +50,13 @@ import type { Register, RegisterError } from '~/types/register'
 const runtimeConfig = useRuntimeConfig();
 
 const route = useRoute();
+const router = useRouter();
 
 const redirection = route.query.redirect as string | undefined;
+
+const cookieHeaders = useRequestHeaders(['cookie']);
+
+await isLoggedInRequest();
 
 const toast = useToast();
 
@@ -174,6 +179,19 @@ function includesUppercase(str: string) {
 function includesLowercase(str: string) {
     let RegEx = /[a-zäöü]/;
     return !RegEx.test(str);
+}
+
+async function isLoggedInRequest() {
+    await $fetch(`${runtimeConfig.public.apiUrl}/account`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: cookieHeaders,
+        onResponse: (response) => {
+            if (response.response.status === 200) {
+                router.push('/');
+            }
+        }
+    })
 }
 
 </script>
