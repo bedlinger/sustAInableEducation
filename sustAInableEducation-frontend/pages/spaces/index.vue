@@ -104,7 +104,7 @@
                             <span class="text-md">
                                 Dieser EcoSpace wurde noch nicht beendet. Wenn Sie diesen EcoSpace fortsetzen wollen,
                                 können Sie
-                                <NuxtLink class="text-blue-700 hover:text-blue-500 hover:underline font-bold" :to="'/ecospaces/' + selectedSpace.id">hier</NuxtLink>
+                                <NuxtLink class="text-blue-700 hover:text-blue-500 hover:underline font-bold" :to="'/spaces/' + selectedSpace.id">hier</NuxtLink>
                                 klicken um diesem beizutreten.
                             </span>
                         </Message>

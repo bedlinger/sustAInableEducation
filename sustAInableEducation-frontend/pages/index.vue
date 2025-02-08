@@ -63,7 +63,7 @@ function joinEcoSpace(code: string) {
         },
         onResponse: (response) => {
             if (response.response.ok) {
-                navigateTo('/ecospaces/' + response.response._data.id)
+                navigateTo('/spaces/' + response.response._data.id)
             } else {
                 loading.value = false;
                 console.log(loading.value)
