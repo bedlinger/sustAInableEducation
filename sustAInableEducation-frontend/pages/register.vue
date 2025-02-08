@@ -33,7 +33,7 @@
                         <Message v-if="$form.confirmPassword?.invalid" severity="error" size="small" class="mt-2">{{
                             $form.confirmPassword.error?.message }}</Message>
                     </div>
-                    <Button type="submit" label="Registrieren" />
+                    <Button type="submit" label="Registrieren" :loading="loading" />
                 </Form>
                 <p class="mt-4">oder</p>
                 <NuxtLink :to="redirection ? '/login?redirect=' + redirection : 'login'" class="text-white mx-4 text-xl">
@@ -59,6 +59,8 @@ const formRefs = {
     email: ref<string>(''),
     password: ref<string>('')
 }
+
+const loading = ref(false)
 
 const initialValues = reactive({
     email: '',
@@ -131,6 +133,7 @@ const onFormSubmit = ({ valid }: { valid: boolean }) => {
 }
 
 async function register() {
+    loading.value = true;
     await $fetch(`${runtimeConfig.public.apiUrl}/account/register`, {
         method: 'POST',
         body: JSON.stringify({
@@ -148,6 +151,7 @@ async function register() {
         },
         onRequestError: (error) => {
             toast.add({ severity: 'error', summary: `Fehler: ${error.response?.status}`, detail: 'Bei der Registrierung ist ein Fehler aufgetreten.' });
+            loading.value = false;
         }
     })
 }

@@ -29,7 +29,7 @@
                             inputId="saveLogin" />
                         <label for="saveLogin" class="ml-2 cursor-pointer">Eingeloggt bleiben</label>
                     </div>
-                    <Button type="submit" label="Login" />
+                    <Button type="submit" label="Login" :loading="loading" />
                 </Form>
                 <p class="mt-4">oder</p>
                 <NuxtLink :to="redirection ? '/register?redirect=' + redirection : '/register'" class="text-white mx-4 text-xl">
@@ -56,6 +56,8 @@ const formRefs = {
     password: ref<string>(''),
     saveLogin: ref<boolean>(false)
 }
+
+const loading = ref(false)
 
 const initialValues = reactive({
     email: '',
@@ -88,6 +90,7 @@ const onFormSubmit = ({ valid }: { valid: boolean }) => {
 };
 
 async function login() {
+    loading.value = true;
     let url = `${runtimeConfig.public.apiUrl}/account/login`;
     if (formRefs.saveLogin.value) {
         url += "?useCookies=true";
@@ -111,6 +114,7 @@ async function login() {
                         navigateTo('/');
                     }
                 } else {
+                    loading.value = false;
                     toast.add({ severity: 'error', summary: `Fehler: ${response.response.status}`, detail: 'Bei der Anmeldung ist ein Fehler aufgetreten.' });
                 }
             }
