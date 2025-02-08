@@ -4,7 +4,11 @@
     <div class="bg-white min-h-[30rem] relative flex justify-center p-5 rounded-lg shadow-xl">
       <div
         class="pp absolute top-[-4.5rem] rounded-full overflow-hidden border-4 border-white shadow-md flex justify-center items-center">
-        <Image src="/img/profilepicture_placeholder.jpg" width="128" alt="Profilbild" preview/>
+        <Image src="/img/profilepicture_placeholder.jpg" width="128" alt="Profilbild" preview>
+          <template #previewicon>
+            <div/>
+          </template>
+        </Image>
       </div>
       <div class="flex flex-col mt-16 gap-4 min-w-72">
         <div>
