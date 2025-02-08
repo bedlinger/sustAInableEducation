@@ -227,6 +227,10 @@
 import type { EcoSpace } from '~/types/EcoSpace';
 import type { OverviewFilter } from '~/types/filter';
 
+useHead({
+    title: 'EcoSpace Übersicht - sustAInableEducation'
+})
+
 const runtimeConfig = useRuntimeConfig();
 const confirmDialog = useConfirm();
 const toast = useToast();
