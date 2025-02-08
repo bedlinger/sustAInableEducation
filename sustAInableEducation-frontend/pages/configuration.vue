@@ -171,8 +171,9 @@
                                                 @click="activateCallback('1')" />
                                             <Button label="EcoSpace erstellen"
                                                 v-tooltip.bottom="{ value: configurationTooltip }"
-                                                :disabled="!configFilledOut || createButtonDisabled"
-                                                @click="createSpace()" />
+                                                :disabled="!configFilledOut || loading"
+                                                @click="createSpace()"
+                                                :loading="loading" />
                                         </div>
                                     </div>
                                 </div>
@@ -192,6 +193,8 @@ import { SdgAsset } from '~/types/sdgs';
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 
+const loading = ref(false)
+
 // Refs
 const topicType = ref('sdg')
 const selectedSdg = ref(-1)
@@ -200,8 +203,6 @@ const bulletPoints = ref([ref('')])
 const decisionPoints = ref(3)
 const selectedZielgruppe = ref('')
 const voteTime = ref(10)
-
-const createButtonDisabled = ref(false)
 
 const showEstimatedTimeDialog = ref(false)
 
@@ -347,7 +348,7 @@ function isLoggedInRequest() {
 
 function createSpaceFromSdg(targetGroup: number) {
 
-    createButtonDisabled.value = true
+    loading.value = true
 
     $fetch(`${runtimeConfig.public.apiUrl}/spaces`, {
         method: 'POST',
@@ -366,6 +367,7 @@ function createSpaceFromSdg(targetGroup: number) {
             if (response.response.ok) {
                 navigateTo(`/ecospaces/${response.response._data.id}`)
             } else {
+                loading.value = false;
                 console.error(response.error)
             }
         }
@@ -374,7 +376,7 @@ function createSpaceFromSdg(targetGroup: number) {
 
 function createSpaceFromTopic(targetGroup: number) {
 
-    createButtonDisabled.value = true
+    loading.value = true
 
     $fetch(`${runtimeConfig.public.apiUrl}/spaces`, {
         method: 'POST',
@@ -393,6 +395,7 @@ function createSpaceFromTopic(targetGroup: number) {
             if (response.response.ok) {
                 navigateTo(`/ecospaces/${response.response._data.id}`)
             } else {
+                loading.value = false;
                 console.error(response.error)
             }
         }
