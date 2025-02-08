@@ -13,11 +13,11 @@
       <div class="flex flex-col mt-16 gap-4 w-full sm:min-w-80">
         <div>
           <p class="text-lg">Benutzername</p>
-          <InputText id="username" value="CarbonFreeStewardship8151" type="text" fluid disabled />
+          <InputText id="username" v-model="username" type="text" fluid disabled />
         </div>
         <div>
           <p class="text-lg">Email</p>
-          <InputText id="username" value="test@example.com" type="email" fluid disabled />
+          <InputText id="username" v-model="email" type="email" fluid disabled />
         </div>
         <div>
           <p class="text-lg">Passwort</p>
@@ -34,10 +34,38 @@
 </template>
 
 <script setup lang="ts">
-
 useHead({
   title: 'Kontoübersicht - sustAInableEducation'
 })
 
-const toggle = ref(false)
+
+const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
+
+const headers = useRequestHeaders(['cookie'])
+
+const username = ref('USERNAME')
+const email = ref('EMAIL@EMAIL.COM')
+
+await getAccountData()
+
+
+async function getAccountData() {
+  await $fetch(`${runtimeConfig.public.apiUrl}/account`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: headers,
+    onResponse: (response) => {
+      if(response.response.ok) {
+        username.value = response.response._data.anonUserName 
+        email.value = response.response._data.email
+      } else if (response.response.status === 401) {
+        router.push('/login')
+      } else {
+        // Handle no connection
+      }
+    }
+  })
+}
+
 </script>
