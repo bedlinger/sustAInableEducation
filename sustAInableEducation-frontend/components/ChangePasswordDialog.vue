@@ -18,7 +18,7 @@
       </div>
       <div class="flex justify-between">
         <Button label="Abbrechen" @click="model = !model" outlined />
-        <Button label="Speichern" @click="" :loading="loading" :disabled="loading || !validator.valid" />
+        <Button label="Speichern" @click="changePassword" :loading="loading" :disabled="loading || !validator.valid" />
       </div>
     </div>
   </Dialog>
@@ -78,5 +78,29 @@ function includesUppercase(str: string) {
 function includesLowercase(str: string) {
   let RegEx = /[a-zäöü]/;
   return !RegEx.test(str);
+}
+
+
+async function changePassword() {
+  loading.value = true;
+
+  await $fetch(`${runtimeConfig.public.apiUrl}/account/changepassword`, {
+    method: 'POST',
+    credentials: 'include',
+    body: {
+      oldPassword: oldPassword.value,
+      newPassword: newPassword.value,
+    },
+    onResponse: (response) => {
+      if (response.response.ok) {
+        emit('success');
+        model.value = false;
+      } else {
+        emit('fail');
+      }
+    }
+  });
+
+  loading.value = false;
 }
 </script>
