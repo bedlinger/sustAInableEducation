@@ -30,7 +30,7 @@
                             inputId="saveLogin" />
                         <label for="saveLogin" class="ml-2 cursor-pointer">Eingeloggt bleiben</label>
                     </div>
-                    <Button type="submit" label="Login" :loading="loading" />
+                    <Button type="submit" label="Anmelden" :loading="loading" />
                 </Form>
                 <p class="mt-4">oder</p>
                 <NuxtLink :to="redirection ? '/register?redirect=' + redirection : '/register'"
