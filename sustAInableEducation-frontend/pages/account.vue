@@ -1,24 +1,5 @@
 <template>
-  <Dialog v-model:visible="showChangePasswordDialog" header="Passwort ändern" modal :draggable="false" dismissable-mask>
-    <div class="flex flex-col gap-4">
-      <div>
-        <p class="text-lg">Altes Passwort</p>
-        <InputText id="oldPassword" type="password" />
-      </div>
-      <div>
-        <p class="text-lg">Neues Passwort</p>
-        <InputText id="newPassword" type="password" />
-      </div>
-      <div>
-        <p class="text-lg">Neues Passwort wiederholen</p>
-        <InputText id="newPasswordRepeat" type="password" />
-      </div>
-      <div class="flex justify-between">
-        <Button label="Abbrechen" @click="showChangePasswordDialog = false" outlined/>
-        <Button label="Speichern" @click="" :loading="passwordLoading"/>
-      </div>
-    </div>
-  </Dialog>
+  <ChangePasswordDialog v-model:visible="showChangePasswordDialog" />
   <div class="w-full h-full flex justify-center items-center mt-16">
     <div class="background animate-anim" />
     <div class="bg-white relative flex justify-center p-5 rounded-lg shadow-xl w-full mx-4 sm:mx-0 sm:w-fit">
@@ -66,10 +47,6 @@ const headers = useRequestHeaders(['cookie'])
 
 // Change password dialog
 const showChangePasswordDialog = ref(false)
-const oldPassword = ref('')
-const newPassword = ref('')
-const newPasswordRepeat = ref('')
-const passwordLoading = ref(false)
 
 const username = ref('USERNAME')
 const email = ref('EMAIL@EMAIL.COM')
