@@ -14,7 +14,7 @@
         <div>
           <p class="text-lg">Benutzername</p>
           <div class="relative flex items-center w-full">
-            <InputText id="username" value="CarbonFreeStewardship8151" type="text" fluid />
+            <InputText id="username" value="CarbonFreeStewardship8151" type="text" fluid disabled />
             <div class="absolute right-0 cursor-pointer h-full aspect-square flex justify-center items-center">
               <Icon name="ic:baseline-edit" class="w-5 h-5 text-gray-400" />
             </div>
@@ -23,7 +23,7 @@
         <div>
           <p class="text-lg">Email</p>
           <div class="relative w-full flex items-center">
-            <InputText id="username" value="test@example.com" type="email" fluid />
+            <InputText id="username" value="test@example.com" type="email" fluid disabled />
             <div class="absolute right-0 cursor-pointer h-full aspect-square flex justify-center items-center">
               <Icon name="ic:baseline-edit" class="w-5 h-5 text-gray-400" />
             </div>
@@ -32,7 +32,7 @@
         <div>
           <p class="text-lg">Passwort</p>
           <div class="relative w-full flex items-center">
-            <InputText id="username" value="Schueler123!" type="password" fluid />
+            <InputText id="username" value="Schueler123!" type="password" fluid disabled />
             <div class="absolute right-0 cursor-pointer h-full aspect-square flex justify-center items-center">
               <Icon name="ic:baseline-edit" class="w-5 h-5 text-gray-400" />
             </div>
