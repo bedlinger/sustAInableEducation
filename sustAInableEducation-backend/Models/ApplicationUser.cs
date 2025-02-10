@@ -17,6 +17,7 @@ namespace sustAInableEducation_backend.Models
 
     public class ChangeEmailRequest
     {
+        public string Password { get; set; } = null!;
         public string NewEmail { get; set; } = null!;
     }
 
