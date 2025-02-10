@@ -24,7 +24,7 @@
         </div>
         <div>
           <p class="text-lg">Passwort</p>
-          <InputText id="username" value="sustAInableEducation" type="password" fluid disabled />
+          <Password id="username" value="sustAInableEducation" fluid disabled />
         </div>
         <div class="flex flex-col gap-2">
           <Divider />
