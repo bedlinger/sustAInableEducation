@@ -24,7 +24,7 @@
         </div>
         <div>
           <p class="text-lg">Passwort</p>
-          <Password id="username" value="sustAInableEducation" fluid disabled />
+          <Password id="username" v-model="password" fluid disabled />
         </div>
         <div class="flex flex-col gap-2">
           <Divider />
@@ -53,6 +53,7 @@ const showChangePasswordDialog = ref(false)
 
 const username = ref('USERNAME')
 const email = ref('EMAIL@EMAIL.COM')
+const password = ref('sustAInableEducation')
 
 if(import.meta.client) {
   await getAccountData()
