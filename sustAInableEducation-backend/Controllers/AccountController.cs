@@ -42,8 +42,13 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost("changeEmail")]
         public async Task<IActionResult> ChangeEmail(ChangeEmailRequest request, UserManager<ApplicationUser> userManager)
         {
-            var userNameResult = await userManager.SetUserNameAsync(_user, request.NewEmail).ConfigureAwait(false);
-            var emailResult = await userManager.SetEmailAsync(_user, request.NewEmail).ConfigureAwait(false);
+            var passwordResult = await userManager.CheckPasswordAsync(_user, request.Password);
+            if (!passwordResult)
+            {
+                return Unauthorized();
+            }
+            var userNameResult = await userManager.SetUserNameAsync(_user, request.NewEmail);
+            var emailResult = await userManager.SetEmailAsync(_user, request.NewEmail);
             if (!userNameResult.Succeeded || !emailResult.Succeeded)
             {
                 return BadRequest(userNameResult.Succeeded ? emailResult.Errors : userNameResult.Errors);
