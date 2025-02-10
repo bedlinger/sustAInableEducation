@@ -42,6 +42,7 @@ useHead({
 })
 
 const toast = useToast()
+const route = useRoute()
 const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 
@@ -53,7 +54,9 @@ const showChangePasswordDialog = ref(false)
 const username = ref('USERNAME')
 const email = ref('EMAIL@EMAIL.COM')
 
-await getAccountData()
+if(import.meta.client) {
+  await getAccountData()
+}
 
 const passSuccess = () => {
   toast.add({ severity: 'success', summary: 'Passwort geändert', detail: 'Das Passwort wurde erfolgreich geändert', life: 5000 })
@@ -73,9 +76,7 @@ async function getAccountData() {
         username.value = response.response._data.anonUserName
         email.value = response.response._data.email
       } else if (response.response.status === 401) {
-        router.push('/login')
-      } else {
-        // Handle no connection
+        router.push(`/login?redirect=${route.fullPath}`)
       }
     }
   })
