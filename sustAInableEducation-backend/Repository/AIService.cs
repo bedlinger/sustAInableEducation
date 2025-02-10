@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SkiaSharp;
 using sustAInableEducation_backend.Models;
 
@@ -1004,7 +1003,8 @@ namespace sustAInableEducation_backend.Repository
             catch (Exception e)
             {
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
-            };
+            }
+            ;
 
 
             return erg;
