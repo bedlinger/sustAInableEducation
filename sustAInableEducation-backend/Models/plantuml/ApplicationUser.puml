@@ -1,8 +1,0 @@
-@startuml
-class ApplicationUser {
-}
-class "ICollection`1"<T> {
-}
-IdentityUser <|-- ApplicationUser
-ApplicationUser --> "Participations<EnvironmentParticipant>" "ICollection`1"
-@enduml

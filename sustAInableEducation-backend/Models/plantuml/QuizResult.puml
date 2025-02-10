@@ -1,7 +1,0 @@
-@startuml
-class QuizResult {
-    + TryNumber : int <<get>> <<set>>
-    + IsCorrect : bool <<get>> <<set>>
-}
-QuizResult --> "QuizQuestionId" Guid
-@enduml
