@@ -443,6 +443,8 @@ namespace sustAInableEducation_backend.Repository
             return chatMessages;
         }
 
+
+
         // Benjamin Edlinger
         /// <summary>
         /// Rebuilds the chat messages of the result for already rebuilt chat messages and the given story object
@@ -797,6 +799,7 @@ namespace sustAInableEducation_backend.Repository
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
+
         private static List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config, List<ChatMessage> chatMessages)
         {
 
@@ -839,6 +842,93 @@ namespace sustAInableEducation_backend.Repository
 
             return chatMessages;
         }
+
+
+        /// <summary>
+        /// Kacper Bohaczyk
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
+        public async Task<string> GenerateProfileImage(String userName, ImageStyle style)
+        {
+            ArgumentNullException.ThrowIfNull(_client);
+            ArgumentNullException.ThrowIfNull(userName);
+
+
+            String imagePrompt = $"Generate an image related to sustainability that matches the term '{userName}'. The Style of the image should match the {style} style";
+
+
+            HttpRequestMessage requestImage = new(HttpMethod.Post, "/v1/inference/black-forest-labs/FLUX-1-dev")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(new
+                {
+                    prompt = imagePrompt,
+                    width = 128,
+                    height = 128
+                }), Encoding.UTF8, "application/json")
+            };
+            HttpResponseMessage responseImage = null!;
+            string responseStringImage;
+
+            try
+            {
+                responseImage = await _client.SendAsync(requestImage);
+                responseImage.EnsureSuccessStatusCode();
+                responseStringImage = await responseImage.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                throw new AIException($"Request for image generation failed with status code {responseImage?.StatusCode}", e);
+            }
+            string base64String;
+            try
+            {
+                ImageContent responseObjectImage = JsonSerializer.Deserialize<ImageContent>(responseStringImage) ?? throw new InvalidOperationException("Response object is null");
+                base64String = responseObjectImage.Images[0];
+                if (base64String.StartsWith("data:image/png;base64,"))
+                {
+                    base64String = base64String.Replace("data:image/png;base64,", string.Empty);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Image content is not a base64 string");
+                }
+            }
+            catch (JsonException e)
+            {
+                throw new AIException("Failed to deserialize response content", e);
+            }
+            string folderName, fileName;
+            try
+            {
+                var wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                folderName = "images";
+                var directoryPath = Path.Combine(wwwRootPath, folderName);
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                fileName = $"{Guid.NewGuid()}.png";
+                var filePath = Path.Combine(directoryPath, fileName);
+                byte[] imageBytes = Convert.FromBase64String(base64String);
+                using (var ms = new MemoryStream(imageBytes))
+                {
+                    using var skImage = SKImage.FromEncodedData(ms);
+                    using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
+                    using var fileStream = File.OpenWrite(filePath);
+                    skData.SaveTo(fileStream);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new AIException("Failed to save image", e);
+            }
+
+            return Path.Combine("/", folderName, fileName).Replace("\\", "/");
+
+
+        }
+
 
         /// <summary>
         /// Kacper Bohaczyk
@@ -913,7 +1003,8 @@ namespace sustAInableEducation_backend.Repository
             catch (Exception e)
             {
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
-            };
+            }
+            ;
 
 
             return erg;
