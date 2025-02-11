@@ -849,24 +849,21 @@ namespace sustAInableEducation_backend.Repository
 
 
         public static string GetEnumMemberValue(Enum enumValue)
+{
+    Type type = enumValue.GetType();
+    MemberInfo memberInfo = type.GetMember(enumValue.ToString()).FirstOrDefault();
+
+    if (memberInfo != null)
     {
-        // Get the type of the enum
-        Type type = enumValue.GetType();
-        // Get the specific enum field info
-        MemberInfo[] memberInfo = type.GetMember(enumValue.ToString());
-
-        if (memberInfo.Length > 0)
+        var attribute = memberInfo.GetCustomAttribute<EnumMemberAttribute>();
+        if (attribute != null)
         {
-            // Get the EnumMember attribute from the field
-            var attribute = memberInfo[0].GetCustomAttribute<EnumMemberAttribute>();
-            if (attribute != null)
-            {
-                return attribute.Value; // Return the EnumMember Value
-            }
+            return attribute.Value; // Return the EnumMember Value
         }
-
-        return enumValue.ToString(); // Fallback to enum name if no attribute is found
     }
+
+    return enumValue.ToString(); // Fallback to enum name if no attribute is found
+}
 
         /// <summary>
         /// Kacper Bohaczyk
@@ -881,9 +878,12 @@ namespace sustAInableEducation_backend.Repository
             var stringstyle = GetEnumMemberValue(style );
 
             // String imagePrompt = $"Use the {stringstyle}.  The image should be related to the aspect of sustainability that matches the term '{userName}";
-             String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. {stringstyle}.";
-            
-            _logger.LogDebug(imagePrompt);
+             String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
+            // String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}Manga – 'Medieval – 'A richly detailed medieval illustration inspired by illuminated manuscripts and old-world paintings. The colors are muted, with ornate patterns, historical clothing, and a sense of ancient storytelling.'";
+            //_logger.LogDebug(style.ToString());
+            //_logger.LogDebug(imagePrompt);
+
+
             // String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Manga – 'A dynamic manga-style illustration with expressive characters, bold linework, and highly detailed backgrounds. The image has a black-and-white or cel-shaded look, with dramatic shading and action-oriented poses.'";
             HttpRequestMessage requestImage = new(HttpMethod.Post, "/v1/inference/black-forest-labs/FLUX-1-dev")
             {

@@ -39,6 +39,8 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost("profileImage")]
         public async Task<ApplicationUser> SignUp(ImageStyle style)
         {
+            // Console.WriteLine($"Received Style: {style}"); Testzwecke
+
             _user.ProfileImage = await _ai.GenerateProfileImage(_user.AnonUserName, style).ConfigureAwait(false);
             _context.SaveChanges();
             return _user;
