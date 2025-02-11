@@ -141,5 +141,11 @@ namespace sustAInableEducation_backend.Repository
         {
             throw new NotImplementedException();
         }
+
+         public Task<string> GenerateProfileImage(string userName, ImageStyle style)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

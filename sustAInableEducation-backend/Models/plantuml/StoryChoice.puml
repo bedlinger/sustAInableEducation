@@ -1,8 +1,0 @@
-@startuml
-class StoryChoice {
-    + Number : int <<get>> <<set>>
-    + Text : string <<get>> <<set>>
-    + IsTaken : bool <<get>> <<set>>
-}
-StoryChoice --> "StoryPartId" Guid
-@enduml

@@ -12,6 +12,8 @@ namespace sustAInableEducation_backend.Models
         public ApplicationUser User { get; set; } = null!;
         [JsonIgnore]
         public Space Space { get; set; } = null!;
+        [JsonIgnore]
+        public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
 
         public string UserName => User?.AnonUserName ?? "";
         public string? ProfileImage => User?.ProfileImage;

@@ -19,16 +19,28 @@ namespace sustAInableEducation_backend.Controllers
         private readonly string _userId;
         private readonly ApplicationUser _user;
 
-        public AccountController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+        private readonly IAIService _ai;
+
+        
+        public AccountController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IAIService ai)
         {
             _context = context;
             _userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             _user = _context.Users.Find(_userId)!;
+            _ai = ai;
         }
 
         [HttpGet]
         public ActionResult<ApplicationUser> GetAccount()
         {
+            return _user;
+        }
+
+        [HttpPost("profileImage")]
+        public async Task<ApplicationUser> SignUp(ImageStyle style)
+        {
+            _user.ProfileImage = await _ai.GenerateProfileImage(_user.AnonUserName, style).ConfigureAwait(false);
+            _context.SaveChanges();
             return _user;
         }
 
@@ -42,8 +54,13 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost("changeEmail")]
         public async Task<IActionResult> ChangeEmail(ChangeEmailRequest request, UserManager<ApplicationUser> userManager)
         {
-            var userNameResult = await userManager.SetUserNameAsync(_user, request.NewEmail).ConfigureAwait(false);
-            var emailResult = await userManager.SetEmailAsync(_user, request.NewEmail).ConfigureAwait(false);
+            var passwordResult = await userManager.CheckPasswordAsync(_user, request.Password);
+            if (!passwordResult)
+            {
+                return Unauthorized();
+            }
+            var userNameResult = await userManager.SetUserNameAsync(_user, request.NewEmail);
+            var emailResult = await userManager.SetEmailAsync(_user, request.NewEmail);
             if (!userNameResult.Succeeded || !emailResult.Succeeded)
             {
                 return BadRequest(userNameResult.Succeeded ? emailResult.Errors : userNameResult.Errors);
