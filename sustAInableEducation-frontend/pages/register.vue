@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-full">
-        <div class="background animate-anim" />
+        <Background/>
         <div class="w-screen flex justify-center items-center h-full ">
             <Toast />
             <div

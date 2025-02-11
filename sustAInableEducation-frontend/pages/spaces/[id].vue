@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-[100dvh] prose-lg flex">
-        <div class="background animate-anim" />
+        <Background/>
         <div class="w-screen flex-1 flex flex-col items-center h-full bg-slate-50 pt-[4.5rem] p-4 overflow-hidden">
             <InviteDialog v-model="inviteDialogIsVisible" :joinCode="joinCode" :expirationDate="joinExpirationDate"
                 v-on:generateCode="getJoinCode" />
