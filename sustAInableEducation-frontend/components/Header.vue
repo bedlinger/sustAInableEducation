@@ -6,7 +6,6 @@
         </NuxtLink>
 
         <div class="flex justify-center items-center">
-            {{ profileImage }}
             <NuxtLink to="/spaces" class="text-white mx-4 text-xl">EcoSpaces</NuxtLink>
             <NuxtLink to="/quizzes" class="text-white mx-4 text-xl">Quizzes</NuxtLink>
             <div class="text-white mx-4 text-xl flex justify-center items-center"
