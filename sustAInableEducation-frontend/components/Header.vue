@@ -6,19 +6,23 @@
         </NuxtLink>
 
         <div class="flex justify-center items-center">
+            {{ username }}
             <NuxtLink to="/spaces" class="text-white mx-4 text-xl">EcoSpaces</NuxtLink>
             <NuxtLink to="/quizzes" class="text-white mx-4 text-xl">Quizzes</NuxtLink>
             <div class="text-white mx-4 text-xl flex justify-center items-center" :class="!(['/login', '/register'].includes(route.path)) ? 'cursor-pointer' : ''" @click="toggleMenu">
-                <Image :src="profileImage" class="bg-white mx-4 size-11 rounded-full overflow-hidden" />
+                <Image :src="profileImage" class="bg-white mx-4 size-11 rounded-full overflow-hidden"/>
             </div>
-            <Menu ref="menu" :model="items" :popup="true"/>
+            <Menu ref="menu" :model="items" :popup="true" @show="isMenuOpen = true" @hide="isMenuOpen = false"/>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { routerKey } from 'vue-router';
+
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
+const router = useRouter();
 const toast = useToast();
 
 const picturePath = ref<string | null>(null)
@@ -26,26 +30,32 @@ const profileImage = computed(() => {
     return picturePath.value ? `${runtimeConfig.public.apiUrl}${picturePath.value}` : '/img/profilepicture_placeholder.jpg'
 })
 
+const username = ref('USERNAME');
+
 const headers = useRequestHeaders(['cookie']);
 
 const menu = ref();
-
-const items = ref([
-    {
-        label: 'Sie sind eingeloggt',
-        items: [
-            {
-                label: 'Abmelden',
-                command: () => logout()
-            }
-        ]
-    }
-
-]);
+const isMenuOpen = ref(false);
 
 if(!(['/login', '/register'].includes(route.path))) {
     await getAccountInformation();
 }
+
+const items = ref([
+    {
+        items: [
+            {
+                label: username.value,
+                command: () => router.push('/account')
+            },
+            {
+                label: 'Abmelden',
+                command: () => logout()
+            },
+        ]
+    }
+
+]);
 
 async function logout() {
     await $fetch(`${runtimeConfig.public.apiUrl}/account/logout`, {
@@ -73,6 +83,7 @@ async function getAccountInformation() {
         onResponse: (response) => {
             if (response.response.ok) {
                 picturePath.value = response.response._data.profileImage;
+                username.value = response.response._data.anonUserName;
             }
         }
     });
