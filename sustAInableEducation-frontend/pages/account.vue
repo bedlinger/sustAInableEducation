@@ -65,10 +65,7 @@ const profileImage = computed(() => {
   return profilePicture.value ? `${runtimeConfig.public.apiUrl}${profilePicture.value}` : '/img/profilepicture_placeholder.jpg'
 })
 
-
-if(import.meta.client) {
-  await getAccountData()
-}
+await getAccountData()
 
 const passSuccess = () => {
   toast.add({ severity: 'success', summary: 'Passwort geändert', detail: 'Das Passwort wurde erfolgreich geändert', life: 5000 })
