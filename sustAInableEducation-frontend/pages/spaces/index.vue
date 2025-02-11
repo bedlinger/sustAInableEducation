@@ -194,7 +194,7 @@
                                                     </div>
                                                     <div class="flex justify-between w-full items-center">
                                                         <span>{{ choice.text }}</span>
-                                                        <Chip class="!bg-white !text-black"
+                                                        <Chip class="!bg-white !text-black h-fit !p-1 !px-2 text-sm"
                                                             :label="choice.numberVotes.toString() + ' Stimmen'" />
                                                     </div>
                                                 </div>
