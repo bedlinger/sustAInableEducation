@@ -9,7 +9,7 @@
             <NuxtLink to="/spaces" class="text-white mx-4 text-xl">EcoSpaces</NuxtLink>
             <NuxtLink to="/quizzes" class="text-white mx-4 text-xl">Quizzes</NuxtLink>
             <div class="text-white mx-4 text-xl flex justify-center items-center" :class="!(['/login', '/register'].includes(route.path)) ? 'cursor-pointer' : ''" @click="toggleMenu">
-                <Icon name="ic:baseline-account-circle" class="bg-white mx-4 size-10" />
+                <Image :src="profileImage" class="bg-white mx-4 size-11 rounded-full overflow-hidden" />
             </div>
             <Menu ref="menu" :model="items" :popup="true"/>
         </div>
@@ -20,6 +20,13 @@
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
 const toast = useToast();
+
+const picturePath = ref<string | null>(null)
+const profileImage = computed(() => {
+    return picturePath.value ? `${runtimeConfig.public.apiUrl}${picturePath.value}` : '/img/profilepicture_placeholder.jpg'
+})
+
+const headers = useRequestHeaders(['cookie']);
 
 const menu = ref();
 
@@ -35,6 +42,10 @@ const items = ref([
     }
 
 ]);
+
+if(!(['/login', '/register'].includes(route.path))) {
+    await getAccountInformation();
+}
 
 async function logout() {
     await $fetch(`${runtimeConfig.public.apiUrl}/account/logout`, {
@@ -53,4 +64,17 @@ const toggleMenu = (event: Event) => {
         menu.value.toggle(event);
     }
 };
+
+async function getAccountInformation() {
+    await $fetch(`${runtimeConfig.public.apiUrl}/account`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: headers,
+        onResponse: (response) => {
+            if (response.response.ok) {
+                picturePath.value = response.response._data.profileImage;
+            }
+        }
+    });
+}
 </script>
