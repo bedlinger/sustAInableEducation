@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model:visible="model" header="Passwort ändern" modal :draggable="false" dismissable-mask class="max-w-md w-full mx-4">
+  <Dialog v-model:visible="model" header="E-Mail ändern" modal :draggable="false" dismissable-mask class="max-w-md w-full mx-4">
     <div class="w-full flex flex-col gap-4">
       <div>
         <p class="text-lg">Neue Email</p>
