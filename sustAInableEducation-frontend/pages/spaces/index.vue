@@ -193,9 +193,9 @@
                                                             v-if="choice.number === part.chosenNumber" />
                                                     </div>
                                                     <div class="flex justify-between w-full items-center">
-                                                        <p>{{ choice.text }}</p>
-                                                        <Badge class="!bg-white !text-black"
-                                                            :value="choice.numberVotes.toString() + ' Stimmen'" />
+                                                        <span>{{ choice.text }}</span>
+                                                        <Chip class="!bg-white !text-black"
+                                                            :label="choice.numberVotes.toString() + ' Stimmen'" />
                                                     </div>
                                                 </div>
                                             </template>
