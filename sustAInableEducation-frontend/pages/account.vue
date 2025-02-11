@@ -40,6 +40,9 @@
 </template>
 
 <script setup lang="ts">
+import { Meta } from '#build/components'
+import type { Account } from '~/types/Account'
+
 useHead({
   title: 'Kontoübersicht - sustAInableEducation'
 })
@@ -61,11 +64,28 @@ const email = ref('EMAIL@EMAIL.COM')
 const password = ref('sustAInableEducation')
 const profilePicture = ref<string | null>(null)
 
+const fetchSuccessfull = ref(false)
+
 const profileImage = computed(() => {
-  return profilePicture.value ? `${runtimeConfig.public.apiUrl}${profilePicture.value}` : '/img/profilepicture_placeholder.jpg'
+  return data.value?.profileImage ? `${runtimeConfig.public.apiUrl}${data.value.profileImage}` : '/img/profilepicture_placeholder.jpg'
 })
 
-await getAccountData()
+
+const { data, error, refresh } = useFetch<Account | null>(`${runtimeConfig.public.apiUrl}/account`, {
+  method: 'GET',
+  credentials: 'include',
+  headers: headers
+})
+
+if(error.value) {
+  navigateTo(`/login?redirect=${route.fullPath}`)
+}
+
+if(data.value) {
+  username.value = data.value.anonUserName
+  email.value = data.value.email
+  profilePicture.value = data.value.profileImage
+}
 
 const passSuccess = () => {
   toast.add({ severity: 'success', summary: 'Passwort geändert', detail: 'Das Passwort wurde erfolgreich geändert', life: 5000 })
@@ -75,39 +95,28 @@ const passFail  = () => {
   toast.add({ severity: 'error', summary: 'Fehler', detail: 'Das Passwort konnte nicht geändert werden', life: 5000 })
 }
 
-const emailSuccess = () => {
+async function emailSuccess() {
   toast.add({ severity: 'success', summary: 'E-Mail geändert', detail: 'Die E-Mail wurde erfolgreich geändert', life: 5000 })
-  getAccountData()
+  await refresh()
+  if(data.value) {
+    email.value = data.value.email
+  }
 }
 
 const emailFail  = () => {
   toast.add({ severity: 'error', summary: 'Fehler', detail: 'Die E-Mail konnte nicht geändert werden', life: 5000 })
 }
 
-const pictureSuccess = () => {
+const pictureSuccess = async () => {
   toast.add({ severity: 'success', summary: 'Profilbild generiert', detail: 'Das Profilbild wurde erfolgreich geändert', life: 5000 })
-  getAccountData()
+  await refresh()
+  if(data.value) {
+    profilePicture.value = data.value.profileImage
+  }
 }
 
 const pictureFail  = () => {
   toast.add({ severity: 'error', summary: 'Fehler', detail: 'Das Bild konnte nicht generiert werden', life: 5000 })
-}
-
-async function getAccountData() {
-  await $fetch(`${runtimeConfig.public.apiUrl}/account`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: headers,
-    onResponse: (response) => {
-      if (response.response.ok) {
-        username.value = response.response._data.anonUserName
-        email.value = response.response._data.email
-        profilePicture.value = response.response._data.profileImage
-      } else if (response.response.status === 401) {
-        router.push(`/login?redirect=${route.fullPath}`)
-      }
-    }
-  })
 }
 
 </script>
