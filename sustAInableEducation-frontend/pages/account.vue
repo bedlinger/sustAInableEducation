@@ -2,6 +2,7 @@
   
   <div class="w-full h-full flex justify-center items-center mt-16">
     <Toast />
+    <PictureDialog v-model:visible="showPictureDialog" @success="pictureSuccess" @fail="pictureFail" />
     <ChangePasswordDialog v-model:visible="showChangePasswordDialog" @success="passSuccess" @fail="passFail" />
     <ChangeEmailDialog v-model:visible="showChangeEmailDialog" @success="emailSuccess" @fail="emailFail" />
     <div class="background animate-anim" />
@@ -31,7 +32,7 @@
           <Divider />
           <Button label="Email ändern" outlined @click="showChangeEmailDialog = true" />
           <Button label="Passwort ändern" outlined @click="showChangePasswordDialog = true" />
-          <Button label="Profilbild generieren" outlined @clik="" />
+          <Button label="Profilbild generieren" outlined @click="showPictureDialog = true" />
         </div>
       </div>
     </div>
@@ -53,6 +54,7 @@ const headers = useRequestHeaders(['cookie'])
 // Change password dialog
 const showChangePasswordDialog = ref(false)
 const showChangeEmailDialog = ref(false)
+const showPictureDialog = ref(false)
 
 const username = ref('USERNAME')
 const email = ref('EMAIL@EMAIL.COM')
@@ -77,6 +79,15 @@ const emailSuccess = () => {
 
 const emailFail  = () => {
   toast.add({ severity: 'error', summary: 'Fehler', detail: 'Die E-Mail konnte nicht geändert werden', life: 5000 })
+}
+
+const pictureSuccess = () => {
+  toast.add({ severity: 'success', summary: 'Profilbild generiert', detail: 'Das Profilbild wurde erfolgreich geändert', life: 5000 })
+  getAccountData()
+}
+
+const pictureFail  = () => {
+  toast.add({ severity: 'error', summary: 'Fehler', detail: 'Das Bild konnte nicht generiert werden', life: 5000 })
 }
 
 async function getAccountData() {
