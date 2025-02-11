@@ -5,6 +5,10 @@ using System.Text.Json.Serialization;
 using SkiaSharp;
 using sustAInableEducation_backend.Models;
 
+using System.Reflection;
+using System.Runtime.Serialization;
+
+
 namespace sustAInableEducation_backend.Repository
 {
     public class AIService : IAIService
@@ -844,6 +848,26 @@ namespace sustAInableEducation_backend.Repository
         }
 
 
+        public static string GetEnumMemberValue(Enum enumValue)
+    {
+        // Get the type of the enum
+        Type type = enumValue.GetType();
+        // Get the specific enum field info
+        MemberInfo[] memberInfo = type.GetMember(enumValue.ToString());
+
+        if (memberInfo.Length > 0)
+        {
+            // Get the EnumMember attribute from the field
+            var attribute = memberInfo[0].GetCustomAttribute<EnumMemberAttribute>();
+            if (attribute != null)
+            {
+                return attribute.Value; // Return the EnumMember Value
+            }
+        }
+
+        return enumValue.ToString(); // Fallback to enum name if no attribute is found
+    }
+
         /// <summary>
         /// Kacper Bohaczyk
         /// </summary>
@@ -854,17 +878,20 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(userName);
 
+            var stringstyle = GetEnumMemberValue(style );
 
-            String imagePrompt = $"Generate an image related to sustainability that matches the term '{userName}'. The Style of the image should match the {style} style";
-
-
+            // String imagePrompt = $"Use the {stringstyle}.  The image should be related to the aspect of sustainability that matches the term '{userName}";
+             String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. {stringstyle}.";
+            
+            _logger.LogDebug(imagePrompt);
+            // String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Manga – 'A dynamic manga-style illustration with expressive characters, bold linework, and highly detailed backgrounds. The image has a black-and-white or cel-shaded look, with dramatic shading and action-oriented poses.'";
             HttpRequestMessage requestImage = new(HttpMethod.Post, "/v1/inference/black-forest-labs/FLUX-1-dev")
             {
                 Content = new StringContent(JsonSerializer.Serialize(new
                 {
                     prompt = imagePrompt,
-                    width = 128,
-                    height = 128
+                    width = 1024,
+                    height = 1024
                 }), Encoding.UTF8, "application/json")
             };
             HttpResponseMessage responseImage = null!;
