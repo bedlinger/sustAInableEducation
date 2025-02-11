@@ -59,7 +59,7 @@ const styles = ref([
 async function generatePicture() {
   loading.value = true;
 
-  await $fetch(`${runtimeConfig.public.apiUrl}/account/profilepicture`, {
+  await $fetch(`${runtimeConfig.public.apiUrl}/account/profileImage`, {
     method: 'POST',
     credentials: 'include',
     body: {
