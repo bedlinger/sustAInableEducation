@@ -86,10 +86,12 @@
                 </div>
             </div>
 
-            <MobileSidebar class="sm:hidden" v-model="showSidebar" :searched-spaces="searchedSpaces" :search-input="searchInput" :show-filters="showFilters" :filters="filters"
-                :is-filter-applied="isFilterApplied" :spaces="spaces" :selected-space="selectedSpace" @toggle-filters="toggleShowFilters" :space-refs-by-id="spaceRefsById"
-                @apply-filters="applyFilters" @reset-filters="resetFilters" @open-delete-dialog="openDialog" @select-space="selectSpaceCloseSidebar" @toggle-sidebar="showSidebar = !showSidebar"
-                @search-update="updateSearch" />
+            <MobileSidebar class="sm:hidden" v-model="showSidebar" :searched-spaces="searchedSpaces"
+                :search-input="searchInput" :show-filters="showFilters" :filters="filters"
+                :is-filter-applied="isFilterApplied" :spaces="spaces" :selected-space="selectedSpace"
+                @toggle-filters="toggleShowFilters" :space-refs-by-id="spaceRefsById" @apply-filters="applyFilters"
+                @reset-filters="resetFilters" @open-delete-dialog="openDialog" @select-space="selectSpaceCloseSidebar"
+                @toggle-sidebar="showSidebar = !showSidebar" @search-update="updateSearch" />
 
             <div class="content flex-1 h-full overflow-y-scroll">
                 <div v-if="selectedSpace" class="w-full pt-20 p-4">
@@ -104,14 +106,15 @@
                             <span class="text-md">
                                 Dieser EcoSpace wurde noch nicht beendet. Wenn Sie diesen EcoSpace fortsetzen wollen,
                                 können Sie
-                                <NuxtLink class="text-blue-700 hover:text-blue-500 hover:underline font-bold" :to="'/spaces/' + selectedSpace.id">hier</NuxtLink>
+                                <NuxtLink class="text-blue-700 hover:text-blue-500 hover:underline font-bold"
+                                    :to="'/spaces/' + selectedSpace.id">hier</NuxtLink>
                                 klicken um diesem beizutreten.
                             </span>
                         </Message>
                         <Panel header="Informationen" class="w-full mb-4">
                             <Divider />
                             <div class="w-full h-full flex justify-between">
-                                <div class="flex flex-col justify-between flex-1 mr-40">
+                                <div class="flex flex-col justify-between flex-1 sm:mr-40 w-full">
                                     <div class="text-lg">
                                         <p class="mb-2">
                                             <span class="font-bold">Erstellt am</span>
@@ -130,7 +133,7 @@
                                             {{ getTargetgroup(selectedSpace.story.targetGroup) }}
                                         </p>
                                     </div>
-                                    <div class="w-full">
+                                    <div class="mb-4">
                                         <MeterGroup :value="getProgressData()" labelPosition="start"
                                             v-tooltip.bottom="{ value: getProgressLabel(), showDelay: 50 }">
                                             <template #label="{ totalPercent }">
@@ -143,8 +146,41 @@
                                             </template>
                                         </MeterGroup>
                                     </div>
+                                    <Fieldset legend="Teilnehmer" class="max-h-64 overflow-scroll sm:hidden">
+                                        <div class="bg-blue-500 !max-w-full">
+                                            <DataTable :value="selectedSpace.participants"
+                                                class="!bg-green-300 !flex !max-w-">
+                                                <Column field="userName" header="Benutzername">
+                                                    <template #body="{ data }">
+                                                        <div class="flex items-center">
+                                                            <div class="size-5 mr-1">
+                                                                <Icon name="ic:baseline-star-rate"
+                                                                    class="size-5 bg-yellow-500"
+                                                                    v-tooltip.bottom="{ value: 'Host', showDelay: 50 }"
+                                                                    v-if="data.isHost" />
+                                                            </div>
+                                                            <span
+                                                                :class="data.userId === myUserId ? 'underline decoration-2 font-bold' : ''">
+                                                                {{ data.userName }}
+                                                            </span>
+                                                        </div>
+                                                    </template>
+                                                </Column>
+                                                <Column field="impact" header="Einfluss">
+                                                    <template #body="{ data }">
+                                                        <div class="flex items-center justify-center">
+                                                            <span v-if="ecoSpaceIsFinished(selectedSpace)">{{
+                                                                data.impact
+                                                            }}</span>
+                                                            <span v-else>?</span>
+                                                        </div>
+                                                    </template>
+                                                </Column>
+                                            </DataTable>
+                                        </div>
+                                    </Fieldset>
                                 </div>
-                                <Fieldset legend="Teilnehmer" class="max-h-64 overflow-scroll">
+                                <Fieldset legend="Teilnehmer" class="max-h-64 overflow-scroll hidden sm:block">
                                     <div class="h-full w-full">
                                         <DataTable :value="selectedSpace.participants">
                                             <Column field="userName" header="Benutzername">
@@ -156,7 +192,9 @@
                                                                 v-tooltip.bottom="{ value: 'Host', showDelay: 50 }"
                                                                 v-if="data.isHost" />
                                                         </div>
-                                                        <span :class="data.userId === myUserId ? 'underline decoration-2 font-bold' : ''">{{ data.userName }}</span>
+                                                        <span
+                                                            :class="data.userId === myUserId ? 'underline decoration-2 font-bold' : ''">{{
+                                                                data.userName }}</span>
                                                     </div>
                                                 </template>
                                             </Column>
@@ -520,7 +558,7 @@ function getUser() {
             } else if (response.response.status === 401) {
                 router.push('/login?redirect=' + route.fullPath);
             }
-        } 
+        }
     });
 }
 </script>
