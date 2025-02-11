@@ -26,6 +26,10 @@ namespace sustAInableEducation_backend.Models
         public string NewPassword { get; set; } = null!;
     }
 
+    public class ImageRequest
+    {
+        public ImageStyle Style { get; set; }
+    }
 
     public enum ImageStyle
     {
