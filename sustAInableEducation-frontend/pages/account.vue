@@ -31,6 +31,7 @@
           <Divider />
           <Button label="Email ändern" outlined @click="showChangeEmailDialog = true" />
           <Button label="Passwort ändern" outlined @click="showChangePasswordDialog = true" />
+          <Button label="Profilbild generieren" outlined @clik="" />
         </div>
       </div>
     </div>
