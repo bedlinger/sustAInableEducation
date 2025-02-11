@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-screen flex items-center justify-center">
-        <div class="background animate-anim" />
+        <Background/>
         <div class="w-screen flex flex-col items-center justify-center h-full">
             <div
                 class="bg-slate-50 shadow-xl rounded-xl flex flex-col p-4 items-center w-full max-w-[1000px] h-full max-h-[650px] ">
