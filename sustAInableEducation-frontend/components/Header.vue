@@ -29,6 +29,12 @@ const profileImage = computed(() => {
     return picturePath.value ? `${runtimeConfig.public.apiUrl}${picturePath.value}` : '/img/profilepicture_placeholder.jpg'
 })
 
+watch(() => route.path, async () => {
+    if(!(['/login', '/register'].includes(route.path))) {
+        await getAccountInformation();
+    }
+});
+
 const username = ref('USERNAME');
 
 const headers = useRequestHeaders(['cookie']);
