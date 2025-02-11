@@ -9,7 +9,7 @@
     <div class="bg-white relative flex justify-center p-5 rounded-lg shadow-xl w-full mx-4 sm:mx-0 sm:w-fit">
       <div
         class="pp absolute top-[-4.5rem] rounded-full overflow-hidden border-4 border-white shadow-md flex justify-center items-center">
-        <Image src="/img/profilepicture_placeholder.jpg" width="128" alt="Profilbild" preview>
+        <Image :src="profileImage" width="128" alt="Profilbild" preview>
           <template #previewicon>
             <div />
           </template>
@@ -59,6 +59,12 @@ const showPictureDialog = ref(false)
 const username = ref('USERNAME')
 const email = ref('EMAIL@EMAIL.COM')
 const password = ref('sustAInableEducation')
+const profilePicture = ref<string | null>(null)
+
+const profileImage = computed(() => {
+  return profilePicture.value ? `${runtimeConfig.public.apiUrl}${profilePicture.value}` : '/img/profilepicture_placeholder.jpg'
+})
+
 
 if(import.meta.client) {
   await getAccountData()
@@ -99,6 +105,7 @@ async function getAccountData() {
       if (response.response.ok) {
         username.value = response.response._data.anonUserName
         email.value = response.response._data.email
+        profilePicture.value = response.response._data.profileImage
       } else if (response.response.status === 401) {
         router.push(`/login?redirect=${route.fullPath}`)
       }
