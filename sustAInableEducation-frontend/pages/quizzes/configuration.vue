@@ -73,7 +73,7 @@
                                               @click="activateCallback('1')" />
                                           <Button label="Quiz erstellen"
                                               :disabled="!isFilledOut || loading"
-                                              @click=""
+                                              @click="createQuiz"
                                               :loading="loading" />
                                       </div>
                                   </div>
@@ -97,12 +97,11 @@ useHead({
   title: 'EcoSpace erstellen - sustAInableEducation'
 })
 
+const headers = useRequestHeaders(['cookie'])
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 
 const loading = ref(false)
-
-
 
 const questionAmount = ref(1)
 const quizTypes = ref();
@@ -143,5 +142,25 @@ const isFilledOut = computed(() => {
   }
   return false
 })
+
+async function createQuiz() {
+  loading.value = true
+  await $fetch(`${runtimeConfig.public.apiUrl}/quizzes`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: headers,
+    body: {
+      spaceId: selectedSpace.value.id,
+      numberQuestions: questionAmount.value,
+      types: quizTypes.value
+    },
+    onResponse: (response) => {
+      if(response.response.ok) {
+        navigateTo(`/quizzes/${response.response._data.id}`)
+      }
+    }
+  })
+  loading.value = false
+}
 
 </script>
