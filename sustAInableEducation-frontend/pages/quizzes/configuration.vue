@@ -7,12 +7,12 @@
               <div class="h-full max-h-[570px] flex flex-col items-center w-full">
                   <h1 class="text-3xl font-bold mb-8 h-5">Quiz erstellen</h1>
                   <Stepper value="1" class="flex-1 w-full h-full" linear>
-                      <Steplist>
-                          <Divider />
+                      <Steplist class="!w-full">
+                          <Divider class="!hidden sm:!block" />
                           <Step value="1">EcoSpace</Step>
                           <Divider />
                           <Step value="2">Einstellungen</Step>
-                          <Divider />
+                          <Divider class="!hidden sm:!block" />
                       </Steplist>
                       <StepPanels class="!p-0 w-full h-full max-h-[520px]">
                           <StepPanel v-slot="{ activateCallback }" value="1" class="w-full h-full rounded-xl">
