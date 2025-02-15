@@ -102,7 +102,7 @@ const loading = ref(false)
 const questionAmount = ref(1)
 const quizTypes = ref();
 
-const selectedSpace = ref();
+const selectedSpace = ref<EcoSpace | null>(null);
 const spaces = ref<EcoSpace[]>([]);
 
 const { data, error, refresh } = useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`, {
@@ -146,7 +146,7 @@ async function createQuiz() {
     credentials: 'include',
     headers: headers,
     body: {
-      spaceId: selectedSpace.value.id,
+      spaceId: selectedSpace.value!.id,
       numberQuestions: questionAmount.value,
       types: quizTypes.value
     },
