@@ -87,9 +87,7 @@
 
 <script setup lang="ts">
 import { Step } from 'primevue';
-import { Configuration } from '~/types/configuration';
 import type { EcoSpace } from '~/types/EcoSpace';
-import { SdgAsset } from '~/types/sdgs';
 
 useHead({
   title: 'EcoSpace erstellen - sustAInableEducation'
