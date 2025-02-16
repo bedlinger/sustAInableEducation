@@ -15,7 +15,7 @@
                         </div>
                     </div>
                     <div id="sidebar-content">
-                        <QuizListEntry v-for="quiz in quizzes" :quiz="quiz" />
+                        <QuizListEntry v-for="quiz in searchedQuizzes" :quiz="quiz" />
                         <NuxtLink to="/quizzes/configuration">
                             <Button label="Quiz erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
@@ -65,7 +65,7 @@ const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
     return acc;
 }, {} as Record<string, Ref<boolean>>) : {};
 
-    const searchedQuizzes = computed(() => {
+const searchedQuizzes = computed(() => {
     return quizzes.value.filter((quiz) => quiz.title.toLowerCase().includes(searchInput.value.toLowerCase()));
 })
 
