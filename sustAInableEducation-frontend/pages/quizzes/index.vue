@@ -5,7 +5,7 @@
             <div class="sidebar-container w-80 h-full pt-16 border-solid border-slate-300 border-r-2 hidden sm:block">
                 <div class="sidebar w-full h-full flex-col p-2 overflow-y-scroll flex">
                     <div id="sidebar-header">
-                        <div class="flex items-center w-full bg-red-500">
+                        <div class="flex items-center w-full mb-2">
                             <IconField class="w-full">
                                 <InputIcon>
                                     <Icon name="ic:baseline-search" />
