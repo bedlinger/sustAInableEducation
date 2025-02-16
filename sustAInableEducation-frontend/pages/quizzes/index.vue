@@ -15,6 +15,7 @@
                         </div>
                     </div>
                     <div id="sidebar-content">
+                        <QuizListEntry v-for="quiz in quizzes" :quiz="quiz" />
                         <NuxtLink to="/quizzes/configuration">
                             <Button label="Quiz erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
