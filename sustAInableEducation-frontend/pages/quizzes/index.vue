@@ -18,7 +18,7 @@
                     <div id="sidebar-content">
                         <QuizListEntry v-for="quiz in searchedQuizzes"
                         :quiz="quiz" v-model="quizRefsById[quiz.id].value"
-                        @click="selectQuizById(quiz.id)" @delete="refreshQuizzes"/>
+                        @click="selectQuizById(quiz.id)" @delete="deleteQuiz"/>
                         <NuxtLink to="/quizzes/configuration">
                             <Button label="Quiz erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
@@ -48,7 +48,7 @@
                     </div>
                 </div>
                 <div v-else class="pt-20 w-full h-full flex items-center justify-center">
-                    <p class="text-lg">Bitte wählen Sie ein Quiz aus der Liste aus. {{ selectedQuiz ? selectedQuiz : '' }}</p>
+                    <p class="text-lg">Bitte wählen Sie ein Quiz aus der Liste aus.</p>
 
                 </div>
             </div>
@@ -59,6 +59,7 @@
 <script setup lang="ts">
 import type { Quiz } from '~/types/Quiz';
 
+const requestHeaders = useRequestHeaders(['cookie']);
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
 
@@ -67,7 +68,7 @@ const { refresh, data: quizzes } = await useFetch<Quiz[]>(`${runtimeConfig.publi
     {
         method: 'GET',
         credentials: 'include',
-        headers: useRequestHeaders(['cookie']),
+        headers: requestHeaders,
         onResponse: (response) => {
             if (response.response.status === 401) {
                 navigateTo('/login?redirect=' + route.fullPath);
@@ -115,7 +116,12 @@ function selectQuizById(id: string) {
     showSidebar.value = false;
 }
 
-function refreshQuizzes() {
+async function deleteQuiz(id: string) {
+    await $fetch(`${runtimeConfig.public.apiUrl}/quizzes/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: requestHeaders
+    });
     refresh();
 }
 </script>
