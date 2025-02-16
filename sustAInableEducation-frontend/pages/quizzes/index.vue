@@ -56,7 +56,22 @@
 <script setup lang="ts">
 import type { Quiz } from '~/types/Quiz';
 
-const quizzes = ref<Quiz[]>([]);
+const runtimeConfig = useRuntimeConfig();
+const route = useRoute();
+
+
+const { error, data: quizzes } = await useFetch<Quiz[]>(`${runtimeConfig.public.apiUrl}/quizzes`,
+    {
+        method: 'GET',
+        credentials: 'include',
+        headers: useRequestHeaders(['cookie']),
+        onResponse: (response) => {
+            if (response.response.status === 401) {
+                navigateTo('/login?redirect=' + route.fullPath);
+            }
+        }
+    }
+)
 
 const selectedQuiz = ref<Quiz | null>(null);
 
@@ -66,9 +81,9 @@ const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
 }, {} as Record<string, Ref<boolean>>) : {};
 
 const searchedQuizzes = computed(() => {
+    if(quizzes.value === null) return [];
     return quizzes.value.filter((quiz) => quiz.title.toLowerCase().includes(searchInput.value.toLowerCase()));
 })
-
 
 const searchInput = ref('');
 
@@ -86,7 +101,7 @@ function updateSearch(newVal: string) {
 }
 
 function selectQuizById(id: string) {
-    selectedQuiz.value = quizzes.value.find((quiz) => quiz.id === id) || null;
+    selectedQuiz.value = quizzes.value!.find((quiz) => quiz.id === id) || null;
     showSidebar.value = false;
 }
 </script>
