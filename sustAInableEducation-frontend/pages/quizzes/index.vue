@@ -16,7 +16,9 @@
                         <Divider/>
                     </div>
                     <div id="sidebar-content">
-                        <QuizListEntry v-for="quiz in searchedQuizzes" :quiz="quiz" />
+                        <QuizListEntry v-for="quiz in searchedQuizzes"
+                        :quiz="quiz" v-model="quizRefsById[quiz.id].value"
+                        @click="selectQuizById(quiz.id)" @delete="refreshQuizzes"/>
                         <NuxtLink to="/quizzes/configuration">
                             <Button label="Quiz erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
@@ -41,12 +43,12 @@
             <div class="content flex-1 h-full overflow-y-scroll">
                 <div v-if="selectedQuiz" class="w-full pt-20 p-4">
                     <div class="flex items-start flex-col w-full h-full">
-
+                        
 
                     </div>
                 </div>
                 <div v-else class="pt-20 w-full h-full flex items-center justify-center">
-                    <p class="text-lg">Bitte wählen Sie ein Quiz aus der Liste aus.</p>
+                    <p class="text-lg">Bitte wählen Sie ein Quiz aus der Liste aus. {{ selectedQuiz ? selectedQuiz : '' }}</p>
 
                 </div>
             </div>
@@ -61,7 +63,7 @@ const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
 
 
-const { error, data: quizzes } = await useFetch<Quiz[]>(`${runtimeConfig.public.apiUrl}/quizzes`,
+const { refresh, data: quizzes } = await useFetch<Quiz[]>(`${runtimeConfig.public.apiUrl}/quizzes`,
     {
         method: 'GET',
         credentials: 'include',
@@ -104,6 +106,16 @@ function updateSearch(newVal: string) {
 
 function selectQuizById(id: string) {
     selectedQuiz.value = quizzes.value!.find((quiz) => quiz.id === id) || null;
+    quizRefsById[id].value = true;
+    Object.keys(quizRefsById).forEach(key => {
+        if (key !== id) {
+            quizRefsById[key].value = false;
+        }
+    });
     showSidebar.value = false;
+}
+
+function refreshQuizzes() {
+    refresh();
 }
 </script>
