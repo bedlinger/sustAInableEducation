@@ -31,6 +31,12 @@
                     </div>
                 </div>
             </div>
+
+            <MobileQuizSidebar class="sm:hidden" v-model="showSidebar" :searched-quizzes="searchedQuizzes"
+                :search-input="searchInput" :quizzes="quizzes" :selected-quiz="selectedQuiz"
+                :quiz-refs-by-id="quizRefsById" @open-delete-dialog="openDialog" @select-quiz="selectQuizById"
+                @toggle-sidebar="showSidebar = !showSidebar" @search-update="updateSearch" />
+
             <div class="content flex-1 h-full overflow-y-scroll">
                 <div v-if="selectedQuiz" class="w-full pt-20 p-4">
                     <div class="flex items-start flex-col w-full h-full">
@@ -55,4 +61,30 @@ const searchInput = ref('');
 
 const quizzes = ref<Quiz[]>([]);
 const selectedQuiz = ref<Quiz | null>(null);
+
+const showSidebar = ref(true); 
+
+const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
+    acc[quiz.id] = ref(false);
+    return acc;
+}, {} as Record<string, Ref<boolean>>) : {};
+
+const deleteDialogOpened = ref(false);
+
+const searchedQuizzes = computed(() => {
+    return quizzes.value.filter((quiz) => quiz.title.toLowerCase().includes(searchInput.value.toLowerCase()));
+})
+
+function openDialog() {
+    deleteDialogOpened.value = true;
+}
+
+function updateSearch(newVal: string) {
+    searchInput.value = newVal;
+}
+
+function selectQuizById(id: string) {
+    selectedQuiz.value = quizzes.value.find((quiz) => quiz.id === id) || null;
+    showSidebar.value = false;
+}
 </script>
