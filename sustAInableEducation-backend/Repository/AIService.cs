@@ -37,7 +37,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
-                _logger.LogError("Failed to initialise AI service: {Exception}", e);
+                _logger.LogCritical("Failed to initialise AI service: {Exception}", e);
                 throw;
             }
             _logger.LogInformation("AI service initialised");
@@ -55,7 +55,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            _logger.LogInformation("Starting new story with title {Title}", story.Title);
+            _logger.LogInformation("Starting new story with id: {Id}", story.Id);
             List<ChatMessage> chatMessages;
             try
             {
@@ -93,8 +93,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    _logger.LogInformation("Successfully started story with title {Title}", story.Title);
-                    return GetStoryPart(assistantContent);
+                    var (storyPart, title) = GetStoryPart(assistantContent);
+                    _logger.LogInformation("Successfully started story with id: {Id}", story.Id);
+                    return (storyPart, title);
                 }
                 catch (Exception e)
                 {
@@ -123,7 +124,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            _logger.LogInformation("Generating next part of story with title {Title}", story.Title);
+            _logger.LogInformation("Generating next part story with id: {Id}", story.Id);
             List<ChatMessage> chatMessages;
             try
             {
@@ -161,8 +162,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    _logger.LogInformation("Successfully generated next part of story with title {Title}", story.Title);
-                    return GetStoryPart(assistantContent).Item1;
+                    var (storyPart, _) = GetStoryPart(assistantContent);
+                    _logger.LogInformation("Successfully generated next part of story with id: {Id}", story.Id);
+                    return storyPart;
                 }
                 catch (Exception e)
                 {
@@ -191,7 +193,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            _logger.LogInformation("Generating result of story with title {Title}", story.Title);
+            _logger.LogInformation("Generating result of story with id: {Id}", story.Id);
             List<ChatMessage> chatMessages;
             try
             {
@@ -281,8 +283,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
+                    var result = GetStoryResult(assistantContent, end);
                     _logger.LogInformation("Successfully generated result of story with title {Title}", story.Title);
-                    return GetStoryResult(assistantContent, end);
+                    return result;
                 }
                 catch (Exception e)
                 {
@@ -675,6 +678,8 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(story);
 
+            _logger.LogInformation("Generating image for story with id: {Id}", story.Id);
+
             string systemPrompt = "Du bist ein professioneller Prompt Engineer, der sich auf die Erstellung hochdetaillierter und konsistenter Bildbeschreibungen für KI-basierte Bildgenerierungssysteme spezialisiert hat. Deine Aufgabe ist es, Prompts zu entwerfen, die zu visuell harmonischen und stilistisch kohärenten Bildern führen. Achte darauf, dass die Beschreibung lebendig und spezifisch ist und alle relevanten Details umfasst – dazu gehören:"
                 + "- Setting: Ort, Umgebung und atmosphärische Details"
                 + "- Charaktere: Aussehen, Mimik, Kleidung und Ausdruck"
@@ -715,6 +720,7 @@ namespace sustAInableEducation_backend.Repository
             string imagePrompt;
             try
             {
+                _logger.LogInformation("Fetching assistant content for image prompt");
                 imagePrompt = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP, false);
             }
             catch (Exception e)
@@ -737,6 +743,7 @@ namespace sustAInableEducation_backend.Repository
             string responseStringImage;
             try
             {
+                _logger.LogInformation("Generating image based on prompt");
                 responseImage = await _client.SendAsync(requestImage);
                 responseImage.EnsureSuccessStatusCode();
                 responseStringImage = await responseImage.Content.ReadAsStringAsync();
@@ -779,13 +786,11 @@ namespace sustAInableEducation_backend.Repository
                 fileName = $"{Guid.NewGuid()}.png";
                 var filePath = Path.Combine(directoryPath, fileName);
                 byte[] imageBytes = Convert.FromBase64String(base64String);
-                using (var ms = new MemoryStream(imageBytes))
-                {
-                    using var skImage = SKImage.FromEncodedData(ms);
-                    using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
-                    using var fileStream = File.OpenWrite(filePath);
-                    skData.SaveTo(fileStream);
-                }
+                using var ms = new MemoryStream(imageBytes);
+                using var skImage = SKImage.FromEncodedData(ms);
+                using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
+                using var fileStream = File.OpenWrite(filePath);
+                skData.SaveTo(fileStream);
             }
             catch (Exception e)
             {
@@ -793,6 +798,7 @@ namespace sustAInableEducation_backend.Repository
                 throw new AIException("Failed to save image", e);
             }
 
+            _logger.LogInformation("Image generated successfully");
             return Path.Combine("/", folderName, fileName).Replace("\\", "/");
         }
 
@@ -849,21 +855,21 @@ namespace sustAInableEducation_backend.Repository
 
 
         public static string GetEnumMemberValue(Enum enumValue)
-{
-    Type type = enumValue.GetType();
-    MemberInfo memberInfo = type.GetMember(enumValue.ToString()).FirstOrDefault();
-
-    if (memberInfo != null)
-    {
-        var attribute = memberInfo.GetCustomAttribute<EnumMemberAttribute>();
-        if (attribute != null)
         {
-            return attribute.Value; // Return the EnumMember Value
-        }
-    }
+            Type type = enumValue.GetType();
+            MemberInfo memberInfo = type.GetMember(enumValue.ToString()).FirstOrDefault();
 
-    return enumValue.ToString(); // Fallback to enum name if no attribute is found
-}
+            if (memberInfo != null)
+            {
+                var attribute = memberInfo.GetCustomAttribute<EnumMemberAttribute>();
+                if (attribute != null)
+                {
+                    return attribute.Value; // Return the EnumMember Value
+                }
+            }
+
+            return enumValue.ToString(); // Fallback to enum name if no attribute is found
+        }
 
         /// <summary>
         /// Kacper Bohaczyk
@@ -875,10 +881,10 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(userName);
 
-            var stringstyle = GetEnumMemberValue(style );
+            var stringstyle = GetEnumMemberValue(style);
 
             // String imagePrompt = $"Use the {stringstyle}.  The image should be related to the aspect of sustainability that matches the term '{userName}";
-             String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
+            String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
             // String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}Manga – 'Medieval – 'A richly detailed medieval illustration inspired by illuminated manuscripts and old-world paintings. The colors are muted, with ornate patterns, historical clothing, and a sense of ancient storytelling.'";
             //_logger.LogDebug(style.ToString());
             //_logger.LogDebug(imagePrompt);
