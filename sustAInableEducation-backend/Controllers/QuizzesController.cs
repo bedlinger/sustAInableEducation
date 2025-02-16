@@ -79,7 +79,7 @@ namespace sustAInableEducation_backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuiz(Guid id)
         {
-            var quiz = await _context.Quiz.FindAsync(id);
+            var quiz = await _context.QuizWithAll.FirstOrDefaultAsync(q => q.Id == id);
             if (quiz == null)
             {
                 return NotFound();
