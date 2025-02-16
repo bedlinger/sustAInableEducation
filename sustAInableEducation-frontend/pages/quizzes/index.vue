@@ -1,6 +1,7 @@
 <template>
     <div class="w-full h-full">
         <div class="w-screen flex items-center h-full bg-slate-50 relative">
+            <ConfirmDialog></ConfirmDialog>
             <Toast />
             <div class="sidebar-container w-80 h-full pt-16 border-solid border-slate-300 border-r-2 hidden sm:block">
                 <div class="sidebar w-full h-full flex-col p-2 overflow-y-scroll flex">
@@ -18,7 +19,7 @@
                     <div id="sidebar-content">
                         <QuizListEntry v-for="quiz in searchedQuizzes"
                         :quiz="quiz" v-model="quizRefsById[quiz.id].value"
-                        @click="selectQuizById(quiz.id)" @delete="deleteQuiz"/>
+                        @click="selectQuizById(quiz.id)" @delete="openDialog"/>
                         <NuxtLink to="/quizzes/configuration">
                             <Button label="Quiz erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
@@ -63,6 +64,7 @@ const requestHeaders = useRequestHeaders(['cookie']);
 const runtimeConfig = useRuntimeConfig();
 const route = useRoute();
 
+const confirmDialog = useConfirm();
 
 const { refresh, data: quizzes } = await useFetch<Quiz[]>(`${runtimeConfig.public.apiUrl}/quizzes`,
     {
@@ -96,11 +98,6 @@ const showSidebar = ref(true);
 
 const deleteDialogOpened = ref(false);
 
-
-function openDialog() {
-    deleteDialogOpened.value = true;
-}
-
 function updateSearch(newVal: string) {
     searchInput.value = newVal;
 }
@@ -123,5 +120,27 @@ async function deleteQuiz(id: string) {
         headers: requestHeaders
     });
     refresh();
+}
+
+const openDialog = (id: string) => {
+    confirmDialog.require({
+        message: 'Sind Sie sich sicher, dass Sie dieses Quiz löschen möchten?',
+        header: 'Endgültig Löschen',
+        rejectProps: {
+            label: 'Abbrechen',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Löschen',
+            severity: 'danger'
+        },
+        accept: () => {
+            deleteQuiz(id);
+        },
+        reject: () => {
+
+        }
+    });
 }
 </script>
