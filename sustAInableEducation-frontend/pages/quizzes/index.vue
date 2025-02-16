@@ -45,7 +45,7 @@
                 <div v-if="selectedQuiz" class="w-full h-full pt-20 p-4">
                     <div class="flex items-start flex-col w-full h-full">
                         <h1 class="text-4xl mb-4">{{ selectedQuiz.title }}</h1>
-                        <Panel header="Informationen" class="!w-full">
+                        <Panel header="Informationen" class="!w-full mb-4">
                             <Divider />
                             <div class="text-lg flex flex-col">
                                 <span>Anzahl der Fragen: {{ selectedQuiz.numberQuestions }}</span>
@@ -68,6 +68,10 @@
                                 </div>
                             </div>
                         </Panel>
+                        <div class="flex flex-col">
+                            <h2 class="text-3xl">Versuche</h2>
+
+                        </div>
                     </div>
                 </div>
                 <div v-else class="pt-20 w-full h-full flex items-center justify-center">
