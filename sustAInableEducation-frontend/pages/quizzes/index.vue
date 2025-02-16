@@ -96,7 +96,6 @@ const searchInput = ref('');
 
 const showSidebar = ref(true);
 
-const deleteDialogOpened = ref(false);
 
 function updateSearch(newVal: string) {
     searchInput.value = newVal;
