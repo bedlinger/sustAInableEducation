@@ -709,7 +709,7 @@ namespace sustAInableEducation_backend.Repository
                 + targetStyle
                 + "- Du eine klare, präzise und bildhafte Sprache verwendest, um die KI optimal anzuleiten."
                 + "Nutze diese Anweisungen, um einen hochwertigen, zielgruppenspezifischen Bildprompt zu generieren."
-                + "Antworte nur auf Englisch!";
+                + "Antworte nur auf Englisch und nur mit dem Prompt, sonst nichts weiters!";
 
             List<ChatMessage> chatMessages =
             [
