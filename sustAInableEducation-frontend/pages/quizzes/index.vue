@@ -11,15 +11,15 @@
                                 <InputIcon>
                                     <Icon name="ic:baseline-search" />
                                 </InputIcon>
-                                <InputText placeholder="Suchen" v-model="searchInput" fluid/>
+                                <InputText placeholder="Suchen" v-model="searchInput" fluid />
                             </IconField>
                         </div>
-                        <Divider/>
+                        <Divider />
                     </div>
                     <div id="sidebar-content">
-                        <QuizListEntry v-for="quiz in searchedQuizzes"
-                        :quiz="quiz" v-model="quizRefsById[quiz.id].value"
-                        @click="selectQuizById(quiz.id)" @delete="openDialog"/>
+                        <QuizListEntry v-for="quiz in searchedQuizzes" :quiz="quiz"
+                            v-model="quizRefsById[quiz.id].value" @click="selectQuizById(quiz.id)"
+                            @delete="openDialog" />
                         <NuxtLink to="/quizzes/configuration">
                             <Button label="Quiz erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
@@ -41,16 +41,37 @@
                 :quiz-refs-by-id="quizRefsById" @open-delete-dialog="openDialog" @select-quiz="selectQuizById"
                 @toggle-sidebar="showSidebar = !showSidebar" @search-update="updateSearch" />
 
-            <div class="content flex-1 h-full overflow-y-scroll">
-                <div v-if="selectedQuiz" class="w-full pt-20 p-4">
+            <div class="content flex-1 h-full overflow-y-scroll w-full">
+                <div v-if="selectedQuiz" class="w-full h-full pt-20 p-4">
                     <div class="flex items-start flex-col w-full h-full">
-                        
-
+                        <h1 class="text-4xl mb-4">{{ selectedQuiz.title }}</h1>
+                        <Panel header="Informationen" class="!w-full">
+                            <Divider />
+                            <div class="text-lg flex flex-col">
+                                <span>Anzahl der Fragen: {{ selectedQuiz.numberQuestions }}</span>
+                                <div class="flex gap-3">
+                                    <span>Ausgewählte Fragentypen: </span>
+                                    <CheckboxGroup name="ingredient" class="flex flex-col gap-2">
+                                        <div class="flex items-center gap-2">
+                                            <Checkbox inputId="singleresponse" :value="0" disabled />
+                                            <label for="singleresponse"> Multiple Choice </label>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <Checkbox inputId="multiresponse" :value="1" disabled />
+                                            <label for="multiresponse"> Multiple Choice (Mehrfachauswahl) </label>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <Checkbox inputId="truefalse" :value="2" disabled />
+                                            <label for="truefalse"> Wahr/Falsch </label>
+                                        </div>
+                                    </CheckboxGroup>
+                                </div>
+                            </div>
+                        </Panel>
                     </div>
                 </div>
                 <div v-else class="pt-20 w-full h-full flex items-center justify-center">
                     <p class="text-lg">Bitte wählen Sie ein Quiz aus der Liste aus.</p>
-
                 </div>
             </div>
         </div>
@@ -87,7 +108,7 @@ const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
 }, {} as Record<string, Ref<boolean>>) : {};
 
 const searchedQuizzes = computed(() => {
-    if(quizzes.value === null) return [];
+    if (quizzes.value === null) return [];
     return quizzes.value.filter((quiz) => quiz.title.toLowerCase().includes(searchInput.value.toLowerCase()));
 })
 
