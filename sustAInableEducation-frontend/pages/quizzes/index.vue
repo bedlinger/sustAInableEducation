@@ -5,12 +5,12 @@
             <div class="sidebar-container w-80 h-full pt-16 border-solid border-slate-300 border-r-2 hidden sm:block">
                 <div class="sidebar w-full h-full flex-col p-2 overflow-y-scroll flex">
                     <div id="sidebar-header">
-                        <div class="flex items-center">
-                            <IconField class="mr-2">
+                        <div class="flex items-center w-full bg-red-500">
+                            <IconField class="w-full">
                                 <InputIcon>
                                     <Icon name="ic:baseline-search" />
                                 </InputIcon>
-                                <InputText placeholder="Suchen" v-model="searchInput" class="w-full" />
+                                <InputText placeholder="Suchen" v-model="searchInput" fluid/>
                             </IconField>
                         </div>
                     </div>
@@ -84,6 +84,7 @@ const searchedQuizzes = computed(() => {
     if(quizzes.value === null) return [];
     return quizzes.value.filter((quiz) => quiz.title.toLowerCase().includes(searchInput.value.toLowerCase()));
 })
+
 
 const searchInput = ref('');
 
