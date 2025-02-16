@@ -678,6 +678,8 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(story);
 
+            _logger.LogInformation("Generating image for story with id: {Id}", story.Id);
+
             string systemPrompt = "Du bist ein professioneller Prompt Engineer, der sich auf die Erstellung hochdetaillierter und konsistenter Bildbeschreibungen für KI-basierte Bildgenerierungssysteme spezialisiert hat. Deine Aufgabe ist es, Prompts zu entwerfen, die zu visuell harmonischen und stilistisch kohärenten Bildern führen. Achte darauf, dass die Beschreibung lebendig und spezifisch ist und alle relevanten Details umfasst – dazu gehören:"
                 + "- Setting: Ort, Umgebung und atmosphärische Details"
                 + "- Charaktere: Aussehen, Mimik, Kleidung und Ausdruck"
@@ -718,6 +720,7 @@ namespace sustAInableEducation_backend.Repository
             string imagePrompt;
             try
             {
+                _logger.LogInformation("Fetching assistant content for image prompt");
                 imagePrompt = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP, false);
             }
             catch (Exception e)
@@ -740,6 +743,7 @@ namespace sustAInableEducation_backend.Repository
             string responseStringImage;
             try
             {
+                _logger.LogInformation("Generating image based on prompt");
                 responseImage = await _client.SendAsync(requestImage);
                 responseImage.EnsureSuccessStatusCode();
                 responseStringImage = await responseImage.Content.ReadAsStringAsync();
@@ -796,6 +800,7 @@ namespace sustAInableEducation_backend.Repository
                 throw new AIException("Failed to save image", e);
             }
 
+            _logger.LogInformation("Image generated successfully");
             return Path.Combine("/", folderName, fileName).Replace("\\", "/");
         }
 
