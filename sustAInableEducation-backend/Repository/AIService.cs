@@ -786,13 +786,11 @@ namespace sustAInableEducation_backend.Repository
                 fileName = $"{Guid.NewGuid()}.png";
                 var filePath = Path.Combine(directoryPath, fileName);
                 byte[] imageBytes = Convert.FromBase64String(base64String);
-                using (var ms = new MemoryStream(imageBytes))
-                {
-                    using var skImage = SKImage.FromEncodedData(ms);
-                    using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
-                    using var fileStream = File.OpenWrite(filePath);
-                    skData.SaveTo(fileStream);
-                }
+                using var ms = new MemoryStream(imageBytes);
+                using var skImage = SKImage.FromEncodedData(ms);
+                using var skData = skImage.Encode(SKEncodedImageFormat.Png, 100);
+                using var fileStream = File.OpenWrite(filePath);
+                skData.SaveTo(fileStream);
             }
             catch (Exception e)
             {
