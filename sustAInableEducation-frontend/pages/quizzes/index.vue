@@ -56,24 +56,26 @@
 <script setup lang="ts">
 import type { Quiz } from '~/types/Quiz';
 
-
-const searchInput = ref('');
-
 const quizzes = ref<Quiz[]>([]);
-const selectedQuiz = ref<Quiz | null>(null);
 
-const showSidebar = ref(true); 
+const selectedQuiz = ref<Quiz | null>(null);
 
 const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
     acc[quiz.id] = ref(false);
     return acc;
 }, {} as Record<string, Ref<boolean>>) : {};
 
-const deleteDialogOpened = ref(false);
-
-const searchedQuizzes = computed(() => {
+    const searchedQuizzes = computed(() => {
     return quizzes.value.filter((quiz) => quiz.title.toLowerCase().includes(searchInput.value.toLowerCase()));
 })
+
+
+const searchInput = ref('');
+
+const showSidebar = ref(true);
+
+const deleteDialogOpened = ref(false);
+
 
 function openDialog() {
     deleteDialogOpened.value = true;
