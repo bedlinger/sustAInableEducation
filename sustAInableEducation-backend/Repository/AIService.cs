@@ -31,7 +31,7 @@ namespace sustAInableEducation_backend.Repository
                 _client = new HttpClient
                 {
                     BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
-                    Timeout = TimeSpan.FromMinutes(5)
+                    Timeout = TimeSpan.FromMinutes(1)
                 };
                 _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
             }
@@ -67,43 +67,23 @@ namespace sustAInableEducation_backend.Repository
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
-            string assistantContent = null!;
             int attempt = 0;
             while (attempt < MAX_RETRY_ATTEMPTS)
             {
                 try
                 {
-                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    break;
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
-                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
-                    {
-                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
-                        throw new AIException("Failed to fetch the assistant content for story part", e);
-                    }
-                    attempt++;
-                }
-            }
-
-            attempt = 0;
-            while (attempt < MAX_RETRY_ATTEMPTS)
-            {
-                try
-                {
+                    string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
                     var (storyPart, title) = GetStoryPart(assistantContent);
                     _logger.LogInformation("Successfully started story with id: {Id}", story.Id);
                     return (storyPart, title);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                    _logger.LogError("Failed to start the story on attempt {Number}: {Exception}", args: [attempt + 1, e]);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
-                        throw new AIException("Failed to deserialize the assistant content for story part", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to start the story");
+                        throw new AIException("Reached maximum retry attempts for trying to start the story", e);
                     }
                     attempt++;
                 }
@@ -136,43 +116,23 @@ namespace sustAInableEducation_backend.Repository
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
-            string assistantContent = null!;
             int attempt = 0;
             while (attempt < MAX_RETRY_ATTEMPTS)
             {
                 try
                 {
-                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    break;
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
-                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
-                    {
-                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
-                        throw new AIException("Failed to fetch the assistant content for story part", e);
-                    }
-                    attempt++;
-                }
-            }
-
-            attempt = 0;
-            while (attempt < MAX_RETRY_ATTEMPTS)
-            {
-                try
-                {
+                    string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
                     var (storyPart, _) = GetStoryPart(assistantContent);
                     _logger.LogInformation("Successfully generated next part of story with id: {Id}", story.Id);
                     return storyPart;
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                    _logger.LogError("Failed to generate next part on attempt {Number}: {Exception}", args: [attempt + 1, e]);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
-                        throw new AIException("Failed to deserialize the assistant content for story part", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to generate next part");
+                        throw new AIException("Reached maximum retry attempts for trying to generate next part", e);
                     }
                     attempt++;
                 }
@@ -205,49 +165,29 @@ namespace sustAInableEducation_backend.Repository
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
-            string assistantContent = null!;
+            StoryPart endPart = null!;
             int attempt = 0;
             while (attempt < MAX_RETRY_ATTEMPTS)
             {
                 try
                 {
-                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    break;
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError("Failed to fetch the assistant content for story part: {Exception}", e);
-                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
-                    {
-                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for story part");
-                        throw new AIException("Failed to fetch the assistant content for story part", e);
-                    }
-                    attempt++;
-                }
-            }
-
-            StoryPart endPart = null!;
-            attempt = 0;
-            while (attempt < MAX_RETRY_ATTEMPTS)
-            {
-                try
-                {
+                    string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
                     endPart = GetStoryPart(assistantContent).Item1;
                     break;
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Failed to deserialize the assistant content for story part: {Exception}", e);
+                    _logger.LogError("Failed to get the end part of the story on attempt {Number}: {Exception}", args: [attempt + 1, e]);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for story part");
-                        throw new AIException("Failed to deserialize the assistant content for story part", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to get the end part of the story");
+                        throw new AIException("Reached maximum retry attempts for trying to get the end part of the story", e);
                     }
                     attempt++;
                 }
             }
-
             string end = endPart.Text;
+
             try
             {
                 chatMessages = RebuildChatMessagesResult(story, chatMessages, end);
@@ -263,37 +203,18 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    break;
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError("Failed to fetch the assistant content for result: {Exception}", e);
-                    if (attempt >= MAX_RETRY_ATTEMPTS - 1)
-                    {
-                        _logger.LogError("Reached maximum retry attempts for trying to fetch the assistant content for result");
-                        throw new AIException("Failed to fetch the assistant content for result", e);
-                    }
-                    attempt++;
-                }
-            }
-
-            attempt = 0;
-            while (attempt < MAX_RETRY_ATTEMPTS)
-            {
-                try
-                {
+                    string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
                     var result = GetStoryResult(assistantContent, end);
                     _logger.LogInformation("Successfully generated result of story with title {Title}", story.Title);
                     return result;
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Failed to deserialize the assistant content for result: {Exception}", e);
+                    _logger.LogError("Failed to generate result on attempt {Number}: {Exception}", args: [attempt + 1, e]);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
-                        _logger.LogError("Reached maximum retry attempts for trying to deserialize the assistant content for result");
-                        throw new AIException("Failed to deserialize the assistant content for result", e);
+                        _logger.LogError("Reached maximum retry attempts for trying to generate result");
+                        throw new AIException("Reached maximum retry attempts for trying to generate result", e);
                     }
                     attempt++;
                 }
