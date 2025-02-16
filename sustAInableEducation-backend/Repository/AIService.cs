@@ -124,7 +124,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            _logger.LogInformation("Starting new story with id: {Id}", story.Id);
+            _logger.LogInformation("Generating next part story with id: {Id}", story.Id);
             List<ChatMessage> chatMessages;
             try
             {
