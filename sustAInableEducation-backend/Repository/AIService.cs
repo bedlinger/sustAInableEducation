@@ -37,7 +37,7 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
-                _logger.LogError("Failed to initialise AI service: {Exception}", e);
+                _logger.LogCritical("Failed to initialise AI service: {Exception}", e);
                 throw;
             }
             _logger.LogInformation("AI service initialised");
@@ -55,7 +55,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            _logger.LogInformation("Starting new story with title {Title}", story.Title);
+            _logger.LogInformation("Starting new story with id: {Id}", story.Id);
             List<ChatMessage> chatMessages;
             try
             {
@@ -93,8 +93,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    _logger.LogInformation("Successfully started story with title {Title}", story.Title);
-                    return GetStoryPart(assistantContent);
+                    var (storyPart, title) = GetStoryPart(assistantContent);
+                    _logger.LogInformation("Successfully started story with id: {Id}", story.Id);
+                    return (storyPart, title);
                 }
                 catch (Exception e)
                 {
@@ -123,7 +124,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            _logger.LogInformation("Generating next part of story with title {Title}", story.Title);
+            _logger.LogInformation("Starting new story with id: {Id}", story.Id);
             List<ChatMessage> chatMessages;
             try
             {
@@ -161,8 +162,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-                    _logger.LogInformation("Successfully generated next part of story with title {Title}", story.Title);
-                    return GetStoryPart(assistantContent).Item1;
+                    var (storyPart, _) = GetStoryPart(assistantContent);
+                    _logger.LogInformation("Successfully generated next part of story with id: {Id}", story.Id);
+                    return storyPart;
                 }
                 catch (Exception e)
                 {
@@ -191,7 +193,7 @@ namespace sustAInableEducation_backend.Repository
         {
             ArgumentNullException.ThrowIfNull(story);
 
-            _logger.LogInformation("Generating result of story with title {Title}", story.Title);
+            _logger.LogInformation("Generating result of story with id: {Id}", story.Id);
             List<ChatMessage> chatMessages;
             try
             {
@@ -281,8 +283,9 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
+                    var result = GetStoryResult(assistantContent, end);
                     _logger.LogInformation("Successfully generated result of story with title {Title}", story.Title);
-                    return GetStoryResult(assistantContent, end);
+                    return result;
                 }
                 catch (Exception e)
                 {
@@ -849,21 +852,21 @@ namespace sustAInableEducation_backend.Repository
 
 
         public static string GetEnumMemberValue(Enum enumValue)
-{
-    Type type = enumValue.GetType();
-    MemberInfo memberInfo = type.GetMember(enumValue.ToString()).FirstOrDefault();
-
-    if (memberInfo != null)
-    {
-        var attribute = memberInfo.GetCustomAttribute<EnumMemberAttribute>();
-        if (attribute != null)
         {
-            return attribute.Value; // Return the EnumMember Value
-        }
-    }
+            Type type = enumValue.GetType();
+            MemberInfo memberInfo = type.GetMember(enumValue.ToString()).FirstOrDefault();
 
-    return enumValue.ToString(); // Fallback to enum name if no attribute is found
-}
+            if (memberInfo != null)
+            {
+                var attribute = memberInfo.GetCustomAttribute<EnumMemberAttribute>();
+                if (attribute != null)
+                {
+                    return attribute.Value; // Return the EnumMember Value
+                }
+            }
+
+            return enumValue.ToString(); // Fallback to enum name if no attribute is found
+        }
 
         /// <summary>
         /// Kacper Bohaczyk
@@ -875,10 +878,10 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(userName);
 
-            var stringstyle = GetEnumMemberValue(style );
+            var stringstyle = GetEnumMemberValue(style);
 
             // String imagePrompt = $"Use the {stringstyle}.  The image should be related to the aspect of sustainability that matches the term '{userName}";
-             String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
+            String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
             // String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}Manga – 'Medieval – 'A richly detailed medieval illustration inspired by illuminated manuscripts and old-world paintings. The colors are muted, with ornate patterns, historical clothing, and a sense of ancient storytelling.'";
             //_logger.LogDebug(style.ToString());
             //_logger.LogDebug(imagePrompt);
