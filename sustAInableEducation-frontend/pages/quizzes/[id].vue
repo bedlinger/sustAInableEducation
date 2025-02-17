@@ -3,7 +3,7 @@
   <div class="w-full h-full flex justify-center items-center pt-20">
     <div v-if="quiz" id="content" class="w-full h-full bg-slate-50 p-4 flex flex-col">
       <div class="flex items-center justify-between">
-        <h1 class="text-3xl">Quiz {{ buttonRefs }}</h1>
+        <h1 class="text-3xl">Quiz {{ refsIncludeTrue }}</h1>
         <span class="text-3xl">1/{{ quiz.questions.length }}</span>
       </div>
       
@@ -19,7 +19,7 @@
             :label="choice.text" class="w-full" :disabled="disableAnswerButtons" @click="handleButtonClick(index)"/>
         </div>
         <div class="w-full flex justify-center items-center">
-          <Button label="Weiter" disabled/>
+          <Button label="Weiter" :disabled="!refsIncludeTrue" @click="saveSelection"/>
         </div>
       </div>
     </div>
@@ -56,10 +56,14 @@ const safeData = computed(() => quiz.value || { questions: [] });
 const selectedQuestionIndex = ref(0);
 const selectedQuestion = computed<Question>(() => safeData.value.questions[selectedQuestionIndex.value] || { id: '', number: 0, text: '', choices: [], isMultipleResponse: false });
 
+const selectedAnswers = ref<number[][]>([]);
+
 const disableAnswerButtons = ref(false);
 const value = ref([{ label: '', value: 10, color: 'var(--p-primary-color)' }]);
 
 const buttonRefs = ref<boolean[]>([]);
+
+const refsIncludeTrue = computed(() => buttonRefs.value.includes(true));
 
 watch(selectedQuestion, (newQuestion) => {3
   buttonRefs.value = newQuestion.choices.map(() => false);
@@ -70,5 +74,11 @@ function handleButtonClick(index: number) {
     buttonRefs.value = buttonRefs.value.map(() => false);
     buttonRefs.value[index] = true;
   }
+}
+
+function saveSelection() {
+  const selected = selectedQuestion.value.choices.map((choice, index) => buttonRefs.value[index] ? choice.number : null).filter((id) => id !== null) as number[];
+  selectedAnswers.value.push(selected);
+  selectedQuestionIndex.value++;
 }
 </script>
