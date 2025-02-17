@@ -225,6 +225,18 @@ namespace sustAInableEducation_backend.Repository
 
         // Benjamin Edlinger
         /// <summary>
+        /// Counts the number of words in the given text
+        /// </summary>
+        /// <param name="text">The text to count the words for</param>
+        /// <returns>Count of words in the text</returns>
+        private static int GetWordCount(string text)
+        {
+            char[] delimiters = [' ', '\r', '\n'];
+            return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).Length;
+        }
+
+        // Benjamin Edlinger
+        /// <summary>
         /// Rebuilds the chat messages of the story for the given story object
         /// </summary>
         /// <param name="story">The story object to rebuild the chat messages for</param>
