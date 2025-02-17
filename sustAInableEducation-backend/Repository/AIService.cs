@@ -31,7 +31,7 @@ namespace sustAInableEducation_backend.Repository
                 _client = new HttpClient
                 {
                     BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
-                    Timeout = TimeSpan.FromMinutes(1)
+                    Timeout = TimeSpan.FromMinutes(2.5)
                 };
                 _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
             }
@@ -123,6 +123,15 @@ namespace sustAInableEducation_backend.Repository
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
                     var (storyPart, _) = GetStoryPart(assistantContent);
+                    int wordCount = GetWordCount(storyPart.Text);
+                    switch (story.TargetGroup)
+                    {
+                        case TargetGroup.PrimarySchool when wordCount < 60 || wordCount > 80:
+                        case TargetGroup.MiddleSchool when wordCount < 125 || wordCount > 150:
+                        case TargetGroup.HighSchool when wordCount < 160 || wordCount > 180:
+                            _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
+                            throw new AIException("Generated story part with invalid word count for target group");
+                    }
                     _logger.LogInformation("Successfully generated next part of story with id: {Id}", story.Id);
                     return storyPart;
                 }
@@ -165,14 +174,23 @@ namespace sustAInableEducation_backend.Repository
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
-            StoryPart endPart = null!;
+            string end = null!;
             int attempt = 0;
             while (attempt < MAX_RETRY_ATTEMPTS)
             {
                 try
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    endPart = GetStoryPart(assistantContent).Item1;
+                    end = GetStoryPart(assistantContent).Item1.Text;
+                    int wordCount = GetWordCount(end);
+                    switch (story.TargetGroup)
+                    {
+                        case TargetGroup.PrimarySchool when wordCount < 60 || wordCount > 80:
+                        case TargetGroup.MiddleSchool when wordCount < 125 || wordCount > 150:
+                        case TargetGroup.HighSchool when wordCount < 160 || wordCount > 180:
+                            _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
+                            throw new AIException("Generated story part with invalid word count for target group");
+                    }
                     break;
                 }
                 catch (Exception e)
@@ -186,7 +204,6 @@ namespace sustAInableEducation_backend.Repository
                     attempt++;
                 }
             }
-            string end = endPart.Text;
 
             try
             {
@@ -259,9 +276,9 @@ namespace sustAInableEducation_backend.Repository
             };
             string lengthRequirement = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 60 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
-                TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 125 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
-                TargetGroup.HighSchool => "Jeder Abschnitt soll mindestens 160 Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
+                TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 60 Wörter und maximal 80 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
+                TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 125 Wörter und maximal 150 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
+                TargetGroup.HighSchool => "Jeder Abschnitt soll mindestens 160 Wörter und maximal 180 Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
                 _ => throw new ArgumentException("Invalid target group")
             };
             string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
