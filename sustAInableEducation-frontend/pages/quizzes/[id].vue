@@ -13,18 +13,15 @@
             <div></div>
           </template>
         </MeterGroup>
+        {{ model }}
         <p class="text-2xl flex-1 text-center flex items-center" >{{ selectedQuestion.text }}</p>
         <div id="controls" class="flex flex-col gap-2 relative">
-          <Button v-for="choice in selectedQuestion.choices"
-            :label="choice.text" class="w-full">
+          <Button v-for="choice, index in selectedQuestion.choices"
+            :label="choice.text" class="w-full" :disabled="disableAnswerButtons" @click="">
           <template #default>
             <p class="text-lg">{{ choice.text }}</p>
           </template>
           </Button>
-          <div v-if="questionAnswered" class="flex justify-center items-center absolute w-full h-full rounded-md" style="backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); background-color: rgba( 255, 255, 255, 0.6 )">
-            <Icon v-if="answeredCorrect" name="ic:baseline-check" class="bg-green-700" size="30vw"/>
-            <Icon v-else name="ic:baseline-close" class="bg-red-700" size="30vw"/>
-          </div>
         </div>
         <div class="w-full flex justify-center items-center">
           <Button label="Weiter" disabled/>
@@ -40,6 +37,8 @@
 
 <script lang="ts" setup>
 import type { Question, Quiz } from '~/types/Quiz';
+
+const model = ref(false)
 
 const requestHeaders = useRequestHeaders(['cookie']);
 const route = useRoute();
@@ -60,15 +59,44 @@ const { data: quiz, refresh } = useFetch<Quiz>(`${runtimeConfig.public.apiUrl}/q
   }
 });
 
-console.log(quiz.value)
-
 const selectedQuestionIndex = ref(0);
 const selectedQuestion = computed<Question>(() => quiz.value?.questions[selectedQuestionIndex.value] || { id: '', number: 0, text: '', choices: [], isMultipleResponse: false });
 const questionAnswered = ref(false)
 const answeredCorrect = ref(false)
 
+const disableAnswerButtons = ref(false)
+
 
 const value = ref([{ label: '', value: 10, color: 'var(--p-primary-color)' }]);
+
+
+async function validateAnswers() {
+  disableAnswerButtons.value = true
+  await $fetch(`${runtimeConfig.public.apiUrl}/quizzes/${route.params.id}/try`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: requestHeaders,
+    body: [
+      {
+        questionId: selectedQuestion.value.id,
+        response: [(index+1)]
+      }
+    ],
+    onResponse: (response) => {
+      if (response.response.ok) {
+        questionAnswered.value = true
+        if(response.response._data) {
+          answeredCorrect.value = response.response._data.isCorrect
+        } else {
+          answeredCorrect.value = false
+        }
+      } else {
+        disableAnswerButtons.value = false
+        //TODO add Toast
+      }
+    }
+  })
+}
 
 
 
