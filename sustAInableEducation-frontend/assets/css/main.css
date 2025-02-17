@@ -51,6 +51,14 @@ html {
     @apply !px-2 !py-1;
 }
 
+.p-progressspinner-spin {
+    @apply !stroke-primary-500;
+}
+
+.p-progressspinner-circle {
+    @apply !stroke-primary-500;
+}
+
 /*
 .p-datatable-thead {
     @apply !fixed;
