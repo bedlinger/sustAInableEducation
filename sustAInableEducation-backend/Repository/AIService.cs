@@ -643,6 +643,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 _logger.LogInformation("Fetching assistant content for image prompt");
                 imagePrompt = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP, false);
+                imagePrompt = imagePrompt.Replace("\n", " ");
             }
             catch (Exception e)
             {
