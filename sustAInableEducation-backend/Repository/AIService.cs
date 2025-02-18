@@ -31,7 +31,7 @@ namespace sustAInableEducation_backend.Repository
                 _client = new HttpClient
                 {
                     BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
-                    Timeout = TimeSpan.FromMinutes(1)
+                    Timeout = TimeSpan.FromMinutes(2.5)
                 };
                 _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
             }
@@ -73,7 +73,7 @@ namespace sustAInableEducation_backend.Repository
                 try
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    var (storyPart, title) = GetStoryPart(assistantContent);
+                    var (storyPart, title) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                     _logger.LogInformation("Successfully started story with id: {Id}", story.Id);
                     return (storyPart, title);
                 }
@@ -122,7 +122,7 @@ namespace sustAInableEducation_backend.Repository
                 try
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    var (storyPart, _) = GetStoryPart(assistantContent);
+                    var (storyPart, _) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                     _logger.LogInformation("Successfully generated next part of story with id: {Id}", story.Id);
                     return storyPart;
                 }
@@ -165,14 +165,15 @@ namespace sustAInableEducation_backend.Repository
                 throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
             }
 
-            StoryPart endPart = null!;
+            string end = null!;
             int attempt = 0;
             while (attempt < MAX_RETRY_ATTEMPTS)
             {
                 try
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    endPart = GetStoryPart(assistantContent).Item1;
+                    var (storyPart, _) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
+                    end = storyPart.Text;
                     break;
                 }
                 catch (Exception e)
@@ -186,7 +187,6 @@ namespace sustAInableEducation_backend.Repository
                     attempt++;
                 }
             }
-            string end = endPart.Text;
 
             try
             {
@@ -247,9 +247,12 @@ namespace sustAInableEducation_backend.Repository
             };
             string lengthRequirement = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 60 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
-                TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 125 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
-                TargetGroup.HighSchool => "Jeder Abschnitt soll mindestens 160 Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
+                TargetGroup.PrimarySchool =>
+                    $"Jeder Geschichten Abschnitt soll mindestens {WordCountLimits.PrimarySchoolMin} und höchstens {WordCountLimits.PrimarySchoolMax} Wörter umfassen. Verwende einfache Sätze und kurze Absätze, damit der Text leicht verständlich bleibt.",
+                TargetGroup.MiddleSchool =>
+                    $"Jeder Geschichten Abschnitt soll mindestens {WordCountLimits.MiddleSchoolMin} und höchstens {WordCountLimits.MiddleSchoolMax} Wörter umfassen. Nutze eine gut verständliche Sprache und veranschauliche deine Erklärungen mit Beispielen.",
+                TargetGroup.HighSchool =>
+                    $"Jeder Geschichten Abschnitt soll mindestens {WordCountLimits.HighSchoolMin} und höchstens {WordCountLimits.HighSchoolMax} Wörter umfassen. Verwende detaillierte Beschreibungen, komplexere Satzstrukturen und vertiefende Erklärungen.",
                 _ => throw new ArgumentException("Invalid target group")
             };
             string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
@@ -371,8 +374,6 @@ namespace sustAInableEducation_backend.Repository
             return chatMessages;
         }
 
-
-
         // Benjamin Edlinger
         /// <summary>
         /// Rebuilds the chat messages of the result for already rebuilt chat messages and the given story object
@@ -444,15 +445,20 @@ namespace sustAInableEducation_backend.Repository
 
         // Benjamin Edlinger
         /// <summary>
-        /// Gets the story part from the given assistant content
+        /// Deserializes the assistant content and returns the story part and the title of the story
+        /// If the word count of the story part is invalid, the assistant content will be fixed
         /// </summary>
-        /// <param name="assistantContent">The assistant content to get the story part from</param>
-        /// <returns>The story part and the title of the story</returns>
-        /// <exception cref="InvalidOperationException">If the message content is null</exception>
-        /// <exception cref="JsonException">If the assistant content could not be deserialized</exception>
-        private static (StoryPart, string) GetStoryPart(string assistantContent)
+        /// <param name="assistantContent">The generated assistant content to deserialize</param>
+        /// <param name="targetGroup">The target group of the story</param>
+        /// <param name="chatMessages">The previous chat messages</param>
+        /// <returns>Returns the story part and the title of the story</returns>
+        /// <exception cref="InvalidOperationException">Gets thrown if the assistant content or chat messages is null</exception>
+        /// <exception cref="JsonException">Gets thrown if the assistant content could not be deserialized</exception>
+        /// <exception cref="AIException">Gets thrown if the story part could not be fixed</exception>
+        private async Task<(StoryPart, string)> GetStoryPart(string assistantContent, TargetGroup targetGroup, List<ChatMessage> chatMessages)
         {
             ArgumentNullException.ThrowIfNull(assistantContent);
+            ArgumentNullException.ThrowIfNull(chatMessages);
 
             StoryContent messageContent;
             try
@@ -475,7 +481,62 @@ namespace sustAInableEducation_backend.Repository
                     Impact = option.Impact
                 }).ToList()
             };
-            return (storyPart, messageContent.Title);
+
+            int wordCount = GetWordCount(storyPart.Text);
+            string? prompt = targetGroup switch
+            {
+                TargetGroup.PrimarySchool when wordCount < WordCountLimits.PrimarySchoolMin * 0.8
+                     => $"Dieser Abschnitt ist zu kurz für die Volksschule. Bitte überarbeite ihn, damit er mindestens {WordCountLimits.PrimarySchoolMin} Wörter umfasst.",
+                TargetGroup.PrimarySchool when wordCount > WordCountLimits.PrimarySchoolMax
+                    => $"Dieser Abschnitt ist zu lang für die Volksschule. Bitte überarbeite ihn, sodass er maximal {WordCountLimits.PrimarySchoolMax} Wörter umfasst.",
+                TargetGroup.MiddleSchool when wordCount < WordCountLimits.MiddleSchoolMin * 0.7
+                    => $"Dieser Abschnitt ist zu kurz für die Sekundarstufe eins. Bitte überarbeite ihn, damit er mindestens {WordCountLimits.MiddleSchoolMin} Wörter umfasst.",
+                TargetGroup.MiddleSchool when wordCount > WordCountLimits.MiddleSchoolMax
+                    => $"Dieser Abschnitt ist zu lang für die Sekundarstufe eins. Bitte überarbeite ihn, sodass er maximal {WordCountLimits.MiddleSchoolMax} Wörter umfasst.",
+                TargetGroup.HighSchool when wordCount < WordCountLimits.HighSchoolMin * 0.6
+                    => $"Dieser Abschnitt ist zu kurz für die Sekundarstufe zwei. Bitte überarbeite ihn, damit er mindestens {WordCountLimits.HighSchoolMin} Wörter umfasst.",
+                TargetGroup.HighSchool when wordCount > WordCountLimits.HighSchoolMax
+                    => $"Dieser Abschnitt ist zu lang für die Sekundarstufe zwei. Bitte überarbeite ihn, sodass er maximal {WordCountLimits.HighSchoolMax} Wörter umfasst.",
+                _ => null
+            };
+
+            if (prompt == null) return (storyPart, messageContent.Title);
+
+            _logger.LogWarning("Story part with id {Id} for {TargetGroup} has invalid word count: {WordCount}", storyPart.Id, targetGroup, wordCount);
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(storyPart) });
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = prompt });
+
+            try
+            {
+                string fixedContent = await FetchAssitantContent(chatMessages, 0.7f, 0.7f);
+                messageContent = JsonSerializer.Deserialize<StoryContent>(fixedContent) ?? throw new InvalidOperationException("Message content is null");
+                storyPart.Text = messageContent.Story;
+                storyPart.Intertitle = messageContent.Intertitle;
+                storyPart.Choices = messageContent.Options.Select((option, index) => new StoryChoice
+                {
+                    Text = option.Text,
+                    Number = index + 1,
+                    Impact = option.Impact
+                }).ToList();
+                return (storyPart, messageContent.Title);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Failed to fix story part with id {Id}: {Exception}", storyPart.Id, e);
+                throw new AIException("Failed to fix story part", e);
+            }
+        }
+
+        // Benjamin Edlinger
+        /// <summary>
+        /// Counts the number of words in the given text
+        /// </summary>
+        /// <param name="text">The text to count the words for</param>
+        /// <returns>Count of words in the text</returns>
+        private static int GetWordCount(string text)
+        {
+            char[] delimiters = [' ', '\r', '\n'];
+            return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).Length;
         }
 
         // Benjamin Edlinger
@@ -986,6 +1047,17 @@ namespace sustAInableEducation_backend.Repository
             : base(message, inner)
         {
         }
+    }
+
+    // Benjamin Edlinger
+    public static class WordCountLimits
+    {
+        public const int PrimarySchoolMin = 70;
+        public const int PrimarySchoolMax = 90;
+        public const int MiddleSchoolMin = 120;
+        public const int MiddleSchoolMax = 140;
+        public const int HighSchoolMin = 170;
+        public const int HighSchoolMax = 190;
     }
 
     // Benjamin Edlinger
