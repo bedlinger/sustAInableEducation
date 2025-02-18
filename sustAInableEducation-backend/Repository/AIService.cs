@@ -31,7 +31,7 @@ namespace sustAInableEducation_backend.Repository
                 _client = new HttpClient
                 {
                     BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
-                    Timeout = TimeSpan.FromMinutes(4)
+                    Timeout = TimeSpan.FromMinutes(2.5)
                 };
                 _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
             }
