@@ -70,7 +70,7 @@
                         </Panel>
                         <div class="flex flex-col w-full">
                             <h2 class="text-3xl mb-2">Versuche</h2>
-                            <DataTable :value="selectedQuiz.tries" class="!w-full !rounded-xl !overflow-hidden">
+                            <DataTable v-if="selectedQuiz.tries.length > 0" :value="selectedQuiz.tries" class="!w-full !rounded-xl !overflow-hidden">
                                 <Column header="Code">
                                     <template #body="{ data }">
                                         <span>{{ selectedQuiz.tries.indexOf(data) +1 }}</span>
@@ -82,6 +82,7 @@
                                     </template>
                                 </Column>
                             </DataTable>
+                            <span v-else class="text-lg ml-2">Es gibt noch keine Versuche</span>
                         </div>
                     </div>
                 </div>
