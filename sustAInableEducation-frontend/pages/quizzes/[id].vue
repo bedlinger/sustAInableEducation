@@ -3,7 +3,7 @@
   <div class="w-full h-full flex justify-center items-center pt-20">
     <div v-if="quiz" id="content" class="w-full h-full bg-slate-50 p-4 flex flex-col">
       <div class="flex items-center justify-between">
-        <h1 class="text-3xl">Quiz {{ result }}</h1>
+        <h1 class="text-3xl">Quiz</h1>
         <span class="text-3xl">{{ selectedQuestionIndex + 1 }} / {{ quiz.questions.length }}</span>
       </div>
       
@@ -14,7 +14,7 @@
           </template>
         </MeterGroup>
         <p class="text-2xl flex-1 text-center flex items-center" >{{ selectedQuestion.text }}</p>
-        <div id="controls" class="flex flex-col gap-2 relative">
+        <div id="controls" class="flex flex-col gap-2">
           <QuizButton v-for="choice, index in selectedQuestion.choices" v-model="buttonRefs[index]"
             :label="choice.text" class="w-full" :disabled="disableAnswerButtons" @click="handleButtonClick(index)"/>
         </div>
@@ -97,9 +97,9 @@ async function getResult () {
 async function saveSelection() {
   const selected = selectedQuestion.value.choices.map((choice, index) => buttonRefs.value[index] ? choice.number : null).filter((id) => id !== null) as number[];
   selectedAnswers.value.push({questionId: selectedQuestion.value.id, response: selected});
-  selectedQuestionIndex.value++;
-
-  if(selectedQuestionIndex.value === safeData.value.questions.length) {
+  if(selectedQuestionIndex.value + 1 !== safeData.value.questions.length) {
+    selectedQuestionIndex.value++;
+  } else {
     disableAnswerButtons.value = true;
     await getResult();
   }
