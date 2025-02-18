@@ -77,9 +77,9 @@ namespace sustAInableEducation_backend.Repository
                     int wordCount = GetWordCount(storyPart.Text);
                     switch (story.TargetGroup)
                     {
-                        case TargetGroup.PrimarySchool when wordCount < 60 || wordCount > 80:
-                        case TargetGroup.MiddleSchool when wordCount < 125 || wordCount > 150:
-                        case TargetGroup.HighSchool when wordCount < 160 || wordCount > 180:
+                        case TargetGroup.PrimarySchool when wordCount < 40 || wordCount > 70:
+                        case TargetGroup.MiddleSchool when wordCount < 90 || wordCount > 120:
+                        case TargetGroup.HighSchool when wordCount < 140 || wordCount > 170:
                             _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
                             throw new AIException("Generated story part with invalid word count for target group");
                     }
@@ -135,9 +135,9 @@ namespace sustAInableEducation_backend.Repository
                     int wordCount = GetWordCount(storyPart.Text);
                     switch (story.TargetGroup)
                     {
-                        case TargetGroup.PrimarySchool when wordCount < 60 || wordCount > 80:
-                        case TargetGroup.MiddleSchool when wordCount < 125 || wordCount > 150:
-                        case TargetGroup.HighSchool when wordCount < 160 || wordCount > 180:
+                        case TargetGroup.PrimarySchool when wordCount < 40 || wordCount > 70:
+                        case TargetGroup.MiddleSchool when wordCount < 90 || wordCount > 120:
+                        case TargetGroup.HighSchool when wordCount < 140 || wordCount > 170:
                             _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
                             throw new AIException("Generated story part with invalid word count for target group");
                     }
@@ -194,9 +194,9 @@ namespace sustAInableEducation_backend.Repository
                     int wordCount = GetWordCount(end);
                     switch (story.TargetGroup)
                     {
-                        case TargetGroup.PrimarySchool when wordCount < 60 || wordCount > 80:
-                        case TargetGroup.MiddleSchool when wordCount < 125 || wordCount > 150:
-                        case TargetGroup.HighSchool when wordCount < 160 || wordCount > 180:
+                        case TargetGroup.PrimarySchool when wordCount < 40 || wordCount > 70:
+                        case TargetGroup.MiddleSchool when wordCount < 90 || wordCount > 120:
+                        case TargetGroup.HighSchool when wordCount < 140 || wordCount > 170:
                             _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
                             throw new AIException("Generated story part with invalid word count for target group");
                     }
@@ -283,11 +283,11 @@ namespace sustAInableEducation_backend.Repository
                     + "- Sekundarstufe zwei: Verwende komplexere Satzstrukturen, Fachbegriffe und beleuchte globale Zusammenhänge der Nachhaltigkeit.",
                 _ => throw new ArgumentException("Invalid target group")
             };
-            string lengthRequirement = story.TargetGroup switch
+                string lengthRequirement = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 60 Wörter und maximal 80 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
-                TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 125 Wörter und maximal 150 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
-                TargetGroup.HighSchool => "Jeder Abschnitt soll mindestens 160 Wörter und maximal 180 Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
+                TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 40 Wörter und maximal 70 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
+                TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 90 Wörter und maximal 120 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
+                TargetGroup.HighSchool => "Jeder Abschnitt soll mindestens 140 Wörter und maximal 170 Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
                 _ => throw new ArgumentException("Invalid target group")
             };
             string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
