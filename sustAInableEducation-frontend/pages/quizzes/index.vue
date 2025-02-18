@@ -68,9 +68,20 @@
                                 </div>
                             </div>
                         </Panel>
-                        <div class="flex flex-col">
-                            <h2 class="text-3xl">Versuche</h2>
-
+                        <div class="flex flex-col w-full">
+                            <h2 class="text-3xl mb-2">Versuche</h2>
+                            <DataTable :value="selectedQuiz.tries" class="!w-full !rounded-xl !overflow-hidden">
+                                <Column header="Code">
+                                    <template #body="{ data }">
+                                        <span>{{ selectedQuiz.tries.indexOf(data) +1 }}</span>
+                                    </template>
+                                </Column>
+                                <Column header="Correct" class="">
+                                    <template #body="{ data }">
+                                        <span>{{ getCorrectTries(data) }}/{{ selectedQuiz.numberQuestions }}</span>
+                                    </template>
+                                </Column>
+                            </DataTable>
                         </div>
                     </div>
                 </div>
@@ -126,8 +137,8 @@ function updateSearch(newVal: string) {
     searchInput.value = newVal;
 }
 
-function selectQuizById(id: string) {
-    selectedQuiz.value = quizzes.value!.find((quiz) => quiz.id === id) || null;
+async function selectQuizById(id: string) {
+    await getQuiz(id);
     quizRefsById[id].value = true;
     Object.keys(quizRefsById).forEach(key => {
         if (key !== id) {
@@ -166,5 +177,23 @@ const openDialog = (id: string) => {
 
         }
     });
+}
+
+async function getQuiz(id: string) {
+    await $fetch(`${runtimeConfig.public.apiUrl}/quizzes/${id}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: requestHeaders,
+        onResponse: ({ response }) => {
+            if (response.status === 401) {
+                navigateTo('/login?redirect=' + route.fullPath);
+            } else if (response.ok) { }
+            selectedQuiz.value = response._data;
+        }
+    });
+}
+
+function getCorrectTries(quizTry: { quizQuestionId: string, isCorrect: boolean }[]) {
+    return quizTry.filter((answer) => answer.isCorrect).length;
 }
 </script>
