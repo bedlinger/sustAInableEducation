@@ -69,7 +69,7 @@
                         <EcoSpaceListEntry v-for="ecoSpace in searchedSpaces" :ecoSpace="ecoSpace"
                             :show-delete="myUserId === ecoSpace.participants.find(participant => participant.isHost)?.userId"
                             v-on:delete="openDialog" v-model="spaceRefsById[ecoSpace.id].value"
-                            v-on:click="selectSpaceById(ecoSpace.id)" />
+                            v-on:click="navigateTo({path: '/spaces',query: {spaceId: ecoSpace.id}});" />
                         <NuxtLink to="/configuration">
                             <Button label="EcoSpace erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
@@ -291,7 +291,6 @@ const { execute, data: spaces } = await useFetch<EcoSpace[]>(`${runtimeConfig.pu
     }
 )
 
-
 const showFilters = ref(false);
 
 const showSidebar = ref(true);
@@ -336,6 +335,16 @@ const spaceRefsById = spaces.value ? spaces.value.reduce((acc, space) => {
     acc[space.id] = ref(false);
     return acc;
 }, {} as Record<string, Ref<boolean>>) : {};
+
+if (route.query.spaceId && spaces) {
+    selectSpaceById(route.query.spaceId as string);
+}
+
+watch(() => route.query.spaceId, (newVal) => {
+    if (newVal && spaces) {
+        selectSpaceById(newVal as string);
+    }
+});
 
 const selectedSpace = ref<EcoSpace>();
 
@@ -439,7 +448,12 @@ async function selectSpaceById(id: string) {
 }
 
 async function selectSpaceCloseSidebar(id: string) {
-    await selectSpaceById(id);
+    navigateTo({
+        path: '/spaces',
+        query: {
+            spaceId: id
+        }
+    });
     showSidebar.value = false;
 }
 

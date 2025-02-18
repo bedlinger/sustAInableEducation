@@ -22,6 +22,7 @@ export interface Question {
 
 export interface Quiz {
     id: string,
+    spaceId: string,
     questions:  Question[],
     title: string,
     numberQuestions: number,
