@@ -19,11 +19,14 @@
             :label="choice.text" class="w-full" :disabled="disableAnswerButtons" @click="handleButtonClick(index)"/>
         </div>
         <div class="w-full flex justify-center items-center">
-          <Button label="Weiter" :disabled="!refsIncludeTrue" @click="saveSelection"/>
+          <Button label="Weiter" :disabled="!refsIncludeTrue" @click="saveSelection" :class="result < 0 ? '' : 'invisible'"/>
         </div>
         <div v-if="result !== -1" class="p-4 flex flex-col items-center w-full h-full absolute top-0 left-0 rounded-xl bg-[rgba(255,255,255,0.5)]" style="backdrop-filter: blur(5px);">
           <p class="text-2xl text-center flex-1 flex justify-center items-center"> Du hast {{ result }}/{{ quiz.questions.length }} Fragen richtig beantwortet</p>
-          <Button label="Zurück zur Übersicht" @click="navigateTo('/quizzes')"/>
+          <div>
+            <Button label="Erneut versuchen" @click="resetQuiz" class="mr-2"/>
+            <Button label="Zurück zur Übersicht" class="ml-2" severity="secondary" @click="navigateTo('/quizzes')"/>
+          </div>
         </div>
       </div>
     </div>
