@@ -119,4 +119,11 @@ async function saveSelection() {
     await getResult();
   }
 }
+
+function resetQuiz() {
+  selectedQuestionIndex.value = 0;
+  selectedAnswers.value = [];
+  result.value = -1;
+  disableAnswerButtons.value = false;
+}
 </script>
