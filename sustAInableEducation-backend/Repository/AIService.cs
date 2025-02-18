@@ -31,7 +31,7 @@ namespace sustAInableEducation_backend.Repository
                 _client = new HttpClient
                 {
                     BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
-                    Timeout = TimeSpan.FromMinutes(2.5)
+                    Timeout = TimeSpan.FromMinutes(4)
                 };
                 _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
             }
@@ -1042,11 +1042,11 @@ namespace sustAInableEducation_backend.Repository
     // Benjamin Edlinger
     public static class WordCountLimits
     {
-        public const int PrimarySchoolMin = 40;
+        public const int PrimarySchoolMin = 50;
         public const int PrimarySchoolMax = 70;
-        public const int MiddleSchoolMin = 80;
+        public const int MiddleSchoolMin = 90;
         public const int MiddleSchoolMax = 110;
-        public const int HighSchoolMin = 120;
+        public const int HighSchoolMin = 130;
         public const int HighSchoolMax = 150;
     }
 
