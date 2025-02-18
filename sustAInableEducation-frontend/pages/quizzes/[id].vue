@@ -14,9 +14,9 @@
           </template>
         </MeterGroup>
         <p class="text-2xl flex-1 text-center flex items-center justify-center" >{{ selectedQuestion.text }}</p>
-        <div id="controls" class="flex flex-col gap-2 p-2">
+        <div id="controls" class="flex flex-col gap-2 p-2 sm:grid sm:grid-cols-2 sm:min-h-60">
           <QuizButton v-for="choice, index in selectedQuestion.choices" v-model="buttonRefs[index]"
-            :label="choice.text" class="w-full" :disabled="disableAnswerButtons" @click="handleButtonClick(index)"/>
+            :label="choice.text" class="w-full sm:h-full sm:!text-xl" :disabled="disableAnswerButtons" @click="handleButtonClick(index)"/>
         </div>
         <div class="w-full flex justify-center items-center">
           <Button label="Weiter" :disabled="!refsIncludeTrue" @click="saveSelection" :class="result < 0 ? '' : 'invisible'"/>
