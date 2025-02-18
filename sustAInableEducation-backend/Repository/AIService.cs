@@ -73,16 +73,7 @@ namespace sustAInableEducation_backend.Repository
                 try
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    var (storyPart, title) = GetStoryPart(assistantContent);
-                    int wordCount = GetWordCount(storyPart.Text);
-                    switch (story.TargetGroup)
-                    {
-                        case TargetGroup.PrimarySchool when wordCount < 40 || wordCount > 70:
-                        case TargetGroup.MiddleSchool when wordCount < 90 || wordCount > 120:
-                        case TargetGroup.HighSchool when wordCount < 140 || wordCount > 170:
-                            _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
-                            throw new AIException("Generated story part with invalid word count for target group");
-                    }
+                    var (storyPart, title) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                     _logger.LogInformation("Successfully started story with id: {Id}", story.Id);
                     return (storyPart, title);
                 }
@@ -131,16 +122,7 @@ namespace sustAInableEducation_backend.Repository
                 try
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    var (storyPart, _) = GetStoryPart(assistantContent);
-                    int wordCount = GetWordCount(storyPart.Text);
-                    switch (story.TargetGroup)
-                    {
-                        case TargetGroup.PrimarySchool when wordCount < 40 || wordCount > 70:
-                        case TargetGroup.MiddleSchool when wordCount < 90 || wordCount > 120:
-                        case TargetGroup.HighSchool when wordCount < 140 || wordCount > 170:
-                            _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
-                            throw new AIException("Generated story part with invalid word count for target group");
-                    }
+                    var (storyPart, _) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                     _logger.LogInformation("Successfully generated next part of story with id: {Id}", story.Id);
                     return storyPart;
                 }
@@ -190,16 +172,8 @@ namespace sustAInableEducation_backend.Repository
                 try
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
-                    end = GetStoryPart(assistantContent).Item1.Text;
-                    int wordCount = GetWordCount(end);
-                    switch (story.TargetGroup)
-                    {
-                        case TargetGroup.PrimarySchool when wordCount < 40 || wordCount > 70:
-                        case TargetGroup.MiddleSchool when wordCount < 90 || wordCount > 120:
-                        case TargetGroup.HighSchool when wordCount < 140 || wordCount > 170:
-                            _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
-                            throw new AIException("Generated story part with invalid word count for target group");
-                    }
+                    var (storyPart, _) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
+                    end = storyPart.Text;
                     break;
                 }
                 catch (Exception e)
@@ -251,18 +225,6 @@ namespace sustAInableEducation_backend.Repository
 
         // Benjamin Edlinger
         /// <summary>
-        /// Counts the number of words in the given text
-        /// </summary>
-        /// <param name="text">The text to count the words for</param>
-        /// <returns>Count of words in the text</returns>
-        private static int GetWordCount(string text)
-        {
-            char[] delimiters = [' ', '\r', '\n'];
-            return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).Length;
-        }
-
-        // Benjamin Edlinger
-        /// <summary>
         /// Rebuilds the chat messages of the story for the given story object
         /// </summary>
         /// <param name="story">The story object to rebuild the chat messages for</param>
@@ -283,7 +245,7 @@ namespace sustAInableEducation_backend.Repository
                     + "- Sekundarstufe zwei: Verwende komplexere Satzstrukturen, Fachbegriffe und beleuchte globale Zusammenhänge der Nachhaltigkeit.",
                 _ => throw new ArgumentException("Invalid target group")
             };
-                string lengthRequirement = story.TargetGroup switch
+            string lengthRequirement = story.TargetGroup switch
             {
                 TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 40 Wörter und maximal 70 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
                 TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 90 Wörter und maximal 120 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
@@ -482,15 +444,20 @@ namespace sustAInableEducation_backend.Repository
 
         // Benjamin Edlinger
         /// <summary>
-        /// Gets the story part from the given assistant content
+        /// Deserializes the assistant content and returns the story part and the title of the story
+        /// If the word count of the story part is invalid, the assistant content will be fixed
         /// </summary>
-        /// <param name="assistantContent">The assistant content to get the story part from</param>
-        /// <returns>The story part and the title of the story</returns>
-        /// <exception cref="InvalidOperationException">If the message content is null</exception>
-        /// <exception cref="JsonException">If the assistant content could not be deserialized</exception>
-        private static (StoryPart, string) GetStoryPart(string assistantContent)
+        /// <param name="assistantContent">The generated assistant content to deserialize</param>
+        /// <param name="targetGroup">The target group of the story</param>
+        /// <param name="chatMessages">The previous chat messages</param>
+        /// <returns>Returns the story part and the title of the story</returns>
+        /// <exception cref="InvalidOperationException">Gets thrown if the assistant content or chat messages is null</exception>
+        /// <exception cref="JsonException">Gets thrown if the assistant content could not be deserialized</exception>
+        /// <exception cref="AIException">Gets thrown if the story part could not be fixed</exception>
+        private async Task<(StoryPart, string)> GetStoryPart(string assistantContent, TargetGroup targetGroup, List<ChatMessage> chatMessages)
         {
             ArgumentNullException.ThrowIfNull(assistantContent);
+            ArgumentNullException.ThrowIfNull(chatMessages);
 
             StoryContent messageContent;
             try
@@ -513,7 +480,55 @@ namespace sustAInableEducation_backend.Repository
                     Impact = option.Impact
                 }).ToList()
             };
-            return (storyPart, messageContent.Title);
+
+            int wordCount = GetWordCount(storyPart.Text);
+            string? prompt = targetGroup switch
+            {
+                TargetGroup.PrimarySchool when wordCount < 40 => "Der Abschnitt ist zu kurz. Bitte überarbeite ihn, sodass er mindestens 40 Wörter umfasst.",
+                TargetGroup.PrimarySchool when wordCount > 70 => "Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal 70 Wörter umfasst.",
+                TargetGroup.MiddleSchool when wordCount < 90 => "Der Abschnitt ist zu kurz. Bitte überarbeite ihn, sodass er mindestens 90 Wörter umfasst.",
+                TargetGroup.MiddleSchool when wordCount > 120 => "Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal 120 Wörter umfasst.",
+                TargetGroup.HighSchool when wordCount > 150 => "Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal 170 Wörter umfasst.",
+                _ => null
+            };
+
+            if (prompt == null) return (storyPart, messageContent.Title);
+
+            _logger.LogWarning("Story part with id {Id} for {TargetGroup} has invalid word count: {WordCount}", storyPart.Id, targetGroup, wordCount);
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(storyPart) });
+            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = prompt });
+
+            try
+            {
+                string fixedContent = await FetchAssitantContent(chatMessages, 0.7f, 0.7f);
+                messageContent = JsonSerializer.Deserialize<StoryContent>(fixedContent) ?? throw new InvalidOperationException("Message content is null");
+                storyPart.Text = messageContent.Story;
+                storyPart.Intertitle = messageContent.Intertitle;
+                storyPart.Choices = messageContent.Options.Select((option, index) => new StoryChoice
+                {
+                    Text = option.Text,
+                    Number = index + 1,
+                    Impact = option.Impact
+                }).ToList();
+                return (storyPart, messageContent.Title);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Failed to fix story part with id {Id}: {Exception}", storyPart.Id, e);
+                throw new AIException("Failed to fix story part", e);
+            }
+        }
+
+        // Benjamin Edlinger
+        /// <summary>
+        /// Counts the number of words in the given text
+        /// </summary>
+        /// <param name="text">The text to count the words for</param>
+        /// <returns>Count of words in the text</returns>
+        private static int GetWordCount(string text)
+        {
+            char[] delimiters = [' ', '\r', '\n'];
+            return text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).Length;
         }
 
         // Benjamin Edlinger
