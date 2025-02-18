@@ -13,7 +13,7 @@
             <div></div>
           </template>
         </MeterGroup>
-        <p class="text-2xl flex-1 text-center flex items-center" >{{ selectedQuestion.text }}</p>
+        <p class="text-2xl flex-1 text-center flex items-center justify-center" >{{ selectedQuestion.text }}</p>
         <div id="controls" class="flex flex-col gap-2 p-2">
           <QuizButton v-for="choice, index in selectedQuestion.choices" v-model="buttonRefs[index]"
             :label="choice.text" class="w-full" :disabled="disableAnswerButtons" @click="handleButtonClick(index)"/>
