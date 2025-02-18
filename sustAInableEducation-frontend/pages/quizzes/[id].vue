@@ -66,7 +66,6 @@ const selectedQuestion = computed<Question>(() => safeData.value.questions[selec
 const selectedAnswers = ref<{questionId: string, response: number[]}[]>([]);
 
 const disableAnswerButtons = ref(false);
-const value = ref([{ label: '', value: 10, color: 'var(--p-primary-color)' }]);
 
 const result = ref(-1)
 
