@@ -74,6 +74,15 @@ namespace sustAInableEducation_backend.Repository
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
                     var (storyPart, title) = GetStoryPart(assistantContent);
+                    int wordCount = GetWordCount(storyPart.Text);
+                    switch (story.TargetGroup)
+                    {
+                        case TargetGroup.PrimarySchool when wordCount < 60 || wordCount > 80:
+                        case TargetGroup.MiddleSchool when wordCount < 125 || wordCount > 150:
+                        case TargetGroup.HighSchool when wordCount < 160 || wordCount > 180:
+                            _logger.LogError("Generated story part with invalid word count for target group {TargetGroup}: {WordCount}", story.TargetGroup, wordCount);
+                            throw new AIException("Generated story part with invalid word count for target group");
+                    }
                     _logger.LogInformation("Successfully started story with id: {Id}", story.Id);
                     return (storyPart, title);
                 }
