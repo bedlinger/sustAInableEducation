@@ -8,7 +8,7 @@
       </div>
       
       <div class="w-full bg-white border border-slate-300 h-full rounded-xl p-4 flex flex-col justify-center gap-4 relative">
-        <MeterGroup :value="value" class="">
+        <MeterGroup :value="meterValue">
           <template #label>
             <div></div>
           </template>
@@ -74,6 +74,14 @@ const refsIncludeTrue = computed(() => buttonRefs.value.includes(true));
 watch(selectedQuestion, (newQuestion) => {3
   buttonRefs.value = newQuestion.choices.map(() => false);
 }, { immediate: true });
+
+const meterValue = computed(() => {
+  let value = ((selectedQuestionIndex.value)/quiz.value!.questions.length) * 100
+  if(result.value >= 0) {
+    value = ((selectedQuestionIndex.value + 1)/quiz.value!.questions.length) * 100
+  }
+  return [{ label: '', value: value, color: 'var(--p-primary-color)' }];
+});
 
 async function handleButtonClick(index: number) {
   if(!selectedQuestion.value.isMultipleResponse) {
