@@ -247,9 +247,9 @@ namespace sustAInableEducation_backend.Repository
             };
             string lengthRequirement = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Jeder Abschnitt soll mindestens 40 Wörter und maximal 70 Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
-                TargetGroup.MiddleSchool => "Jeder Abschnitt soll mindestens 90 Wörter und maximal 120 Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
-                TargetGroup.HighSchool => "Jeder Abschnitt soll mindestens 140 Wörter und maximal 170 Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
+                TargetGroup.PrimarySchool => $"Jeder Abschnitt soll mindestens {WordCountLimits.PrimarySchoolMin} Wörter und maximal {WordCountLimits.PrimarySchoolMax} Wörter umfassen, in einfachen Sätzen und mit kurzen Absätzen.",
+                TargetGroup.MiddleSchool => $"Jeder Abschnitt soll mindestens {WordCountLimits.MiddleSchoolMin} Wörter und maximal {WordCountLimits.MiddleSchoolMax} Wörter umfassen, mit verständlicher Sprache und anschaulichen Beispielen.",
+                TargetGroup.HighSchool => $"Jeder Abschnitt soll mindestens {WordCountLimits.HighSchoolMin} Wörter und maximal {WordCountLimits.HighSchoolMax} Wörter umfassen, mit detaillierten Beschreibungen, komplexen Satzstrukturen und umfangreichen Erklärungen.",
                 _ => throw new ArgumentException("Invalid target group")
             };
             string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
@@ -371,8 +371,6 @@ namespace sustAInableEducation_backend.Repository
             return chatMessages;
         }
 
-
-
         // Benjamin Edlinger
         /// <summary>
         /// Rebuilds the chat messages of the result for already rebuilt chat messages and the given story object
@@ -484,11 +482,12 @@ namespace sustAInableEducation_backend.Repository
             int wordCount = GetWordCount(storyPart.Text);
             string? prompt = targetGroup switch
             {
-                TargetGroup.PrimarySchool when wordCount < 40 => "Der Abschnitt ist zu kurz. Bitte überarbeite ihn, sodass er mindestens 40 Wörter umfasst.",
-                TargetGroup.PrimarySchool when wordCount > 70 => "Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal 70 Wörter umfasst.",
-                TargetGroup.MiddleSchool when wordCount < 90 => "Der Abschnitt ist zu kurz. Bitte überarbeite ihn, sodass er mindestens 90 Wörter umfasst.",
-                TargetGroup.MiddleSchool when wordCount > 120 => "Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal 120 Wörter umfasst.",
-                TargetGroup.HighSchool when wordCount > 150 => "Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal 170 Wörter umfasst.",
+                TargetGroup.PrimarySchool when wordCount < WordCountLimits.PrimarySchoolMin => $"Der Abschnitt ist zu kurz. Bitte überarbeite ihn, sodass er mindestens {WordCountLimits.PrimarySchoolMin} Wörter umfasst.",
+                TargetGroup.PrimarySchool when wordCount > WordCountLimits.PrimarySchoolMax => $"Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal {WordCountLimits.PrimarySchoolMax} Wörter umfasst.",
+                TargetGroup.MiddleSchool when wordCount < WordCountLimits.MiddleSchoolMin => $"Der Abschnitt ist zu kurz. Bitte überarbeite ihn, sodass er mindestens {WordCountLimits.MiddleSchoolMin} Wörter umfasst.",
+                TargetGroup.MiddleSchool when wordCount > WordCountLimits.MiddleSchoolMax => $"Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal {WordCountLimits.MiddleSchoolMax} Wörter umfasst.",
+                TargetGroup.HighSchool when wordCount < WordCountLimits.HighSchoolMin => $"Der Abschnitt ist zu kurz. Bitte überarbeite ihn, sodass er mindestens {WordCountLimits.HighSchoolMin} Wörter umfasst.",
+                TargetGroup.HighSchool when wordCount > WordCountLimits.HighSchoolMax => $"Der Abschnitt ist zu lang. Bitte überarbeite ihn, sodass er maximal {WordCountLimits.HighSchoolMax} Wörter umfasst.",
                 _ => null
             };
 
@@ -1038,6 +1037,17 @@ namespace sustAInableEducation_backend.Repository
             : base(message, inner)
         {
         }
+    }
+
+    // Benjamin Edlinger
+    public static class WordCountLimits
+    {
+        public const int PrimarySchoolMin = 40;
+        public const int PrimarySchoolMax = 70;
+        public const int MiddleSchoolMin = 80;
+        public const int MiddleSchoolMax = 110;
+        public const int HighSchoolMin = 120;
+        public const int HighSchoolMax = 150;
     }
 
     // Benjamin Edlinger
