@@ -3,8 +3,8 @@
   <div class="w-full h-full flex justify-center items-center pt-20">
     <div v-if="quiz" id="content" class="w-full h-full bg-slate-50 p-4 flex flex-col">
       <div class="flex items-center justify-between">
-        <h1 class="text-3xl">Quiz {{ refsIncludeTrue }}</h1>
-        <span class="text-3xl">1/{{ quiz.questions.length }}</span>
+        <h1 class="text-3xl">Quiz {{ result }}</h1>
+        <span class="text-3xl">{{ selectedQuestionIndex + 1 }} / {{ quiz.questions.length }}</span>
       </div>
       
       <div class="w-full bg-white border border-slate-300 h-full rounded-xl p-4 flex flex-col justify-center gap-4">
@@ -56,10 +56,12 @@ const safeData = computed(() => quiz.value || { questions: [] });
 const selectedQuestionIndex = ref(0);
 const selectedQuestion = computed<Question>(() => safeData.value.questions[selectedQuestionIndex.value] || { id: '', number: 0, text: '', choices: [], isMultipleResponse: false });
 
-const selectedAnswers = ref<number[][]>([]);
+const selectedAnswers = ref<{questionId: string, response: number[]}[]>([]);
 
 const disableAnswerButtons = ref(false);
 const value = ref([{ label: '', value: 10, color: 'var(--p-primary-color)' }]);
+
+const result = ref(-1)
 
 const buttonRefs = ref<boolean[]>([]);
 
@@ -69,16 +71,37 @@ watch(selectedQuestion, (newQuestion) => {3
   buttonRefs.value = newQuestion.choices.map(() => false);
 }, { immediate: true });
 
-function handleButtonClick(index: number) {
+async function handleButtonClick(index: number) {
   if(!selectedQuestion.value.isMultipleResponse) {
     buttonRefs.value = buttonRefs.value.map(() => false);
     buttonRefs.value[index] = true;
   }
 }
 
-function saveSelection() {
+async function getResult () {
+  console.log(`${runtimeConfig.public.apiUrl}/quizzes/${route.params.id}/try`)
+  console.table(selectedAnswers.value)
+  await $fetch<{isCorrect: boolean}[]>(`${runtimeConfig.public.apiUrl}/quizzes/${route.params.id}/try`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: requestHeaders,
+    body: JSON.stringify(selectedAnswers.value),
+    onResponse({ response }) {
+      if(response.ok) {
+        result.value = response._data.filter((answer: { questioonId: string, isCorrect: boolean }) => answer.isCorrect).length;
+      }
+    }
+  });
+}
+
+async function saveSelection() {
   const selected = selectedQuestion.value.choices.map((choice, index) => buttonRefs.value[index] ? choice.number : null).filter((id) => id !== null) as number[];
-  selectedAnswers.value.push(selected);
+  selectedAnswers.value.push({questionId: selectedQuestion.value.id, response: selected});
   selectedQuestionIndex.value++;
+
+  if(selectedQuestionIndex.value === safeData.value.questions.length) {
+    disableAnswerButtons.value = true;
+    await getResult();
+  }
 }
 </script>
