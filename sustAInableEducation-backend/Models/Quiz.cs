@@ -8,7 +8,6 @@ namespace sustAInableEducation_backend.Models
         public Guid Id { get; set; }
         [JsonIgnore]
         public string UserId { get; set; } = null!;
-        [JsonIgnore]
         public Guid SpaceId { get; set; }
 
         public ICollection<QuizQuestion> Questions { get; set; } = new List<QuizQuestion>();
