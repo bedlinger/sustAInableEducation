@@ -73,6 +73,9 @@
                                 </div> -->
                             </div>
                         </Panel>
+                        <div class="mb-2 w-full flex justify-center items-center">
+                            <Button label="Quiz starten" size="large" fluid @click="navigateTo(`/quizzes/${selectedQuiz.id}`)"/>
+                        </div>
                         <div class="flex flex-col w-full">
                             <h2 class="text-3xl mb-2">Versuche</h2>
                             <DataTable v-if="selectedQuiz.tries.length > 0" :value="selectedQuiz.tries" class="!w-full !rounded-xl !overflow-hidden">
@@ -102,6 +105,8 @@
 <script setup lang="ts">
 import type { EcoSpace } from '~/types/EcoSpace';
 import type { Quiz } from '~/types/Quiz';
+
+const showDelete = ref(false)
 
 const requestHeaders = useRequestHeaders(['cookie']);
 const runtimeConfig = useRuntimeConfig();
