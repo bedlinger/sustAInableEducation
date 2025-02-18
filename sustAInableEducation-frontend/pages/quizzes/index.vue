@@ -49,7 +49,7 @@
                             <Divider />
                             <div class="text-lg flex flex-col">
                                 <span>Anzahl der Fragen: {{ selectedQuiz.numberQuestions }}</span>
-                                <div class="flex gap-3">
+                                <!-- <div class="flex gap-3" >
                                     <span>Ausgewählte Fragentypen: </span>
                                     <CheckboxGroup name="ingredient" class="flex flex-col gap-2">
                                         <div class="flex items-center gap-2">
@@ -65,7 +65,7 @@
                                             <label for="truefalse"> Wahr/Falsch </label>
                                         </div>
                                     </CheckboxGroup>
-                                </div>
+                                </div> -->
                             </div>
                         </Panel>
                         <div class="flex flex-col w-full">
