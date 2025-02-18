@@ -48,7 +48,12 @@
                         <Panel header="Informationen" class="!w-full mb-4">
                             <Divider />
                             <div class="text-lg flex flex-col">
+                                <div>
+                                    <span>EcoSpace: </span>
+                                    <Button class="!text-lg !px-0" variant="link" :label="quizSpace?.story.title" @click="navigateTo(`/spaces?spaceId=${quizSpace?.id}`)" text />
+                                </div>
                                 <span>Anzahl der Fragen: {{ selectedQuiz.numberQuestions }}</span>
+                                
                                 <!-- <div class="flex gap-3" >
                                     <span>Ausgewählte Fragentypen: </span>
                                     <CheckboxGroup name="ingredient" class="flex flex-col gap-2">
@@ -95,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+import type { EcoSpace } from '~/types/EcoSpace';
 import type { Quiz } from '~/types/Quiz';
 
 const requestHeaders = useRequestHeaders(['cookie']);
@@ -117,6 +123,7 @@ const { refresh, data: quizzes } = await useFetch<Quiz[]>(`${runtimeConfig.publi
 )
 
 const selectedQuiz = ref<Quiz | null>(null);
+const quizSpace = ref<EcoSpace | null>(null);
 
 const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
     acc[quiz.id] = ref(false);
@@ -188,11 +195,32 @@ async function getQuiz(id: string) {
         onResponse: ({ response }) => {
             if (response.status === 401) {
                 navigateTo('/login?redirect=' + route.fullPath);
-            } else if (response.ok) { }
-            selectedQuiz.value = response._data;
+            } else if (response.ok) {
+                selectedQuiz.value = response._data;
+                
+            }
         }
     });
+
+    if(selectedQuiz.value) {
+        await getSpace(selectedQuiz.value.spaceId);
+    }
+    
 }
+
+async function getSpace(id: string) {
+    await $fetch(`${runtimeConfig.public.apiUrl}/spaces/${id}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: requestHeaders,
+        onResponse: ({ response }) => {
+            if (response.ok) {
+                quizSpace.value = response._data;
+            }
+            
+        }
+    });
+}   
 
 function getCorrectTries(quizTry: { quizQuestionId: string, isCorrect: boolean }[]) {
     return quizTry.filter((answer) => answer.isCorrect).length;
