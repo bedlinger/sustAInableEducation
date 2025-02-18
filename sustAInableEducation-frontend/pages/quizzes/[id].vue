@@ -7,19 +7,22 @@
         <span class="text-3xl">{{ selectedQuestionIndex + 1 }} / {{ quiz.questions.length }}</span>
       </div>
       
-      <div class="w-full bg-white border border-slate-300 h-full rounded-xl p-4 flex flex-col justify-center gap-4">
+      <div class="w-full bg-white border border-slate-300 h-full rounded-xl p-4 flex flex-col justify-center gap-4 relative">
         <MeterGroup :value="value" class="">
           <template #label>
             <div></div>
           </template>
         </MeterGroup>
         <p class="text-2xl flex-1 text-center flex items-center" >{{ selectedQuestion.text }}</p>
-        <div id="controls" class="flex flex-col gap-2">
+        <div id="controls" class="flex flex-col gap-2 p-2">
           <QuizButton v-for="choice, index in selectedQuestion.choices" v-model="buttonRefs[index]"
             :label="choice.text" class="w-full" :disabled="disableAnswerButtons" @click="handleButtonClick(index)"/>
         </div>
         <div class="w-full flex justify-center items-center">
           <Button label="Weiter" :disabled="!refsIncludeTrue" @click="saveSelection"/>
+        </div>
+        <div v-if="result !== -1" class=" flex justify-center items-center w-full h-full absolute top-0 left-0 rounded-xl bg-[rgba(255,255,255,0.5)]" style="backdrop-filter: blur(5px);">
+          <p class="text-2xl text-center"> Du hast {{ result }}/{{ quiz.questions.length }} Fragen richtig beantwortet</p>
         </div>
       </div>
     </div>
