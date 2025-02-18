@@ -1,6 +1,6 @@
 <template>
   <div class="text-white py-2 px-3 flex items-center min-h-9 justify-center rounded-md cursor-pointer" :class="getConditionalClasses()" @click="model = !model">
-    <span class="text-lg">{{ props.label }} - {{ model }}</span>
+    <span class="text-lg">{{ props.label }}</span>
   </div>
 </template>
 
