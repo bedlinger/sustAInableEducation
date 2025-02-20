@@ -7,6 +7,7 @@ using sustAInableEducation_backend.Models;
 
 using System.Reflection;
 using System.Runtime.Serialization;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 
 namespace sustAInableEducation_backend.Repository
@@ -803,8 +804,7 @@ namespace sustAInableEducation_backend.Repository
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
-
-        private static List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config, List<ChatMessage> chatMessages)
+        private List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config, List<ChatMessage> chatMessages)
         {
 
 
@@ -820,50 +820,69 @@ namespace sustAInableEducation_backend.Repository
             };
             // Der Teil drüber soll zusätylich in den SystemPromt reinkommen
 
-            string systemPrompt = "Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit." +
-                                   "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
-                                   "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
-                                   "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
-                                   $"Formatierungsrichtlinien: {targetGroupString} " +
-                                  "{'Title': 'Der Titel des ganzen Quizes', 'NumberQuestions': 'Anzahl an Questions', 'Questions': {'Text': 'Der Titel der jeweiligen Frage','Text': 'Der Titel der jeweiligen Frage', 'Number': 'Die Nummer der Frage', 'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit', 'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', 'IsCorrect': 'Ein Wahrheitswert, der angibt, ob die Auswahl korrekt ist'}]}} " +
-                                   $"Das Quiz soll aus" +
-                                   string.Join(", ", config.Types.Select(t =>
-                                   {
-                                       return t switch
+
+            try
+            {
+
+                string systemPrompt = "Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit." +
+                                       "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
+                                       "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
+                                       "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
+                                       $"Formatierungsrichtlinien: {targetGroupString} " +
+                                      "{'Title': 'Der Titel des ganzen Quizes'," +
+                                      "'NumberQuestions': 'Anzahl an Questions'," + 
+                                       "'Questions': {'Text': 'Der Titel der jeweiligen Frage'," +
+                                       "'IsMultipleResponse': 'Besagt ob die Frage eine MultipleRespose Frage ist - bei ja wird True gesetzt bei nein False '" + 
+                                       "'Number': 'Die Nummer der Frage', "+
+                                       "'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit'," +
+                                       "'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', "+
+                                       "'IsCorrect': 'Ein Wahrheitswert, der angibt, ob die Auswahl korrekt ist'}]}} " +
+                                       $"Das Quiz soll aus ausschließlich aus." +
+                                       string.Join(", ", config.Types.Select(t =>
                                        {
-                                           QuizType.MultipleResponse => "Multiple response-",
-                                           QuizType.SingleResponse => "Single response-",
-                                           QuizType.TrueFalse => "True/False-",
-                                           _ => throw new ArgumentException("Invalid quiz type")
-                                       };
-                                   })) +
-                                   $"Fragen bestehen und soll {config.NumberQuestions} Fragen lang sein";
-            ;
-            string userPrompt = "Generiere das Quiz auf Basis der durchlebten Story.";
+                                           return t switch
+                                           {
+                                               QuizType.MultipleResponse => "Multiple Response - bedeutet, dass es mehrere Antwortmöglichkeiten gibt. Hierbei müssen meherere Richtig sein. überprüfe das von 2-4 Auswahlmöglichkeiten  mindestens 2 richtig - setzte bei diesen Fragen hierebei das Atribut 'isMultipleResponse' im JSON auf true",
+                                               QuizType.SingleResponse => "Single response - bedeutet,  dass es mehrere Antwortmöglichkeiten gibt. Hierbei ist muss nur eine der 4 Richtig sein - setzte bei diesen Fragen hierebei das Atribut 'isMultipleResponse' im JSON auf false ",
+                                               QuizType.TrueFalse => "True/False - bedeutet, dass es 2 Antwortmöglichkeiten gibt(Wahr und Falsch). Eines der beiden kann hierbei nur Richitg sein - setzte bei diesen Fragen hierebei das Atribut 'isMultipleResponse' im JSON auf false  ",
+                                               _ => throw new ArgumentException("Invalid quiz type")
+                                           };
+                                       })) +
+                                       $"Fragen bestehen und soll {config.NumberQuestions} Frage/n lang sein.";
+                ;
+                string userPrompt = "Generiere das Quiz auf Basis der durchlebten Story.";
 
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
+                chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
+                chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
 
+                _logger.LogDebug(systemPrompt);
+                _logger.LogDebug(chatMessages.ToString());
+            }
+            catch (Exception e)
+            {
+                throw new AIException("Failed to generate Quiz", e);
+            }
+            
             return chatMessages;
         }
 
 
         public static string GetEnumMemberValue(Enum enumValue)
-{
-    Type type = enumValue.GetType();
-    MemberInfo memberInfo = type.GetMember(enumValue.ToString()).FirstOrDefault();
-
-    if (memberInfo != null)
-    {
-        var attribute = memberInfo.GetCustomAttribute<EnumMemberAttribute>();
-        if (attribute != null)
         {
-            return attribute.Value; // Return the EnumMember Value
-        }
-    }
+            Type type = enumValue.GetType();
+            MemberInfo memberInfo = type.GetMember(enumValue.ToString()).FirstOrDefault();
 
-    return enumValue.ToString(); // Fallback to enum name if no attribute is found
-}
+            if (memberInfo != null)
+            {
+                var attribute = memberInfo.GetCustomAttribute<EnumMemberAttribute>();
+                if (attribute != null)
+                {
+                    return attribute.Value; // Return the EnumMember Value
+                }
+            }
+
+            return enumValue.ToString(); // Fallback to enum name if no attribute is found
+        }
 
         /// <summary>
         /// Kacper Bohaczyk
@@ -875,10 +894,10 @@ namespace sustAInableEducation_backend.Repository
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(userName);
 
-            var stringstyle = GetEnumMemberValue(style );
+            var stringstyle = GetEnumMemberValue(style);
 
             // String imagePrompt = $"Use the {stringstyle}.  The image should be related to the aspect of sustainability that matches the term '{userName}";
-             String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
+            String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
             // String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}Manga – 'Medieval – 'A richly detailed medieval illustration inspired by illuminated manuscripts and old-world paintings. The colors are muted, with ornate patterns, historical clothing, and a sense of ancient storytelling.'";
             //_logger.LogDebug(style.ToString());
             //_logger.LogDebug(imagePrompt);
@@ -890,8 +909,8 @@ namespace sustAInableEducation_backend.Repository
                 Content = new StringContent(JsonSerializer.Serialize(new
                 {
                     prompt = imagePrompt,
-                    width = 1024,
-                    height = 1024
+                    width = 256,
+                    height = 256
                 }), Encoding.UTF8, "application/json")
             };
             HttpResponseMessage responseImage = null!;
@@ -1008,32 +1027,41 @@ namespace sustAInableEducation_backend.Repository
         public async Task<Quiz> GenerateQuiz(Story story, QuizRequest config)
         {
             ArgumentNullException.ThrowIfNull(story);
-            Quiz erg;
+            Quiz erg = null;
             List<ChatMessage> chatMessages;
-            try
-            {
-                chatMessages = RebuildChatMessagesStory(story);
-                if (story.Result == null) throw new AIException("The result is not set");
-                chatMessages = RebuildChatMessagesResult(story, chatMessages, story.Result.Text);
-                chatMessages = RebuildChatMessagesQuiz(story, config, chatMessages);
-            }
-            catch (Exception e)
-            {
-                throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
-            }
-            try
-            {
 
-                string assistantContent = await FetchAssitantContent(chatMessages, 0.8f, 0.9f);
-                erg = GetQuiz(assistantContent);
-            }
-            catch (Exception e)
+            for (int xer = 0; xer <= 1; xer++)
             {
-                throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
+                try
+                {
+
+                    chatMessages = RebuildChatMessagesStory(story);
+                    if (story.Result == null) throw new AIException("The result is not set");
+                    chatMessages = RebuildChatMessagesResult(story, chatMessages, story.Result.Text);
+                    chatMessages = RebuildChatMessagesQuiz(story, config, chatMessages);
+                }
+                catch (Exception e)
+                {
+                    throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
+                }
+                try
+                {
+                    string assistantContent = await FetchAssitantContent(chatMessages, 0.8f, 0.9f);
+                    erg = GetQuiz(assistantContent);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (xer == 1)
+                    {
+                        throw new ArgumentException("Failed to getQuiz", e);
+                    }
+
+
+                }
+
             }
             ;
-
-
             return erg;
             throw new NotImplementedException();
         }
@@ -1250,53 +1278,54 @@ namespace sustAInableEducation_backend.Repository
         [JsonPropertyName("estimated_cost")]
         public double EstimatedCost { get; set; }
     }
-}
-
-
-// Kacper Bohaczyk
-public class QuizContent
-{
-    [JsonPropertyName("Title")]
-    public string Title { get; set; } = null!;
-
-    [JsonPropertyName("NumberQuestions")]
-    public uint NumberQuestions { get; set; }
-
-    [JsonPropertyName("Questions")]
-    public List<Questions> Questions { get; set; } = null!;
-
-}
-
-public class Questions
-{
-    [JsonPropertyName("Text")]
-    public string Text { get; set; } = null!;
-
-    [JsonPropertyName("Number")]
-    public int Number { get; set; }
-
-    [JsonPropertyName("IsMultipleResponse")]
-    public Boolean IsMultipleResponse { get; set; }
-
-    [JsonPropertyName("Choices")]
-    public List<Choices> Choices { get; set; } = null!;
 
 
 
+    // Kacper Bohaczyk
+    public class QuizContent
+    {
+        [JsonPropertyName("Title")]
+        public string Title { get; set; } = null!;
 
-}
+        [JsonPropertyName("NumberQuestions")]
+        public uint NumberQuestions { get; set; }
 
-public class Choices
-{
-    [JsonPropertyName("Text")]
-    public string Text { get; set; } = null!;
+        [JsonPropertyName("Questions")]
+        public List<Questions> Questions { get; set; } = null!;
 
-    [JsonPropertyName("Number")]
-    public int Number { get; set; }
+    }
 
-    [JsonPropertyName("IsCorrect")]
-    public Boolean IsCorrect { get; set; }
+    public class Questions
+    {
+        [JsonPropertyName("Text")]
+        public string Text { get; set; } = null!;
+
+        [JsonPropertyName("Number")]
+        public int Number { get; set; }
+
+        [JsonPropertyName("IsMultipleResponse")]
+        public Boolean IsMultipleResponse { get; set; }
+
+        [JsonPropertyName("Choices")]
+        public List<Choices> Choices { get; set; } = null!;
 
 
 
+
+    }
+
+    public class Choices
+    {
+        [JsonPropertyName("Text")]
+        public string Text { get; set; } = null!;
+
+        [JsonPropertyName("Number")]
+        public int Number { get; set; }
+
+        [JsonPropertyName("IsCorrect")]
+        public Boolean IsCorrect { get; set; }
+
+
+
+    }
 }
