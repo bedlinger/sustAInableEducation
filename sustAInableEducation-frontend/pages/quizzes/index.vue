@@ -39,7 +39,7 @@
             <MobileQuizSidebar class="sm:hidden" v-model="showSidebar" :searched-quizzes="searchedQuizzes"
                 :search-input="searchInput" :quizzes="quizzes" :selected-quiz="selectedQuiz"
                 :quiz-refs-by-id="quizRefsById" @open-delete-dialog="openDialog"
-                @select-quiz="(id: number) => navigateTo({ path: '/quizzes', query: { quizId: id } })"
+                @select-quiz="(id: string) => selectQuizById(id, true)"
                 @toggle-sidebar="showSidebar = !showSidebar" @search-update="updateSearch" />
 
             <div class="content flex-1 h-full overflow-y-scroll w-full">
@@ -109,9 +109,6 @@
 <script setup lang="ts">
 import type { EcoSpace } from '~/types/EcoSpace';
 import type { Quiz } from '~/types/Quiz';
-import Id from './[id].vue';
-
-const showDelete = ref(false)
 
 const requestHeaders = useRequestHeaders(['cookie']);
 const runtimeConfig = useRuntimeConfig();
