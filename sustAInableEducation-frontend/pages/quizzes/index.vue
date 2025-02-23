@@ -18,7 +18,7 @@
                     </div>
                     <div id="sidebar-content">
                         <QuizListEntry v-for="quiz in searchedQuizzes" :quiz="quiz"
-                            v-model="quizRefsById[quiz.id].value" @click="selectQuizById(quiz.id)"
+                            v-model="quizRefsById[quiz.id].value" @click="navigateTo({path: '/quizzes',query: {quizId: quiz.id}});"
                             @delete="openDialog" />
                         <NuxtLink to="/quizzes/configuration">
                             <Button label="Quiz erstellen" rounded size="small" class="w-full !text-">
@@ -38,7 +38,7 @@
 
             <MobileQuizSidebar class="sm:hidden" v-model="showSidebar" :searched-quizzes="searchedQuizzes"
                 :search-input="searchInput" :quizzes="quizzes" :selected-quiz="selectedQuiz"
-                :quiz-refs-by-id="quizRefsById" @open-delete-dialog="openDialog" @select-quiz="selectQuizById"
+                :quiz-refs-by-id="quizRefsById" @open-delete-dialog="openDialog" @select-quiz="(id: number) => navigateTo({path: '/quizzes',query: {quizId: id}})"
                 @toggle-sidebar="showSidebar = !showSidebar" @search-update="updateSearch" />
 
             <div class="content flex-1 h-full overflow-y-scroll w-full">
@@ -105,6 +105,7 @@
 <script setup lang="ts">
 import type { EcoSpace } from '~/types/EcoSpace';
 import type { Quiz } from '~/types/Quiz';
+import Id from './[id].vue';
 
 const showDelete = ref(false)
 
@@ -134,6 +135,10 @@ const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
     acc[quiz.id] = ref(false);
     return acc;
 }, {} as Record<string, Ref<boolean>>) : {};
+
+if(route.query.quizId && quizzes) {
+    selectQuizById(route.query.quizId as string);
+}
 
 const searchedQuizzes = computed(() => {
     if (quizzes.value === null) return [];
