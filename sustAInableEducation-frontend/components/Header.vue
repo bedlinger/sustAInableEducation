@@ -10,9 +10,9 @@
             <NuxtLink to="/quizzes" class="text-white mx-4 text-xl">Quizzes</NuxtLink>
             <div class="text-white mx-4 text-xl flex justify-center items-center"
                 :class="!(['/login', '/register'].includes(route.path)) ? 'cursor-pointer' : ''" @click="toggleMenu">
-                <Image v-if="showImage" ref="img" :src="profileImage" class="bg-white mx-4 size-11 rounded-full overflow-hidden" />
+                <Image ref="img" :src="profileImage" class="bg-white mx-4 size-11 rounded-full overflow-hidden" />
             </div>
-            <Menu ref="menu" :model="items" :popup="true" @show="isMenuOpen = true" @hide="isMenuOpen = false" />
+            <Menu v-if="true" ref="menu" :model="items" :popup="true" @show="isMenuOpen = true" @hide="isMenuOpen = false" />
         </div>
     </div>
 </template>
@@ -25,33 +25,15 @@ const route = useRoute();
 const router = useRouter();
 
 const username = ref('USERNAME');
+const picturePath = ref<string | null>(null);
 
-const picturePath = ref<string | null>(null)
 const profileImage = computed(() => {
-    return picturePath.value ? `${runtimeConfig.public.apiUrl}${picturePath.value}` : '/img/profilepicture_placeholder.jpg'
-})
-
-const menu = ref();
-const isMenuOpen = ref(false);
-
-const showImage = ref(true);
-
-const { data, error, refresh } = useFetch<Account | null>(`${runtimeConfig.public.apiUrl}/account`, {
-    headers: useRequestHeaders(['cookie']),
-    method: 'GET',
-    credentials: 'include'
+    return picturePath.value ? `${runtimeConfig.public.apiUrl}${picturePath.value}` : '/img/profilepicture_placeholder.jpg';
 });
 
-if (!(['/login', '/register'].includes(route.path)) && error.value && error.value.statusCode === 401) {
-        navigateTo(`/login?redirect=${route.fullPath}`)
-}
+const menu = ref();
 
-if (data.value) {
-    picturePath.value = data.value.profileImage;
-    username.value = data.value.anonUserName;
-    rerenderImage();
-}
-
+// Reaktives items-Objekt für das Menü
 const items = ref([
     {
         items: [
@@ -67,21 +49,38 @@ const items = ref([
     }
 ]);
 
+const { data, error, refresh } = useFetch<Account | null>(`${runtimeConfig.public.apiUrl}/account`, {
+    headers: useRequestHeaders(['cookie']),
+    method: 'GET',
+    credentials: 'include',
+});
+
+if (data.value) {
+    picturePath.value = data.value.profileImage;
+    username.value = data.value.anonUserName;
+    updateMenu(); 
+}
+
+const isMenuOpen = ref(false);
+
 watch(() => route.path, async () => {
     if (!(['/login', '/register'].includes(route.path))) {
-        refresh()
-        if(data.value) {
-            picturePath.value = data.value.profileImage
-            username.value = data.value.anonUserName
-            rerenderImage()
+        refresh();
+        if (data.value) {
+            picturePath.value = data.value.profileImage;
+            username.value = data.value.anonUserName;
+            updateMenu(); 
         }
-        if(error.value && error.value.statusCode === 401) {
-            navigateTo(`/login?redirect=${route.fullPath}`)
+        if (error.value && error.value.statusCode === 401) {
+            navigateTo(`/login?redirect=${route.fullPath}`);
         }
     } else {
-        picturePath.value = null
+        picturePath.value = null;
     }
 });
+function updateMenu() {
+    items.value[0].items[0].label = username.value;
+}
 
 async function logout() {
     await $fetch(`${runtimeConfig.public.apiUrl}/account/logout`, {
@@ -89,16 +88,10 @@ async function logout() {
         credentials: 'include',
         onResponse: (response) => {
             if (response.response.ok) {
-                navigateTo('/login?redirect=' + route.fullPath)
+                navigateTo('/login?redirect=' + route.fullPath);
             }
         }
-    })
-}
-
-async function rerenderImage() {
-    showImage.value = false
-    await nextTick()
-    showImage.value = true
+    });
 }
 
 const toggleMenu = (event: Event) => {
