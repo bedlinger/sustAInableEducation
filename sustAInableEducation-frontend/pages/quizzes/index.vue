@@ -18,7 +18,7 @@
                     </div>
                     <div id="sidebar-content">
                         <QuizListEntry v-for="quiz in searchedQuizzes" :quiz="quiz"
-                            v-model="quizRefsById[quiz.id].value" @click="navigateTo({path: '/quizzes',query: {quizId: quiz.id}});"
+                            v-model="quizRefsById[quiz.id].value" @click="selectQuizById(quiz.id, true)"
                             @delete="openDialog" />
                         <NuxtLink to="/quizzes/configuration">
                             <Button label="Quiz erstellen" rounded size="small" class="w-full !text-">
@@ -38,7 +38,8 @@
 
             <MobileQuizSidebar class="sm:hidden" v-model="showSidebar" :searched-quizzes="searchedQuizzes"
                 :search-input="searchInput" :quizzes="quizzes" :selected-quiz="selectedQuiz"
-                :quiz-refs-by-id="quizRefsById" @open-delete-dialog="openDialog" @select-quiz="(id: number) => navigateTo({path: '/quizzes',query: {quizId: id}})"
+                :quiz-refs-by-id="quizRefsById" @open-delete-dialog="openDialog"
+                @select-quiz="(id: number) => navigateTo({ path: '/quizzes', query: { quizId: id } })"
                 @toggle-sidebar="showSidebar = !showSidebar" @search-update="updateSearch" />
 
             <div class="content flex-1 h-full overflow-y-scroll w-full">
@@ -50,10 +51,11 @@
                             <div class="text-lg flex flex-col">
                                 <div>
                                     <span>EcoSpace: </span>
-                                    <Button class="!text-lg !px-0" variant="link" :label="quizSpace?.story.title" @click="navigateTo(`/spaces?spaceId=${quizSpace?.id}`)" text />
+                                    <Button class="!text-lg !px-0" variant="link" :label="quizSpace?.story.title"
+                                        @click="navigateTo(`/spaces?spaceId=${quizSpace?.id}`)" text />
                                 </div>
                                 <span>Anzahl der Fragen: {{ selectedQuiz.numberQuestions }}</span>
-                                
+
                                 <!-- <div class="flex gap-3" >
                                     <span>Ausgewählte Fragentypen: </span>
                                     <CheckboxGroup name="ingredient" class="flex flex-col gap-2">
@@ -74,14 +76,16 @@
                             </div>
                         </Panel>
                         <div class="mb-2 w-full flex justify-center items-center">
-                            <Button label="Quiz starten" size="large" fluid @click="navigateTo(`/quizzes/${selectedQuiz.id}`)"/>
+                            <Button label="Quiz starten" size="large" fluid
+                                @click="navigateTo(`/quizzes/${selectedQuiz.id}`)" />
                         </div>
                         <div class="flex flex-col w-full">
                             <h2 class="text-3xl mb-2">Versuche</h2>
-                            <DataTable v-if="selectedQuiz.tries.length > 0" :value="selectedQuiz.tries" class="!w-full !rounded-xl !overflow-hidden">
+                            <DataTable v-if="selectedQuiz.tries.length > 0" :value="selectedQuiz.tries"
+                                class="!w-full !rounded-xl !overflow-hidden">
                                 <Column header="Code">
                                     <template #body="{ data }">
-                                        <span>{{ selectedQuiz.tries.indexOf(data) +1 }}</span>
+                                        <span>{{ selectedQuiz.tries.indexOf(data) + 1 }}</span>
                                     </template>
                                 </Column>
                                 <Column header="Correct" class="">
@@ -128,7 +132,28 @@ const { refresh, data: quizzes } = await useFetch<Quiz[]>(`${runtimeConfig.publi
     }
 )
 
-const selectedQuiz = ref<Quiz | null>(null);
+const quizId = computed(() => route.query.quizId);
+const apiUrl = computed(() => `${runtimeConfig.public.apiUrl}/quizzes/${quizId.value}`);
+
+const { data: selectedQuiz, refresh: refreshSelected } = useAsyncData<Quiz | null>(
+    `${apiUrl.value}`, // Dynamische URL
+    async () => {
+        const response = await $fetch<Quiz | null>(`${runtimeConfig.public.apiUrl}/quizzes/${quizId.value}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: requestHeaders,
+        });
+
+        if (!response) {
+            navigateTo('/login?redirect=' + route.fullPath);
+        }
+
+        return response;
+    },
+    { watch: [quizId] } // Reaktiv auf Änderungen von quizId
+);
+
+//const selectedQuiz = ref<Quiz | null>(null);
 const quizSpace = ref<EcoSpace | null>(null);
 
 const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
@@ -136,7 +161,7 @@ const quizRefsById = quizzes.value ? quizzes.value.reduce((acc, quiz) => {
     return acc;
 }, {} as Record<string, Ref<boolean>>) : {};
 
-if(route.query.quizId && quizzes) {
+if (route.query.quizId && quizzes) {
     selectQuizById(route.query.quizId as string);
 }
 
@@ -155,8 +180,11 @@ function updateSearch(newVal: string) {
     searchInput.value = newVal;
 }
 
-async function selectQuizById(id: string) {
-    await getQuiz(id);
+async function selectQuizById(id: string, navigate = false) {
+    if (navigate) {
+        navigateTo({ path: '/quizzes', query: { quizId: id } });
+    }
+    await getQuiz();
     quizRefsById[id].value = true;
     Object.keys(quizRefsById).forEach(key => {
         if (key !== id) {
@@ -197,25 +225,13 @@ const openDialog = (id: string) => {
     });
 }
 
-async function getQuiz(id: string) {
-    await $fetch(`${runtimeConfig.public.apiUrl}/quizzes/${id}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: requestHeaders,
-        onResponse: ({ response }) => {
-            if (response.status === 401) {
-                navigateTo('/login?redirect=' + route.fullPath);
-            } else if (response.ok) {
-                selectedQuiz.value = response._data;
-                
-            }
-        }
-    });
+async function getQuiz() {
+    refreshSelected()
 
-    if(selectedQuiz.value) {
+    if (selectedQuiz.value) {
         await getSpace(selectedQuiz.value.spaceId);
     }
-    
+
 }
 
 async function getSpace(id: string) {
@@ -227,10 +243,10 @@ async function getSpace(id: string) {
             if (response.ok) {
                 quizSpace.value = response._data;
             }
-            
+
         }
     });
-}   
+}
 
 function getCorrectTries(quizTry: { quizQuestionId: string, isCorrect: boolean }[]) {
     return quizTry.filter((answer) => answer.isCorrect).length;
