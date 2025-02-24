@@ -28,8 +28,10 @@
                             </Button>
                         </div>
                         <div class="flex-1 p-4 flex gap-2 flex-col">
-                            <a class="text-3xl text-primary-700 cursor-pointer" @click="navigate('/spaces')">EcoSpaces</a>
-                            <a class="text-3xl text-primary-700 cursor-pointer" @click="navigate('/quizzes')">Quizzes</a>
+                            <a class="text-3xl text-primary-700 cursor-pointer"
+                                @click="navigate('/spaces')">EcoSpaces</a>
+                            <a class="text-3xl text-primary-700 cursor-pointer"
+                                @click="navigate('/quizzes')">Quizzes</a>
                         </div>
                         <div>
                             <Divider class="!mx-4" />
