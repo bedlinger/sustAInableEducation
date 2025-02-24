@@ -6,6 +6,8 @@
             <div class="sidebar-container w-80 h-full pt-16 border-solid border-slate-300 border-r-2 hidden sm:block">
                 <div class="sidebar w-full h-full flex-col p-2 overflow-y-scroll flex">
                     <div id="sidebar-header">
+                        <p @click="console.log(searchedSpaces)">{{ filters.applied.sort.subject.value }}</p>
+                        <p @click="console.log(sortedSpaces)">{{ filters.applied.sort.subject.value }}</p>
                         <div class="flex items-center">
                             <IconField class="mr-2">
                                 <InputIcon>
@@ -66,7 +68,7 @@
                         <Divider class="!w-full" />
                     </div>
                     <div id="sidebar-content">
-                        <EcoSpaceListEntry v-for="ecoSpace in searchedSpaces" :ecoSpace="ecoSpace"
+                        <EcoSpaceListEntry v-for="ecoSpace in sortedSpaces" :ecoSpace="ecoSpace" :key="ecoSpace.id"
                             :show-delete="myUserId === ecoSpace.participants.find(participant => participant.isHost)?.userId"
                             v-on:delete="openDialog" v-model="spaceRefsById[ecoSpace.id].value"
                             v-on:click="navigateTo({path: '/spaces',query: {spaceId: ecoSpace.id}});" />
@@ -265,7 +267,6 @@ const toast = useToast();
 const route = useRoute();
 const router = useRouter();
 
-
 const { execute, data: spaces } = await useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`,
     {
         method: 'GET',
@@ -339,78 +340,76 @@ const selectedSpace = ref<EcoSpace>();
 
 const searchInput = ref('');
 
-const searchedSpaces = computed(() => {
-    return sortedSpaces.value.filter(space => {
-        if (space.story.title) {
-            return space.story.title.toLowerCase().includes(searchInput.value.toLowerCase())
-        } else {
-            if (searchInput.value !== "") {
-                return false
-            }
-            return true
-        }
-    });
-});
-
 const filteredSpaces = computed<EcoSpace[]>(() => {
     if (!spaces.value) return [];
 
     const normalizeDate = (date: Date) => {
         return new Date(date.getFullYear(), date.getMonth(), date.getDate());
     }
-    const result = spaces.value?.filter(space => {
 
+    return spaces.value.filter(space => {
         let finished;
         switch (filters.applied.finished.value) {
             case 'Alle':
                 finished = true;
                 break;
             case 'Beendet':
-                finished = ecoSpaceIsFinished(space)
+                finished = ecoSpaceIsFinished(space);
                 break;
             case 'Nicht beendet':
-                finished = !ecoSpaceIsFinished(space)
+                finished = !ecoSpaceIsFinished(space);
                 break;
         }
 
         if (filters.applied.date.value) {
-            if (Array.isArray(filters.applied.date.value)) {
-                if (filters.applied.date.value[0] !== null) {
-                    let fromDate = normalizeDate(new Date(space.createdAt)) >= filters.applied.date.value[0];
-                    if (filters.applied.date.value[1] !== null) {
-                        let toDate = normalizeDate(new Date(space.createdAt)) <= filters.applied.date.value[1];
-                        return finished && fromDate && toDate;
-                    } else {
-                        return finished && fromDate;
-                    }
+            if (Array.isArray(filters.applied.date.value) && filters.applied.date.value[0] !== null) {
+                let fromDate = normalizeDate(new Date(space.createdAt)) >= filters.applied.date.value[0];
+                if (filters.applied.date.value[1] !== null) {
+                    let toDate = normalizeDate(new Date(space.createdAt)) <= filters.applied.date.value[1];
+                    return finished && fromDate && toDate;
+                } else {
+                    return finished && fromDate;
                 }
-            } else {
-                return finished;
             }
-        } else {
-            return finished;
         }
+        return finished;
     });
-    return Array.isArray(result) ? result : [result];
+});
+
+const searchedSpaces = computed<EcoSpace[]>(() => {
+    return filteredSpaces.value.filter(space => {
+        if (space.story.title) {
+            return space.story.title.toLowerCase().includes(searchInput.value.toLowerCase());
+        }
+        return searchInput.value === "";
+    });
 });
 
 const sortedSpaces = computed<EcoSpace[]>(() => {
-    const sortedList = filteredSpaces.value.sort((a, b) => {
+    return [...searchedSpaces.value].sort((a, b) => {
         switch (filters.applied.sort.subject.value) {
             case 'Erstellungsdatum':
-                return filters.applied.sort.direction.value ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                return filters.applied.sort.direction.value
+                    ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                    : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
             case 'Titel':
-                return filters.applied.sort.direction.value ? b.story.title.localeCompare(a.story.title) : a.story.title.localeCompare(b.story.title);
+                return filters.applied.sort.direction.value
+                    ? b.story.title.localeCompare(a.story.title)
+                    : a.story.title.localeCompare(b.story.title);
             case 'Anzahl der Entscheidungspunkte':
-                return filters.applied.sort.direction.value ? a.story.length - b.story.length : b.story.length - a.story.length;
+                return filters.applied.sort.direction.value
+                    ? a.story.length - b.story.length
+                    : b.story.length - a.story.length;
             case 'Anzahl der Teilnehmer':
-                return filters.applied.sort.direction.value ? a.participants.length - b.participants.length : b.participants.length - a.participants.length;
+                return filters.applied.sort.direction.value
+                    ? a.participants.length - b.participants.length
+                    : b.participants.length - a.participants.length;
             default:
                 return 0;
         }
     });
-    return sortedList;
-})
+});
+
 
 const isFilterApplied = computed(() => {
     return filters.applied.finished.value === filters.refs.finished.value && filters.applied.date.value === filters.refs.date.value && filters.applied.sort.subject.value === filters.refs.sort.subject.value && filters.applied.sort.direction.value === filters.refs.sort.direction.value;
