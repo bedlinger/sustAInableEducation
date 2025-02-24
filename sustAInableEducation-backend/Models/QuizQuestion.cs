@@ -13,7 +13,7 @@ namespace sustAInableEducation_backend.Models
 
         public int Number { get; set; }
         public string Text { get; set; } = null!;
-        public bool IsMultipleResponse { get; set; }
+        public bool IsMultipleResponse { get; set; } = true;
     }
 
     public class QuizQuestionResponse
