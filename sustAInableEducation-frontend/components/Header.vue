@@ -46,7 +46,7 @@
             <Menu v-if="true" ref="menu" :model="items" :popup="true" @show="isMenuOpen = true"
                 @hide="isMenuOpen = false" />
         </div>
-        <div class="flex aspect-square h-full cursor-pointer sm:hidden" @click="showNavDrawer = !showNavDrawer">
+        <div class="flex aspect-square h-full cursor-pointer sm:hidden" @click="showNavDrawer = !showNavDrawer" v-if="!(['/login', '/register'].includes(route.path))">
             <Icon name="ic:baseline-menu" class="bg-white h-full w-full" />
         </div>
     </div>
