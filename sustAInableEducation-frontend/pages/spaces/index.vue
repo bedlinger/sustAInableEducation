@@ -202,7 +202,13 @@
                                 </Fieldset>
                             </div>
                         </Panel>
-                        <h2 class="text-2xl mb-2">Storyteile</h2>
+                        <div class="flex justify-between items-center w-full mb-2">
+                            <h2 class="text-2xl">Storyteile</h2>
+                            <InputGroup class="!w-fit">
+                                <Button label="Alle einklappen" @click="navigateTo('/spaces')" size="small" class="!mr-[1px]"/>
+                                <Button label="Alle aufklappen" @click="navigateTo('/spaces/' + selectedSpace.id)" size="small" />
+                            </InputGroup>
+                        </div>
                         <Accordion :value="Array.from(Array(selectedSpace.story.parts.length).keys())" multiple
                             class="w-full my-2">
                             <AccordionPanel v-for="part, index in selectedSpace.story.parts" :key="part.intertitle"
