@@ -124,6 +124,9 @@ async function login() {
                     } else {
                         navigateTo('/');
                     }
+                } else if(response.response.status === 401) {
+                    loading.value = false;
+                    toast.add({ severity: 'error', summary: `Fehler`, detail: 'Die eingegebene E-Mail-Adresse oder das Passwort ist ungültig.' });
                 } else {
                     loading.value = false;
                     toast.add({ severity: 'error', summary: `Fehler: ${response.response.status}`, detail: 'Bei der Anmeldung ist ein Fehler aufgetreten.' });
