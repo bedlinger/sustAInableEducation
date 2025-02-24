@@ -824,7 +824,7 @@ namespace sustAInableEducation_backend.Repository
             try
             {
 
-                string systemPrompt = "Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit." +
+                string systemPrompt = $"Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit im genauen bei {story.Topic}." +
                                        "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
                                        "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
                                        "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
@@ -832,7 +832,7 @@ namespace sustAInableEducation_backend.Repository
                                       "{'Title': 'Der Titel des ganzen Quizes'," +
                                       "'NumberQuestions': 'Anzahl an Questions'," + 
                                        "'Questions': {'Text': 'Der Titel der jeweiligen Frage'," +
-                                       "'IsMultipleResponse': 'Besagt ob die Frage eine MultipleRespose Frage ist - bei ja wird True gesetzt bei nein False '" + 
+                                       //"'IsMultipleResponse': 'Besagt ob die Frage eine MultipleRespose Frage ist - bei ja wird True gesetzt bei nein False '" + 
                                        "'Number': 'Die Nummer der Frage', "+
                                        "'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit'," +
                                        "'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', "+
@@ -842,15 +842,15 @@ namespace sustAInableEducation_backend.Repository
                                        {
                                            return t switch
                                            {
-                                               QuizType.MultipleResponse => "Multiple Response - bedeutet, dass es mehrere Antwortmöglichkeiten gibt. Hierbei müssen meherere Richtig sein. überprüfe das von 2-4 Auswahlmöglichkeiten  mindestens 2 richtig - setzte bei diesen Fragen hierebei das Atribut 'isMultipleResponse' im JSON auf true",
-                                               QuizType.SingleResponse => "Single response - bedeutet,  dass es mehrere Antwortmöglichkeiten gibt. Hierbei ist muss nur eine der 4 Richtig sein - setzte bei diesen Fragen hierebei das Atribut 'isMultipleResponse' im JSON auf false ",
-                                               QuizType.TrueFalse => "True/False - bedeutet, dass es 2 Antwortmöglichkeiten gibt(Wahr und Falsch). Eines der beiden kann hierbei nur Richitg sein - setzte bei diesen Fragen hierebei das Atribut 'isMultipleResponse' im JSON auf false  ",
+                                               QuizType.MultipleResponse => "Multiple Response - bedeutet, dass es mehrere Antwortmöglichkeiten gibt. Hierbei müssen meherere Richtig sein. überprüfe das von 2-4 Auswahlmöglichkeiten  mindestens 2 richtig",
+                                               QuizType.SingleResponse => "Single response - bedeutet,  dass es mehrere Antwortmöglichkeiten gibt. Hierbei ist muss nur eine der 4 Richtig sein ",
+                                               QuizType.TrueFalse => "True/False - bedeutet, dass es 2 Antwortmöglichkeiten gibt(Wahr und Falsch). Eines der beiden kann hierbei nur Richitg sein ",
                                                _ => throw new ArgumentException("Invalid quiz type")
                                            };
                                        })) +
                                        $"Fragen bestehen und soll {config.NumberQuestions} Frage/n lang sein.";
                 ;
-                string userPrompt = "Generiere das Quiz auf Basis der durchlebten Story.";
+                string userPrompt = $"Alle Fragen sollen zum Gebiet {story.Topic} passen. Generiere das Quiz auf Basis der durchlebten Story.";
 
                 chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
                 chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
