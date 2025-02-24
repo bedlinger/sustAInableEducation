@@ -54,13 +54,10 @@ const runtimeConfig = useRuntimeConfig()
 
 const headers = useRequestHeaders(['cookie'])
 
-// Change password dialog
 const showChangePasswordDialog = ref(false)
 const showChangeEmailDialog = ref(false)
 const showPictureDialog = ref(false)
 
-/* const username = ref('USERNAME')
-const email = ref('EMAIL@EMAIL.COM') */
 const password = ref('sustAInableEducation')
 
 const profileImage = computed(() => {
