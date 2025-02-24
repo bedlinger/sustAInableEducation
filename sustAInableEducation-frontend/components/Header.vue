@@ -35,12 +35,12 @@
                         </div>
                         <div>
                             <Divider class="!mx-4" />
-                            <div class="flex justify-between items-center p-4">
+                            <div class="flex justify-between items-center p-4 gap-4">
                                 <a @click="navigate('/account')" class="flex justify-center gap-4 items-center">
                                     <Avatar :image="profileImage" shape="circle" />
-                                    <span class="font-bold">{{ username }}</span>
+                                    <span class="font-bold truncate w-48">{{ username }}</span>
                                 </a>
-                                <div class="flex items-center" @click="logout">
+                                <div class="flex items-center bg-red-500" @click="logout">
                                     <Icon name="ic:baseline-logout" class="cursor-pointer size-7" @click="logout" />
                                 </div>
                             </div>
@@ -126,6 +126,7 @@ function updateMenu() {
 }
 
 async function logout() {
+    showNavDrawer.value = false;
     await $fetch(`${runtimeConfig.public.apiUrl}/account/logout`, {
         method: 'POST',
         credentials: 'include',
