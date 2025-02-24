@@ -158,6 +158,16 @@ async function register() {
                 } else {
                     navigateTo('/login');
                 }
+            } else {
+                loading.value = false;
+                if (response.response.status === 400) {
+                    toast.add({
+                        severity: 'error',
+                        summary: `Fehler: ${response.response.status}`,
+                        detail: 'Diese E-Mail ist bereits registriert.',
+                        life: 5000
+                    });
+                }
             }
         },
         onRequestError: (error) => {
