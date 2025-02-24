@@ -69,7 +69,7 @@
                         <EcoSpaceListEntry v-for="ecoSpace in sortedSpaces" :ecoSpace="ecoSpace" :key="ecoSpace.id"
                             :show-delete="myUserId === ecoSpace.participants.find(participant => participant.isHost)?.userId"
                             v-on:delete="openDialog" v-model="spaceRefsById[ecoSpace.id].value"
-                            v-on:click="navigateTo({path: '/spaces',query: {spaceId: ecoSpace.id}});" />
+                            v-on:click="navigateTo({ path: '/spaces', query: { spaceId: ecoSpace.id } });" />
                         <NuxtLink to="/configuration">
                             <Button label="EcoSpace erstellen" rounded size="small" class="w-full !text-">
                                 <template #icon>
@@ -98,7 +98,8 @@
                     <div class="flex items-start flex-col w-full h-full">
                         <div class="w-full mb-4 justify-between flex flex-wrap">
                             <h1 class="text-4xl font-bold">{{ selectedSpace.story.title }}</h1>
-                            <Button v-if="!ecoSpaceIsFinished(selectedSpace)" label="EcoSpace beitreten" @click="navigateTo('/spaces/' + selectedSpace.id)"/>
+                            <Button v-if="!ecoSpaceIsFinished(selectedSpace)" label="EcoSpace beitreten"
+                                @click="navigateTo('/spaces/' + selectedSpace.id)" />
                         </div>
                         <Panel header="Informationen" class="w-full mb-4">
                             <Divider />
@@ -160,7 +161,7 @@
                                                         <div class="flex items-center justify-center">
                                                             <span v-if="ecoSpaceIsFinished(selectedSpace)">{{
                                                                 data.impact
-                                                            }}</span>
+                                                                }}</span>
                                                             <span v-else>?</span>
                                                         </div>
                                                     </template>
@@ -191,7 +192,7 @@
                                                 <template #body="{ data }">
                                                     <div class="flex items-center justify-center">
                                                         <span v-if="ecoSpaceIsFinished(selectedSpace)">{{ data.impact
-                                                            }}</span>
+                                                        }}</span>
                                                         <span v-else>?</span>
                                                     </div>
 
@@ -202,9 +203,16 @@
                                 </Fieldset>
                             </div>
                         </Panel>
-                        <h2 class="text-2xl mb-2">Storyteile</h2>
-                        <Accordion :value="Array.from(Array(selectedSpace.story.parts.length).keys())" multiple
-                            class="w-full my-2">
+                        <div class="flex justify-between items-center w-full mb-2">
+                            <h2 class="text-2xl">Storyteile</h2>
+                            <InputGroup class="!w-fit">
+                                <Button label="Alle einklappen" @click="collapseAccordion" size="small"
+                                    class="!mr-[1px]" />
+                                <Button label="Alle aufklappen" @click="decollapseAccordion"
+                                    size="small" />
+                            </InputGroup>
+                        </div>
+                        <Accordion :value="openedAccordions" multiple class="w-full my-2">
                             <AccordionPanel v-for="part, index in selectedSpace.story.parts" :key="part.intertitle"
                                 :value="index">
                                 <AccordionHeader class="!text-xl">{{ part.intertitle }}</AccordionHeader>
@@ -278,6 +286,8 @@ const { execute, data: spaces } = await useFetch<EcoSpace[]>(`${runtimeConfig.pu
         }
     }
 )
+
+const openedAccordions = ref<number[]>([]);
 
 const showFilters = ref(false);
 
@@ -422,6 +432,9 @@ async function selectSpaceById(id: string) {
             onResponse: (response) => {
                 if (response.response.ok) {
                     selectedSpace.value = response.response._data;
+                    if (selectedSpace.value) {
+                        openedAccordions.value = Array.from(Array(selectedSpace.value.story.parts.length).keys())
+                    }
                 }
             }
         });
@@ -560,6 +573,14 @@ function getUser() {
             }
         }
     });
+}
+
+function collapseAccordion() {
+    openedAccordions.value = [];
+}
+
+function decollapseAccordion() {
+    openedAccordions.value = Array.from(Array(selectedSpace.value!.story.parts.length).keys());
 }
 </script>
 
