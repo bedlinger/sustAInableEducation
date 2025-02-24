@@ -29,7 +29,7 @@
                 <div class="content h-full mt-4 mx-4 overflow-y-scroll overflow-x-hidden" ref="contentDiv">
                     <div v-for="part, index in space?.story.parts" class="px-4 pb-4 pt-0" ref="partsRef">
 
-                        <h2 class="font-bold mb-2" :ref="index === space!.story.parts.length - 1 ? 'lastPart' : ''">{{
+                        <h2 @click="console.log(part.choices)" class="font-bold mb-2" :ref="index === space!.story.parts.length - 1 ? 'lastPart' : ''">{{
                             `${index + 1}:
                             ${part.intertitle}` }}</h2>
                         <p class="mb-4">{{ part.text }}</p>
@@ -595,6 +595,7 @@ function printLogs() {
 
 function getPercentages(part: Part) {
     let sum = part.choices.reduce((a, b) => a + b.numberVotes, 0)
+    if(sum === 0) return [0, 0, 0, 0]
     return part.choices.map((choice) => Math.round((choice.numberVotes / sum) * 100))
 }
 </script>
