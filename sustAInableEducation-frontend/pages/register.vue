@@ -163,7 +163,7 @@ async function register() {
                 if (response.response.status === 400) {
                     toast.add({
                         severity: 'error',
-                        summary: `Fehler: ${response.response.status}`,
+                        summary: `Fehler`,
                         detail: 'Diese E-Mail ist bereits registriert.',
                         life: 5000
                     });
