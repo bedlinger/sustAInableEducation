@@ -291,7 +291,7 @@ const filters: OverviewFilter = {
         date: ref<Date | Date[] | (Date | null)[] | null | undefined>(undefined),
         sort: {
             subject: ref('Erstellungsdatum'),
-            direction: ref(false) // false = ascending, true = descending
+            direction: ref(true) // false = ascending, true = descending
         }
     },
     refs: {
