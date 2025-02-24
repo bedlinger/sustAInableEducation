@@ -59,15 +59,20 @@ const showChangePasswordDialog = ref(false)
 const showChangeEmailDialog = ref(false)
 const showPictureDialog = ref(false)
 
-const username = ref('USERNAME')
-const email = ref('EMAIL@EMAIL.COM')
+/* const username = ref('USERNAME')
+const email = ref('EMAIL@EMAIL.COM') */
 const password = ref('sustAInableEducation')
-const profilePicture = ref<string | null>(null)
-
-const fetchSuccessfull = ref(false)
 
 const profileImage = computed(() => {
   return data.value?.profileImage ? `${runtimeConfig.public.apiUrl}${data.value.profileImage}` : '/img/profilepicture_placeholder.jpg'
+})
+
+const username = computed(() => {
+  return data.value ? data.value.anonUserName : 'USERNAME'
+})
+
+const email = computed(() => {
+  return data.value ? data.value.email : 'EMAIL@EMAIL.COM'
 })
 
 
@@ -81,12 +86,6 @@ if(error.value) {
   navigateTo(`/login?redirect=${route.fullPath}`)
 }
 
-if(data.value) {
-  username.value = data.value.anonUserName
-  email.value = data.value.email
-  profilePicture.value = data.value.profileImage
-}
-
 const passSuccess = () => {
   toast.add({ severity: 'success', summary: 'Passwort geändert', detail: 'Das Passwort wurde erfolgreich geändert', life: 5000 })
 }
@@ -98,9 +97,6 @@ const passFail  = () => {
 async function emailSuccess() {
   toast.add({ severity: 'success', summary: 'E-Mail geändert', detail: 'Die E-Mail wurde erfolgreich geändert', life: 5000 })
   await refresh()
-  if(data.value) {
-    email.value = data.value.email
-  }
 }
 
 const emailFail  = () => {
@@ -110,9 +106,6 @@ const emailFail  = () => {
 const pictureSuccess = async () => {
   toast.add({ severity: 'success', summary: 'Profilbild generiert', detail: 'Das Profilbild wurde erfolgreich geändert', life: 5000 })
   await refresh()
-  if(data.value) {
-    profilePicture.value = data.value.profileImage
-  }
 }
 
 const pictureFail  = () => {
