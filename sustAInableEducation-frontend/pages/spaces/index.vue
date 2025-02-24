@@ -96,7 +96,10 @@
             <div class="content flex-1 h-full overflow-y-scroll">
                 <div v-if="selectedSpace" class="w-full pt-20 p-4">
                     <div class="flex items-start flex-col w-full h-full">
-                        <h1 class="text-4xl font-bold mb-4">{{ selectedSpace.story.title }}</h1>
+                        <div class="w-full mb-4 justify-between flex flex-wrap">
+                            <h1 class="text-4xl font-bold">{{ selectedSpace.story.title }}</h1>
+                            <Button v-if="!ecoSpaceIsFinished(selectedSpace)" label="EcoSpace beitreten" @click="navigateTo('/spaces/' + selectedSpace.id)"/>
+                        </div>
                         <Message class="w-full mb-4" v-if="!ecoSpaceIsFinished(selectedSpace)">
                             <template #icon>
                                 <div class="flex items-center">
