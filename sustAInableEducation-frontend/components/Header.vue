@@ -5,7 +5,7 @@
             <img src="/public/sustainableeducation_logo_white.svg" alt="sustAInableEducation Logo" class="h-16" />
         </NuxtLink>
 
-        <div class="flex justify-center items-center bg-blue-400 h-full">
+        <div class="flex justify-center items-center h-full">
             <NuxtLink to="/spaces" class="text-white mx-4 text-xl hidden sm:block">EcoSpaces</NuxtLink>
             <NuxtLink to="/quizzes" class="text-white mx-4 text-xl hidden sm:block">Quizzes</NuxtLink>
             <div class="text-white mx-4 text-xl sm:flex justify-center items-center hidden"
@@ -40,7 +40,7 @@
                                     <Avatar :image="profileImage" shape="circle" />
                                     <span class="font-bold truncate w-48">{{ username }}</span>
                                 </a>
-                                <div class="flex items-center bg-red-500" @click="logout">
+                                <div class="flex items-center" @click="logout">
                                     <Icon name="ic:baseline-logout" class="cursor-pointer size-7" @click="logout" />
                                 </div>
                             </div>
