@@ -5,14 +5,14 @@
             <img src="/public/sustainableeducation_logo_white.svg" alt="sustAInableEducation Logo" class="h-16" />
         </NuxtLink>
 
-        <div class="flex justify-center items-center">
+        <div class="flex justify-center items-center bg-blue-400 h-full">
             <NuxtLink to="/spaces" class="text-white mx-4 text-xl hidden sm:block">EcoSpaces</NuxtLink>
             <NuxtLink to="/quizzes" class="text-white mx-4 text-xl hidden sm:block">Quizzes</NuxtLink>
             <div class="text-white mx-4 text-xl sm:flex justify-center items-center hidden"
                 :class="!(['/login', '/register'].includes(route.path)) ? 'cursor-pointer' : ''" @click="toggleMenu">
                 <Image ref="img" :src="profileImage" class="bg-white mx-4 size-11 rounded-full overflow-hidden" />
             </div>
-            <p @click="showNavDrawer = !showNavDrawer" class="sm:hidden">ALARM</p>
+
             <Drawer v-model:visible="showNavDrawer" header="Navigation" position="right">
                 <template #container="{ closeCallback }">
                     <div class="flex flex-col h-full">
@@ -32,7 +32,7 @@
                             <a class="text-3xl text-primary-700" @click="navigate('/quizzes')">Quizzes</a>
                         </div>
                         <div>
-                            <Divider class="!mx-4"/>
+                            <Divider class="!mx-4" />
                             <a @click="navigate('/account')" class="flex justify-center gap-4 items-center p-4">
                                 <Avatar :image="profileImage" shape="circle" />
                                 <span class="font-bold">{{ username }}</span>
@@ -43,6 +43,9 @@
             </Drawer>
             <Menu v-if="true" ref="menu" :model="items" :popup="true" @show="isMenuOpen = true"
                 @hide="isMenuOpen = false" />
+        </div>
+        <div class="flex aspect-square h-full cursor-pointer sm:hidden" @click="showNavDrawer = !showNavDrawer">
+            <Icon name="ic:baseline-menu" class="bg-white h-full w-full" />
         </div>
     </div>
 </template>
