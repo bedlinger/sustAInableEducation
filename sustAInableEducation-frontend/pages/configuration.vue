@@ -238,7 +238,9 @@ const configFilledOut = computed(() => {
 })
 
 const estimatedTime = computed(() => {
-    let seconds = (decisionPoints.value - 1) * voteTime.value + decisionPoints.value * 90
+    const readingTimePerPoint = 180 // seconds per decision point for reading
+    const votingTimeTotal = (decisionPoints.value - 1) * voteTime.value // total voting time
+    let seconds = votingTimeTotal + decisionPoints.value * readingTimePerPoint
     return `${Math.trunc(seconds / 60)} Minuten` + (seconds % 60 !== 0 ? ` ${seconds % 60} Sekunden` : '')
 })
 
