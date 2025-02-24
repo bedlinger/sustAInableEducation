@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-full">
-        <Background/>
+        <Background />
         <div class="w-screen flex justify-center items-center h-full ">
             <Toast />
             <div
@@ -165,6 +165,13 @@ async function register() {
                         severity: 'error',
                         summary: `Fehler: ${response.response.status}`,
                         detail: 'Diese E-Mail ist bereits registriert.',
+                        life: 5000
+                    });
+                } else {
+                    toast.add({
+                        severity: 'error',
+                        summary: `Fehler: ${response.response.status}`,
+                        detail: 'Es ist ein Fehler aufgetreten.',
                         life: 5000
                     });
                 }
