@@ -35,10 +35,15 @@
                         </div>
                         <div>
                             <Divider class="!mx-4" />
-                            <a @click="navigate('/account')" class="flex justify-center gap-4 items-center p-4">
-                                <Avatar :image="profileImage" shape="circle" />
-                                <span class="font-bold">{{ username }}</span>
-                            </a>
+                            <div class="flex justify-between items-center p-4">
+                                <a @click="navigate('/account')" class="flex justify-center gap-4 items-center">
+                                    <Avatar :image="profileImage" shape="circle" />
+                                    <span class="font-bold">{{ username }}</span>
+                                </a>
+                                <div class="flex items-center" @click="logout">
+                                    <Icon name="ic:baseline-logout" class="cursor-pointer size-7" @click="logout" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>
