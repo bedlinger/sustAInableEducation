@@ -469,7 +469,8 @@ function ecoSpaceIsFinished(space: EcoSpace): boolean {
 }
 
 function getProgressData() {
-    let percentage = (selectedSpace.value!.story.parts.length / selectedSpace.value!.story.length) * 100;
+    let divider = selectedSpace.value!.story.result ? selectedSpace.value!.story.length : selectedSpace.value!.story.length+1;
+    let percentage = (selectedSpace.value!.story.parts.length / divider) * 100;
     return [{ label: '', value: percentage, color: 'var(--p-primary-color)' }];
 }
 
