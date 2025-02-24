@@ -96,21 +96,10 @@
             <div class="content flex-1 h-full overflow-y-scroll">
                 <div v-if="selectedSpace" class="w-full pt-20 p-4">
                     <div class="flex items-start flex-col w-full h-full">
-                        <h1 class="text-4xl font-bold mb-4">{{ selectedSpace.story.title }}</h1>
-                        <Message class="w-full mb-4" v-if="!ecoSpaceIsFinished(selectedSpace)">
-                            <template #icon>
-                                <div class="flex items-center">
-                                    <Icon name="ic:baseline-info" class="size-5" />
-                                </div>
-                            </template>
-                            <span class="text-md">
-                                Dieser EcoSpace wurde noch nicht beendet. Wenn Sie diesen EcoSpace fortsetzen wollen,
-                                können Sie
-                                <NuxtLink class="text-blue-700 hover:text-blue-500 hover:underline font-bold"
-                                    :to="'/spaces/' + selectedSpace.id">hier</NuxtLink>
-                                klicken um diesem beizutreten.
-                            </span>
-                        </Message>
+                        <div class="w-full mb-4 justify-between flex flex-wrap">
+                            <h1 class="text-4xl font-bold">{{ selectedSpace.story.title }}</h1>
+                            <Button v-if="!ecoSpaceIsFinished(selectedSpace)" label="EcoSpace beitreten" @click="navigateTo('/spaces/' + selectedSpace.id)"/>
+                        </div>
                         <Panel header="Informationen" class="w-full mb-4">
                             <Divider />
                             <div class="w-full h-full flex justify-between">
