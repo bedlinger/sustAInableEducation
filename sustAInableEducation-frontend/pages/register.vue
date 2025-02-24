@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-full">
-        <Background/>
+        <Background />
         <div class="w-screen flex justify-center items-center h-full ">
             <Toast />
             <div
@@ -158,11 +158,33 @@ async function register() {
                 } else {
                     navigateTo('/login');
                 }
+            } else {
+                loading.value = false;
+                if (response.response.status === 400) {
+                    toast.add({
+                        severity: 'error',
+                        summary: `Fehler`,
+                        detail: 'Diese E-Mail ist bereits registriert.',
+                        life: 5000
+                    });
+                } else {
+                    toast.add({
+                        severity: 'error',
+                        summary: `Fehler: ${response.response.status}`,
+                        detail: 'Es ist ein Fehler aufgetreten.',
+                        life: 5000
+                    });
+                }
             }
         },
         onRequestError: (error) => {
-            toast.add({ severity: 'error', summary: `Fehler: ${error.response?.status}`, detail: 'Bei der Registrierung ist ein Fehler aufgetreten.' });
             loading.value = false;
+            toast.add({
+                severity: 'error',
+                summary: 'Fehler',
+                detail: 'Es konnte keine Verbindung zum Server hergestellt werden.',
+                life: 5000
+            });
         }
     })
 }
