@@ -161,8 +161,13 @@ async function register() {
             }
         },
         onRequestError: (error) => {
-            toast.add({ severity: 'error', summary: `Fehler: ${error.response?.status}`, detail: 'Bei der Registrierung ist ein Fehler aufgetreten.' });
             loading.value = false;
+            toast.add({
+                severity: 'error',
+                summary: 'Fehler',
+                detail: 'Es konnte keine Verbindung zum Server hergestellt werden.',
+                life: 5000
+            });
         }
     })
 }
