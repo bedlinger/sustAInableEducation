@@ -6,8 +6,6 @@
             <div class="sidebar-container w-80 h-full pt-16 border-solid border-slate-300 border-r-2 hidden sm:block">
                 <div class="sidebar w-full h-full flex-col p-2 overflow-y-scroll flex">
                     <div id="sidebar-header">
-                        <p @click="console.log(searchedSpaces)">{{ filters.applied.sort.subject.value }}</p>
-                        <p @click="console.log(sortedSpaces)">{{ filters.applied.sort.subject.value }}</p>
                         <div class="flex items-center">
                             <IconField class="mr-2">
                                 <InputIcon>
