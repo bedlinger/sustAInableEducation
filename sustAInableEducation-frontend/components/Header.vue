@@ -127,11 +127,13 @@ function updateMenu() {
 
 async function logout() {
     showNavDrawer.value = false;
+    
     await $fetch(`${runtimeConfig.public.apiUrl}/account/logout`, {
         method: 'POST',
         credentials: 'include',
         onResponse: (response) => {
             if (response.response.ok) {
+                refresh();
                 navigateTo('/login?redirect=' + route.fullPath);
             }
         }
