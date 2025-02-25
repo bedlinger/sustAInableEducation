@@ -59,6 +59,10 @@ html {
     @apply !stroke-primary-500;
 }
 
+.p-listbox-list-container {
+    @apply !max-h-full !h-full;
+}
+
 /*
 .p-datatable-thead {
     @apply !fixed;

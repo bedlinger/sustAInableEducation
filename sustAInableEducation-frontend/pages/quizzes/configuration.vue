@@ -15,12 +15,12 @@
               <Divider class="!hidden sm:!block" />
             </Steplist>
             <StepPanels class="!p-0 w-full h-full max-h-[520px]">
-              <StepPanel v-slot="{ activateCallback }" value="1" class="w-full h-full rounded-xl">
+              <StepPanel v-slot="{ activateCallback }" value="1" class="w-full h-full rounded-xl max-h-full">
                 <div class="w-full h-full flex flex-col px-5 pt-5">
                   <h1 class="text-3xl font-bold mb-2">EcoSpace auswählen</h1>
-                  <div class="w-full h-full flex flex-col justify-between ">
+                  <div class="w-full flex flex-col justify-between bg-red-500 max-h-full">
                     <Listbox v-if="spaces.length > 0" v-model="selectedSpace" :options="spaces"
-                      optionLabel="story.title" class="!flex-1">
+                      optionLabel="story.title" class="!max-h-96">
                       <template #option="{ option }">
                         <div class="flex flex-col w-full h-full">
                           <span class="text-xl">{{ option.story.title }}</span>
@@ -117,14 +117,15 @@ if (error.value && error.value.statusCode === 401) {
 
 if (data.value) {
   console.log("PRE")
-  spaces.value = data.value.filter(space => {
+  /* spaces.value = data.value.filter(space => {
     if (space.story) {
       return space.story.result !== null
     }
     return false
-  })
+  }) */
   console.log("POST2")
 }
+
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: '2-digit' })
@@ -158,5 +159,53 @@ async function createQuiz() {
   })
   loading.value = false
 }
+
+const generateEcoSpace = (id: number): EcoSpace => {
+  const length = Math.floor(Math.random() * 5) + 1;
+  return {
+    id: `ecospace-${id}`,
+    votingTimeSeconds: Math.floor(Math.random() * 300) + 30,
+    createdAt: new Date().toISOString(),
+    participants: Array.from({ length: Math.floor(Math.random() * 10) + 1 }, (_, i) => ({
+      userId: `user-${id}-${i}`,
+      userName: `User ${i + 1}`,
+      isHost: i === 0,
+      isOnline: Math.random() > 0.5,
+      impact: Math.floor(Math.random() * 100),
+    })),
+    story: {
+      title: `Story ${id}`,
+      prompt: `This is a prompt for story ${id}.`,
+      length: length,
+      temperature: Math.random() * 2,
+      topP: Math.random(),
+      totalImpact: Math.floor(Math.random() * 1000),
+      targetGroup: Math.floor(Math.random() * 18) + 10,
+      parts: Array.from({ length: length }, (_, j) => ({
+        intertitle: `Part ${j + 1}`,
+        text: `This is the text of part ${j + 1} of story ${id}.`,
+        votingEndAt: new Date(Date.now() + Math.random() * 86400000).toISOString(),
+        chosenNumber: Math.floor(Math.random() * 4) + 1,
+        choices: Array.from({ length: 4 }, (_, k) => ({
+          number: k + 1,
+          text: `Choice ${k + 1} for part ${j + 1}`,
+          numberVotes: Math.floor(Math.random() * 20),
+        })),
+        image: `https://example.com/image-${id}-${j}.jpg`,
+      })),
+      result: {
+        text: `Final result of story ${id}.`,
+        summary: `Summary of story ${id}.`,
+        positiveChoices: ["Choice 1", "Choice 2"],
+        negativeChoices: ["Choice 3"],
+        learnings: ["Lesson 1", "Lesson 2"],
+        discussionQuestions: ["What did you learn?", "How can this be applied?"]
+      }
+    }
+  };
+};
+
+spaces.value = Array.from({ length: 40 }, (_, i) => generateEcoSpace(i));
+
 
 </script>
