@@ -15,12 +15,12 @@
               <Divider class="!hidden sm:!block" />
             </Steplist>
             <StepPanels class="!p-0 w-full h-full max-h-[520px]">
-              <StepPanel v-slot="{ activateCallback }" value="1" class="w-full h-full rounded-xl">
-                <div class="w-full h-full flex flex-col px-5 pt-5">
+              <StepPanel v-slot="{ activateCallback }" value="1" class="w-full h-full rounded-xl max-h-full">
+                <div class="w-full h-full max-h-full flex flex-col px-5 pt-5">
                   <h1 class="text-3xl font-bold mb-2">EcoSpace auswählen</h1>
-                  <div class="w-full h-full flex flex-col justify-between ">
+                  <div class="w-full flex flex-col justify-between max-h-full h-full">
                     <Listbox v-if="spaces.length > 0" v-model="selectedSpace" :options="spaces"
-                      optionLabel="story.title" class="!flex-1">
+                      optionLabel="story.title" class="!max-h-96 !flex-1">
                       <template #option="{ option }">
                         <div class="flex flex-col w-full h-full">
                           <span class="text-xl">{{ option.story.title }}</span>
@@ -103,12 +103,22 @@ const questionAmount = ref(1)
 const quizTypes = ref();
 
 const selectedSpace = ref<EcoSpace | null>(null);
-const spaces = ref<EcoSpace[]>([]);
+//const spaces = ref<EcoSpace[]>([]);
+
 
 const { data, error, refresh } = useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`, {
   method: 'GET',
   credentials: 'include',
   headers: useRequestHeaders(['cookie']),
+})
+
+const spaces = computed(() => {
+  return data.value ? data.value.filter(space => {
+    if (space.story) {
+      return space.story.result !== null
+    }
+    return false
+  }) : [] 
 })
 
 if (error.value && error.value.statusCode === 401) {
@@ -117,14 +127,15 @@ if (error.value && error.value.statusCode === 401) {
 
 if (data.value) {
   console.log("PRE")
-  spaces.value = data.value.filter(space => {
+  /* spaces.value = data.value.filter(space => {
     if (space.story) {
       return space.story.result !== null
     }
     return false
-  })
+  }) */
   console.log("POST2")
 }
+
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: '2-digit' })
