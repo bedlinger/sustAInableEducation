@@ -20,7 +20,7 @@
                   <h1 class="text-3xl font-bold mb-2">EcoSpace auswählen</h1>
                   <div class="w-full flex flex-col justify-between bg-red-500 max-h-full h-full">
                     <Listbox v-if="spaces.length > 0" v-model="selectedSpace" :options="spaces"
-                      optionLabel="story.title" class="!max-h-96">
+                      optionLabel="story.title" class="!max-h-full !h-full">
                       <template #option="{ option }">
                         <div class="flex flex-col w-full h-full">
                           <span class="text-xl">{{ option.story.title }}</span>
