@@ -103,12 +103,22 @@ const questionAmount = ref(1)
 const quizTypes = ref();
 
 const selectedSpace = ref<EcoSpace | null>(null);
-const spaces = ref<EcoSpace[]>([]);
+//const spaces = ref<EcoSpace[]>([]);
+
 
 const { data, error, refresh } = useFetch<EcoSpace[]>(`${runtimeConfig.public.apiUrl}/spaces`, {
   method: 'GET',
   credentials: 'include',
   headers: useRequestHeaders(['cookie']),
+})
+
+const spaces = computed(() => {
+  return data.value ? data.value.filter(space => {
+    if (space.story) {
+      return space.story.result !== null
+    }
+    return false
+  }) : [] 
 })
 
 if (error.value && error.value.statusCode === 401) {
