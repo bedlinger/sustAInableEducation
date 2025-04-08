@@ -7,7 +7,6 @@ using sustAInableEducation_backend.Models;
 
 using System.Reflection;
 using System.Runtime.Serialization;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 
 namespace sustAInableEducation_backend.Repository
@@ -342,10 +341,10 @@ namespace sustAInableEducation_backend.Repository
                         + "  \"intertitle\": \"Zwischentitel des Schlussabschnitts\","
                         + "  \"story\": \"Abschließender Text der Geschichte, der alle Handlungsstränge zusammenführt.\","
                         + "  \"options\": ["
-                        + "    { \"impact\": \"\", \"text\": \"\" },"
-                        + "    { \"impact\": \"\", \"text\": \"\" },"
-                        + "    { \"impact\": \"\", \"text\": \"\" },"
-                        + "    { \"impact\": \"\", \"text\": \"\" }"
+                        + "    { \"impact\": \"0\", \"text\": \"\" },"
+                        + "    { \"impact\": \"0\", \"text\": \"\" },"
+                        + "    { \"impact\": \"0\", \"text\": \"\" },"
+                        + "    { \"impact\": \"0\", \"text\": \"\" }"
                         + "  ]"
                         + "}"
                         + "Bitte beende jetzt die Geschichte.";
