@@ -19,6 +19,7 @@ namespace sustAInableEducation_backend.Repository
         private readonly ILogger _logger;
         private readonly HttpClient _client;
         const int MAX_RETRY_ATTEMPTS = 2; // Maximum number of retry attempts for a failed request or deserialization
+        private const string TEXT_GENERATION_MODEL = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
 
         // Benjamin Edlinger
         public AIService(IConfiguration config, ILogger<AIService> logger)
@@ -601,7 +602,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 requestBody = new
                 {
-                    model = "meta-llama/Llama-3.3-70B-Instruct",
+                    model = TEXT_GENERATION_MODEL,
                     messages = chatMessages,
                     response_format = new { type = "json_object" },
                     temperature,
@@ -612,7 +613,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 requestBody = new
                 {
-                    model = "meta-llama/Llama-3.3-70B-Instruct",
+                    model = TEXT_GENERATION_MODEL,
                     messages = chatMessages,
                     temperature,
                     top_p = topP
