@@ -9,7 +9,8 @@ namespace sustAInableEducation_backend.Repository
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        { }
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -44,24 +45,25 @@ namespace sustAInableEducation_backend.Repository
         public DbSet<sustAInableEducation_backend.Models.Setting> Setting { get; set; } = default!;
 
         public IQueryable<Space> SpaceWithStory => Space
-                .Include(e => e.Story)
-                .ThenInclude(s => s.Parts.OrderBy(p => p.CreatedAt))
-                .ThenInclude(p => p.Choices.OrderBy(p => p.Number));
+            .Include(e => e.Story)
+            .ThenInclude(s => s.Parts.OrderBy(p => p.CreatedAt))
+            .ThenInclude(p => p.Choices.OrderBy(p => p.Number));
+
         public IQueryable<Space> SpaceWithAll => SpaceWithStory
-                .Include(e => e.Participants)
-                .ThenInclude(e => e.User);
+            .Include(e => e.Participants)
+            .ThenInclude(e => e.User);
 
         public IQueryable<Quiz> QuizWithAll => Quiz
-                .Include(q => q.Questions)
-                .ThenInclude(q => q.Choices)
-                .Include(q => q.Questions)
-                .ThenInclude(q => q.Results);
+            .Include(q => q.Questions)
+            .ThenInclude(q => q.Choices)
+            .Include(q => q.Questions)
+            .ThenInclude(q => q.Results);
 
         public async Task<bool> IsParticipant(string userId, Guid spaceId)
         {
             return await SpaceParticipant.AnyAsync(p => p.UserId == userId && p.SpaceId == spaceId);
         }
-        
+
         public async Task<bool> IsHost(string userId, Guid spaceId)
         {
             return await SpaceParticipant.AnyAsync(p => p.UserId == userId && p.SpaceId == spaceId && p.IsHost);

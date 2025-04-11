@@ -35,6 +35,7 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return await _context.Quiz.Where(q => q.UserId == _userId && q.SpaceId == spaceId).ToListAsync();
             }
+
             return await _context.Quiz.Where(q => q.UserId == _userId).ToListAsync();
         }
 
@@ -51,6 +52,7 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return NotFound();
             }
+
             if (quiz.UserId != _userId)
             {
                 return Unauthorized();
@@ -66,6 +68,7 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return Unauthorized();
             }
+
             var story = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == config.SpaceId))!.Story;
             var quiz = await _ai.GenerateQuiz(story, config);
             quiz.UserId = _userId;
@@ -84,7 +87,8 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return NotFound();
             }
-            if(quiz.UserId != _userId)
+
+            if (quiz.UserId != _userId)
             {
                 return Unauthorized();
             }
@@ -96,21 +100,26 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpPost("{id}/try")]
-        public async Task<ActionResult<ICollection<QuizResult>>> PostTry(Guid id, ICollection<QuizQuestionResponse> responses)
+        public async Task<ActionResult<ICollection<QuizResult>>> PostTry(Guid id,
+            ICollection<QuizQuestionResponse> responses)
         {
             var quiz = await _context.QuizWithAll.FirstOrDefaultAsync(q => q.Id == id);
             if (quiz == null)
             {
                 return NotFound();
             }
+
             if (quiz.UserId != _userId)
             {
                 return Unauthorized();
             }
-            if (responses.Select(r => r.QuestionId).Intersect(quiz.Questions.Select(q => q.Id)).Count() != responses.Count)
+
+            if (responses.Select(r => r.QuestionId).Intersect(quiz.Questions.Select(q => q.Id)).Count() !=
+                responses.Count)
             {
                 return BadRequest();
             }
+
             int tryNumber = quiz.Tries.Count();
             var results = new List<QuizResult>();
             foreach (var question in quiz.Questions)
@@ -120,16 +129,19 @@ namespace sustAInableEducation_backend.Controllers
                 {
                     return BadRequest();
                 }
+
                 var result = new QuizResult
                 {
                     QuizQuestionId = question.Id,
                     TryNumber = tryNumber,
                     IsCorrect = !question.Choices
-                        .Any(c => c.IsCorrect && !response.Response.Contains(c.Number) || !c.IsCorrect && response.Response.Contains(c.Number))
+                        .Any(c => c.IsCorrect && !response.Response.Contains(c.Number) ||
+                                  !c.IsCorrect && response.Response.Contains(c.Number))
                 };
                 results.Add(result);
                 _context.QuizResult.Add(result);
             }
+
             await _context.SaveChangesAsync();
             return results;
         }

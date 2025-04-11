@@ -14,13 +14,14 @@ namespace sustAInableEducation_backend.Repository
             var sustainabilityAdjectives = data["sustainability_adjectives"];
 
             // Example usage
-            string email = "example@example.com";  // Replace with your email
+            string email = "example@example.com"; // Replace with your email
             string username = GenerateUsername(email, sustainableNouns, sustainabilityAdjectives);
             return username;
         }
 
         // Function to generate a random username
-        static string GenerateUsername(string email, List<string> sustainableNouns, List<string> sustainabilityAdjectives)
+        static string GenerateUsername(string email, List<string> sustainableNouns,
+            List<string> sustainabilityAdjectives)
         {
             // Extract the part before the '@' symbol from the email
             string usernamePart = email.Split('@')[0];

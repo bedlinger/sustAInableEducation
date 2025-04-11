@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using SkiaSharp;
 using sustAInableEducation_backend.Models;
-
 using System.Reflection;
 using System.Runtime.Serialization;
 
@@ -31,16 +30,19 @@ namespace sustAInableEducation_backend.Repository
             {
                 _client = new HttpClient
                 {
-                    BaseAddress = new Uri(_config["DeepInfra:Url"] ?? throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
+                    BaseAddress = new Uri(_config["DeepInfra:Url"] ??
+                                          throw new ArgumentNullException("DeepInfra:Url configuration is missing")),
                     Timeout = TimeSpan.FromMinutes(2.5)
                 };
-                _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
+                _client.DefaultRequestHeaders.Add("Authorization",
+                    $"Bearer {_config["DeepInfra:ApiKey"] ?? throw new ArgumentNullException("DeepInfra:ApiKey configuration is missing")}");
             }
             catch (Exception e)
             {
                 _logger.LogCritical("Failed to initialise AI service: {Exception}", e);
                 throw;
             }
+
             _logger.LogInformation("AI service initialised");
         }
 
@@ -80,12 +82,14 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Failed to start the story on attempt {Number}: {Exception}", args: [attempt + 1, e]);
+                    _logger.LogError("Failed to start the story on attempt {Number}: {Exception}",
+                        args: [attempt + 1, e]);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
                         _logger.LogError("Reached maximum retry attempts for trying to start the story");
                         throw new AIException("Reached maximum retry attempts for trying to start the story", e);
                     }
+
                     attempt++;
                 }
             }
@@ -129,12 +133,14 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Failed to generate next part on attempt {Number}: {Exception}", args: [attempt + 1, e]);
+                    _logger.LogError("Failed to generate next part on attempt {Number}: {Exception}",
+                        args: [attempt + 1, e]);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
                         _logger.LogError("Reached maximum retry attempts for trying to generate next part");
                         throw new AIException("Reached maximum retry attempts for trying to generate next part", e);
                     }
+
                     attempt++;
                 }
             }
@@ -179,12 +185,15 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Failed to get the end part of the story on attempt {Number}: {Exception}", args: [attempt + 1, e]);
+                    _logger.LogError("Failed to get the end part of the story on attempt {Number}: {Exception}",
+                        args: [attempt + 1, e]);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
                         _logger.LogError("Reached maximum retry attempts for trying to get the end part of the story");
-                        throw new AIException("Reached maximum retry attempts for trying to get the end part of the story", e);
+                        throw new AIException(
+                            "Reached maximum retry attempts for trying to get the end part of the story", e);
                     }
+
                     attempt++;
                 }
             }
@@ -195,8 +204,10 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (Exception e)
             {
-                _logger.LogError("Failed to rebuild chat messages for result because of error in story object: {Exception}", e);
-                throw new ArgumentException("Failed to rebuild chat messages for result because of error in story object", e);
+                _logger.LogError(
+                    "Failed to rebuild chat messages for result because of error in story object: {Exception}", e);
+                throw new ArgumentException(
+                    "Failed to rebuild chat messages for result because of error in story object", e);
             }
 
             attempt = 0;
@@ -211,12 +222,14 @@ namespace sustAInableEducation_backend.Repository
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Failed to generate result on attempt {Number}: {Exception}", args: [attempt + 1, e]);
+                    _logger.LogError("Failed to generate result on attempt {Number}: {Exception}",
+                        args: [attempt + 1, e]);
                     if (attempt >= MAX_RETRY_ATTEMPTS - 1)
                     {
                         _logger.LogError("Reached maximum retry attempts for trying to generate result");
                         throw new AIException("Reached maximum retry attempts for trying to generate result", e);
                     }
+
                     attempt++;
                 }
             }
@@ -238,11 +251,14 @@ namespace sustAInableEducation_backend.Repository
 
             string targetGroupString = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Die Geschichte wird für Volksschüler (6-10 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                TargetGroup.PrimarySchool =>
+                    "Die Geschichte wird für Volksschüler (6-10 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
                     + "- Volksschüler: Verwende einfache Sprache, kurze Sätze und erkläre schwierige Begriffe mit Alltagsbeispielen.",
-                TargetGroup.MiddleSchool => "Die Geschichte wird für Schüler der Sekundarstufe eins (10-14 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                TargetGroup.MiddleSchool =>
+                    "Die Geschichte wird für Schüler der Sekundarstufe eins (10-14 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
                     + "- Sekundarstufe eins: Nutze lebendige, verständliche Sprache und integriere moralische Konflikte, die greifbar sind.",
-                TargetGroup.HighSchool => "Die Geschichte wird für Schüler der Sekundarstufe zwei (15-19 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
+                TargetGroup.HighSchool =>
+                    "Die Geschichte wird für Schüler der Sekundarstufe zwei (15-19 Jahre) erstellt. Passe Sprachstil, Wortwahl und Inhalte genau an die jeweilige Altersgruppe an:"
                     + "- Sekundarstufe zwei: Verwende komplexere Satzstrukturen, Fachbegriffe und beleuchte globale Zusammenhänge der Nachhaltigkeit.",
                 _ => throw new ArgumentException("Invalid target group")
             };
@@ -256,7 +272,8 @@ namespace sustAInableEducation_backend.Repository
                     $"Jeder Geschichten Abschnitt soll mindestens {WordCountLimits.HighSchoolMin} und höchstens {WordCountLimits.HighSchoolMax} Wörter umfassen. Verwende detaillierte Beschreibungen, komplexere Satzstrukturen und vertiefende Erklärungen.",
                 _ => throw new ArgumentException("Invalid target group")
             };
-            string systemPrompt = "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
+            string systemPrompt =
+                "Du bist ein Geschichtenerzähler, der interaktive und textbasierte Geschichten zum Thema Nachhaltigkeit erstellt. Bitte beachte folgende Vorgaben:"
                 + "[Thema]"
                 + story.Topic
                 + "[Zielgruppe]"
@@ -285,7 +302,8 @@ namespace sustAInableEducation_backend.Repository
                 + "Stelle sicher, dass das JSON fehlerfrei geparst werden kann."
                 + "[Kontext und Fortführung]"
                 + "Berücksichtige alle bisherigen Entscheidungen und ihre Konsequenzen. Jeder Abschnitt sollte nahtlos an den vorherigen anschließen und die Geschichte weiterentwickeln.";
-            string userPrompt = "Alle Teilnehmer sind bereit. Beginne bitte mit dem ersten Abschnitt deiner Geschichte zum Thema Nachhaltigkeit. "
+            string userPrompt =
+                "Alle Teilnehmer sind bereit. Beginne bitte mit dem ersten Abschnitt deiner Geschichte zum Thema Nachhaltigkeit. "
                 + $"Die Geschichte umfasst insgesamt {story.Length} Entscheidungspunkte."
                 + "Bitte beachte:"
                 + "- Verwende den vorgegebenen Sprachstil für die jeweilige Zielgruppe."
@@ -323,7 +341,8 @@ namespace sustAInableEducation_backend.Repository
                         Text = choice.Text
                     }).ToList()
                 };
-                chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assitentContent) });
+                chatMessages.Add(new ChatMessage
+                    { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assitentContent) });
 
                 if (!part.value.ChosenNumber.HasValue || part.value.ChosenNumber < 1 || part.value.ChosenNumber > 4)
                 {
@@ -331,7 +350,8 @@ namespace sustAInableEducation_backend.Repository
                 }
                 else if (story.Length == part.index + 1)
                 {
-                    userPrompt = $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\" wurde gewählt. Du hast nun den letzten Entscheidungspunkt erreicht. Bitte schreibe den abschließenden Teil der Geschichte."
+                    userPrompt =
+                        $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\" wurde gewählt. Du hast nun den letzten Entscheidungspunkt erreicht. Bitte schreibe den abschließenden Teil der Geschichte."
                         + "Achte darauf:"
                         + "- Führe die Geschichte konsequent zu einem runden Abschluss, indem du alle vorherigen Ereignisse berücksichtigst."
                         + "- Im letzten Abschnitt soll es keinen weiteren Entscheidungspunkt mehr geben. Daher müssen die Optionen im JSON-Array als leere, aber valide Einträge erscheinen (z. B. leere Strings)."
@@ -352,7 +372,8 @@ namespace sustAInableEducation_backend.Repository
                 }
                 else
                 {
-                    userPrompt = $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\"  wurde gewählt. Bitte fahre mit dem nächsten Abschnitt der Geschichte fort. Achte darauf:"
+                    userPrompt =
+                        $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\"  wurde gewählt. Bitte fahre mit dem nächsten Abschnitt der Geschichte fort. Achte darauf:"
                         + "- Den bisherigen Kontext und die Konsequenzen der getroffenen Entscheidungen nahtlos einzubauen."
                         + "- Einen neuen Entscheidungspunkt zu integrieren, der wieder vier Optionen enthält (mit den Einflusswerten, deren Summe exakt 0 beträgt)."
                         + "- Den neuen Abschnitt im vorgegebenen JSON-Format auszugeben:"
@@ -385,7 +406,8 @@ namespace sustAInableEducation_backend.Repository
         /// <returns>The rebuilt chat messages</returns>
         /// <exception cref="ArgumentNullException">If the story object is null, the chat messages are null or the end is null</exception>
         /// <exception cref="ArgumentException">If the chat messages list is empty</exception>
-        private static List<ChatMessage> RebuildChatMessagesResult(Story story, List<ChatMessage> chatMessages, string end)
+        private static List<ChatMessage> RebuildChatMessagesResult(Story story, List<ChatMessage> chatMessages,
+            string end)
         {
             ArgumentNullException.ThrowIfNull(story);
             ArgumentNullException.ThrowIfNull(chatMessages);
@@ -395,12 +417,16 @@ namespace sustAInableEducation_backend.Repository
             chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = end });
             string targetGroupString = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Für Volksschüler (6-10 Jahre): Verwende einfache, bildhafte Sprache, kurze Sätze und anschauliche Beispiele, die aus dem Alltag der Kinder stammen.",
-                TargetGroup.MiddleSchool => "- Für Schüler der Sekundarstufe eins (11-14 Jahre): Nutze einen lebendigen, verständlichen Sprachstil und integriere altersgerechte Erklärungen und Beispiele. Baue moralische Konflikte ein, die für diesen Altersbereich nachvollziehbar sind.",
-                TargetGroup.HighSchool => "- Für Schüler der Sekundarstufe zwei (15-19 Jahre): Verwende einen anspruchsvolleren Sprachstil mit komplexeren Satzstrukturen und gegebenenfalls Fachbegriffen, um tiefere Zusammenhänge und globale Perspektiven zu beleuchten.",
+                TargetGroup.PrimarySchool =>
+                    "Für Volksschüler (6-10 Jahre): Verwende einfache, bildhafte Sprache, kurze Sätze und anschauliche Beispiele, die aus dem Alltag der Kinder stammen.",
+                TargetGroup.MiddleSchool =>
+                    "- Für Schüler der Sekundarstufe eins (11-14 Jahre): Nutze einen lebendigen, verständlichen Sprachstil und integriere altersgerechte Erklärungen und Beispiele. Baue moralische Konflikte ein, die für diesen Altersbereich nachvollziehbar sind.",
+                TargetGroup.HighSchool =>
+                    "- Für Schüler der Sekundarstufe zwei (15-19 Jahre): Verwende einen anspruchsvolleren Sprachstil mit komplexeren Satzstrukturen und gegebenenfalls Fachbegriffen, um tiefere Zusammenhänge und globale Perspektiven zu beleuchten.",
                 _ => throw new ArgumentException("Invalid target group")
             };
-            string systemPrompt = "Du übernimmst die Rolle einer Lehrkraft, die gemeinsam mit den Teilnehmern die gerade durchlebte Geschichte zum Thema Nachhaltigkeit reflektiert."
+            string systemPrompt =
+                "Du übernimmst die Rolle einer Lehrkraft, die gemeinsam mit den Teilnehmern die gerade durchlebte Geschichte zum Thema Nachhaltigkeit reflektiert."
                 + "Bitte beachte dabei, dass du deinen Sprachstil, die Beispiele und die Diskussionsfragen an die jeweilige Zielgruppe anpasst:"
                 + targetGroupString
                 + "Deine Aufgabe besteht darin, den thematischen Kontext und die getroffenen Entscheidungen faktenbasiert und verständlich zu analysieren. Bitte folge diesen Schritten:"
@@ -425,7 +451,8 @@ namespace sustAInableEducation_backend.Repository
                 + "  \"discussion_questions\": [\"Frage 1\", \"Weitere Fragen je nach Bedarf\"]"
                 + "}";
             chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
-            string userPrompt = "Die Geschichte ist soeben beendet. Du kannst nun die Analyse der durchlebten Geschichte erstellen. Denke daran, deinen Sprachstil, deine Beispiele und Diskussionsfragen an die Zielgruppe anzupassen. Bitte folge dabei genau den genannten Anweisungen und dem vorgegebenen JSON-Format.";
+            string userPrompt =
+                "Die Geschichte ist soeben beendet. Du kannst nun die Analyse der durchlebten Geschichte erstellen. Denke daran, deinen Sprachstil, deine Beispiele und Diskussionsfragen an die Zielgruppe anzupassen. Bitte folge dabei genau den genannten Anweisungen und dem vorgegebenen JSON-Format.";
             chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
 
             if (story.Result != null)
@@ -438,7 +465,8 @@ namespace sustAInableEducation_backend.Repository
                     Learnings = story.Result.Learnings,
                     DiscussionQuestions = story.Result.DiscussionQuestions
                 };
-                chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assistentContent) });
+                chatMessages.Add(new ChatMessage
+                    { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assistentContent) });
             }
 
             return chatMessages;
@@ -456,7 +484,8 @@ namespace sustAInableEducation_backend.Repository
         /// <exception cref="InvalidOperationException">Gets thrown if the assistant content or chat messages is null</exception>
         /// <exception cref="JsonException">Gets thrown if the assistant content could not be deserialized</exception>
         /// <exception cref="AIException">Gets thrown if the story part could not be fixed</exception>
-        private async Task<(StoryPart, string)> GetStoryPart(string assistantContent, TargetGroup targetGroup, List<ChatMessage> chatMessages)
+        private async Task<(StoryPart, string)> GetStoryPart(string assistantContent, TargetGroup targetGroup,
+            List<ChatMessage> chatMessages)
         {
             ArgumentNullException.ThrowIfNull(assistantContent);
             ArgumentNullException.ThrowIfNull(chatMessages);
@@ -464,7 +493,8 @@ namespace sustAInableEducation_backend.Repository
             StoryContent messageContent;
             try
             {
-                messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+                messageContent = JsonSerializer.Deserialize<StoryContent>(assistantContent) ??
+                                 throw new InvalidOperationException("Message content is null");
             }
             catch (JsonException e)
             {
@@ -487,7 +517,7 @@ namespace sustAInableEducation_backend.Repository
             string? prompt = targetGroup switch
             {
                 TargetGroup.PrimarySchool when wordCount < WordCountLimits.PrimarySchoolMin * 0.8
-                     => $"Dieser Abschnitt ist zu kurz für die Volksschule. Bitte überarbeite ihn, damit er mindestens {WordCountLimits.PrimarySchoolMin} Wörter umfasst.",
+                    => $"Dieser Abschnitt ist zu kurz für die Volksschule. Bitte überarbeite ihn, damit er mindestens {WordCountLimits.PrimarySchoolMin} Wörter umfasst.",
                 TargetGroup.PrimarySchool when wordCount > WordCountLimits.PrimarySchoolMax
                     => $"Dieser Abschnitt ist zu lang für die Volksschule. Bitte überarbeite ihn, sodass er maximal {WordCountLimits.PrimarySchoolMax} Wörter umfasst.",
                 TargetGroup.MiddleSchool when wordCount < WordCountLimits.MiddleSchoolMin * 0.7
@@ -503,14 +533,17 @@ namespace sustAInableEducation_backend.Repository
 
             if (prompt == null) return (storyPart, messageContent.Title);
 
-            _logger.LogWarning("Story part with id {Id} for {TargetGroup} has invalid word count: {WordCount}", storyPart.Id, targetGroup, wordCount);
-            chatMessages.Add(new ChatMessage { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(storyPart) });
+            _logger.LogWarning("Story part with id {Id} for {TargetGroup} has invalid word count: {WordCount}",
+                storyPart.Id, targetGroup, wordCount);
+            chatMessages.Add(new ChatMessage
+                { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(storyPart) });
             chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = prompt });
 
             try
             {
                 string fixedContent = await FetchAssitantContent(chatMessages, 0.7f, 0.7f);
-                messageContent = JsonSerializer.Deserialize<StoryContent>(fixedContent) ?? throw new InvalidOperationException("Message content is null");
+                messageContent = JsonSerializer.Deserialize<StoryContent>(fixedContent) ??
+                                 throw new InvalidOperationException("Message content is null");
                 storyPart.Text = messageContent.Story;
                 storyPart.Intertitle = messageContent.Intertitle;
                 storyPart.Choices = messageContent.Options.Select((option, index) => new StoryChoice
@@ -557,7 +590,8 @@ namespace sustAInableEducation_backend.Repository
             AnalysisContent messageContent;
             try
             {
-                messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+                messageContent = JsonSerializer.Deserialize<AnalysisContent>(assistantContent) ??
+                                 throw new InvalidOperationException("Message content is null");
             }
             catch (JsonException e)
             {
@@ -588,7 +622,8 @@ namespace sustAInableEducation_backend.Repository
         /// <exception cref="HttpRequestException">If the request failed</exception>
         /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
         /// <exception cref="JsonException">If the response content could not be deserialized</exception>
-        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP, bool isJsonResponse = true)
+        private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP,
+            bool isJsonResponse = true)
         {
             ArgumentNullException.ThrowIfNull(_client);
             ArgumentNullException.ThrowIfNull(chatMessages);
@@ -618,6 +653,7 @@ namespace sustAInableEducation_backend.Repository
                     top_p = topP
                 };
             }
+
             HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
             {
                 Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
@@ -638,9 +674,11 @@ namespace sustAInableEducation_backend.Repository
 
             try
             {
-                Response responseObject = JsonSerializer.Deserialize<Response>(responseString) ?? throw new InvalidOperationException("Response object is null");
+                Response responseObject = JsonSerializer.Deserialize<Response>(responseString) ??
+                                          throw new InvalidOperationException("Response object is null");
                 _logger.LogDebug("Assistant response: {Response}", responseObject.Choices[0].Message.Content);
-                return responseObject.Choices[0].Message.Content ?? throw new InvalidOperationException("Assistant content is null or empty");
+                return responseObject.Choices[0].Message.Content ??
+                       throw new InvalidOperationException("Assistant content is null or empty");
             }
             catch (JsonException e)
             {
@@ -663,7 +701,8 @@ namespace sustAInableEducation_backend.Repository
 
             _logger.LogInformation("Generating image for story with id: {Id}", story.Id);
 
-            string systemPrompt = "Du bist ein professioneller Prompt Engineer, der sich auf die Erstellung hochdetaillierter und konsistenter Bildbeschreibungen für KI-basierte Bildgenerierungssysteme spezialisiert hat. Deine Aufgabe ist es, Prompts zu entwerfen, die zu visuell harmonischen und stilistisch kohärenten Bildern führen. Achte darauf, dass die Beschreibung lebendig und spezifisch ist und alle relevanten Details umfasst – dazu gehören:"
+            string systemPrompt =
+                "Du bist ein professioneller Prompt Engineer, der sich auf die Erstellung hochdetaillierter und konsistenter Bildbeschreibungen für KI-basierte Bildgenerierungssysteme spezialisiert hat. Deine Aufgabe ist es, Prompts zu entwerfen, die zu visuell harmonischen und stilistisch kohärenten Bildern führen. Achte darauf, dass die Beschreibung lebendig und spezifisch ist und alle relevanten Details umfasst – dazu gehören:"
                 + "- Setting: Ort, Umgebung und atmosphärische Details"
                 + "- Charaktere: Aussehen, Mimik, Kleidung und Ausdruck"
                 + "- Beleuchtung und Farben: Lichtverhältnisse, Farbschema, Stimmung"
@@ -679,12 +718,15 @@ namespace sustAInableEducation_backend.Repository
             ArgumentException.ThrowIfNullOrEmpty(text);
             string targetStyle = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "- Für Volksschüler: cartoonhaft, verspielt und mit kräftigen Primärfarben.",
-                TargetGroup.MiddleSchool => "- Für Sekundarstufe eins: halb-realistischer/stilisierter Stil, lebendig und dynamisch.",
+                TargetGroup.PrimarySchool =>
+                    "- Für Volksschüler: cartoonhaft, verspielt und mit kräftigen Primärfarben.",
+                TargetGroup.MiddleSchool =>
+                    "- Für Sekundarstufe eins: halb-realistischer/stilisierter Stil, lebendig und dynamisch.",
                 TargetGroup.HighSchool => "- Für Sekundarstufe zwei: detailliert, photorealistisch und ernst.",
                 _ => throw new ArgumentException("Invalid target group")
             };
-            string userPrompt = $"Erstelle einen detaillierten und lebendigen Prompt für ein KI-basiertes Bildgenerierungssystem basierend auf folgendem Storypart: \"{text}\"."
+            string userPrompt =
+                $"Erstelle einen detaillierten und lebendigen Prompt für ein KI-basiertes Bildgenerierungssystem basierend auf folgendem Storypart: \"{text}\"."
                 + "Bitte stelle sicher, dass:"
                 + "- Alle relevanten Details wie Setting, Charaktere, Beleuchtung, Farben, Stimmung und künstlerischer Stil in der Bildbeschreibung enthalten sind."
                 + "- Die Bildbeschreibung vollständig mit der Erzählung übereinstimmt und alle Elemente stilistisch harmonisch aufeinander abgestimmt sind."
@@ -734,13 +776,17 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (HttpRequestException e)
             {
-                _logger.LogError("Request for image generation failed with status code {StatusCode}", responseImage?.StatusCode);
-                throw new AIException($"Request for image generation failed with status code {responseImage?.StatusCode}", e);
+                _logger.LogError("Request for image generation failed with status code {StatusCode}",
+                    responseImage?.StatusCode);
+                throw new AIException(
+                    $"Request for image generation failed with status code {responseImage?.StatusCode}", e);
             }
+
             string base64String;
             try
             {
-                ImageContent responseObjectImage = JsonSerializer.Deserialize<ImageContent>(responseStringImage) ?? throw new InvalidOperationException("Response object is null");
+                ImageContent responseObjectImage = JsonSerializer.Deserialize<ImageContent>(responseStringImage) ??
+                                                   throw new InvalidOperationException("Response object is null");
                 base64String = responseObjectImage.Images[0];
                 if (base64String.StartsWith("data:image/png;base64,"))
                 {
@@ -757,6 +803,7 @@ namespace sustAInableEducation_backend.Repository
                 _logger.LogError("Failed to deserialize response content: {Exception}", e);
                 throw new AIException("Failed to deserialize response content", e);
             }
+
             string folderName, fileName;
             try
             {
@@ -767,6 +814,7 @@ namespace sustAInableEducation_backend.Repository
                 {
                     Directory.CreateDirectory(directoryPath);
                 }
+
                 fileName = $"{Guid.NewGuid()}.png";
                 var filePath = Path.Combine(directoryPath, fileName);
                 byte[] imageBytes = Convert.FromBase64String(base64String);
@@ -793,18 +841,19 @@ namespace sustAInableEducation_backend.Repository
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
-        private List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config, List<ChatMessage> chatMessages)
+        private List<ChatMessage> RebuildChatMessagesQuiz(Story story, QuizRequest config,
+            List<ChatMessage> chatMessages)
         {
-
-
-
             ArgumentNullException.ThrowIfNull(story);
 
             string targetGroupString = story.TargetGroup switch
             {
-                TargetGroup.PrimarySchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Volksschüler im Alter von 6 bis 10 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende einfache Sprache mit kurzen und klaren Sätzen.",
-                TargetGroup.MiddleSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe eins im Alter von 11 bis 14 Jahren. Pass deinen Stil an diese Zielgruppe und verwende einen passend anspruchsvollen Wortschatz und Satzbau.",
-                TargetGroup.HighSchool => "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe zwei im Alter von 15 bis 19 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende eine anspruchsvollere Sprache mit komplexeren Satzstrukturen und Fachbegriffen.",
+                TargetGroup.PrimarySchool =>
+                    "Die Teilnehmer, welche den Quiz  durchführen, sind Volksschüler im Alter von 6 bis 10 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende einfache Sprache mit kurzen und klaren Sätzen.",
+                TargetGroup.MiddleSchool =>
+                    "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe eins im Alter von 11 bis 14 Jahren. Pass deinen Stil an diese Zielgruppe und verwende einen passend anspruchsvollen Wortschatz und Satzbau.",
+                TargetGroup.HighSchool =>
+                    "Die Teilnehmer, welche den Quiz  durchführen, sind Schüler der Sekundarstufe zwei im Alter von 15 bis 19 Jahren. Pass deinen Stil an diese Zielgruppe an und verwende eine anspruchsvollere Sprache mit komplexeren Satzstrukturen und Fachbegriffen.",
                 _ => throw new ArgumentException("Invalid target group")
             };
             // Der Teil drüber soll zusätylich in den SystemPromt reinkommen
@@ -812,34 +861,38 @@ namespace sustAInableEducation_backend.Repository
 
             try
             {
-
-                string systemPrompt = $"Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit im genauen bei {story.Topic}." +
-                                       "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
-                                       "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
-                                       "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
-                                       $"Formatierungsrichtlinien: {targetGroupString} " +
-                                      "{'Title': 'Der Titel des ganzen Quizes'," +
-                                      "'NumberQuestions': 'Anzahl an Questions'," + 
-                                       "'Questions': {'Text': 'Der Titel der jeweiligen Frage'," +
-                                       //"'IsMultipleResponse': 'Besagt ob die Frage eine MultipleRespose Frage ist - bei ja wird True gesetzt bei nein False '" + 
-                                       "'Number': 'Die Nummer der Frage', "+
-                                       "'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit'," +
-                                       "'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', "+
-                                       "'IsCorrect': 'Ein Wahrheitswert, der angibt, ob die Auswahl korrekt ist'}]}} " +
-                                       $"Das Quiz soll aus ausschließlich aus." +
-                                       string.Join(", ", config.Types.Select(t =>
-                                       {
-                                           return t switch
-                                           {
-                                               QuizType.MultipleResponse => "Multiple Response - bedeutet, dass es mehrere Antwortmöglichkeiten gibt. Hierbei müssen meherere Richtig sein. überprüfe das von 2-4 Auswahlmöglichkeiten  mindestens 2 richtig",
-                                               QuizType.SingleResponse => "Single response - bedeutet,  dass es mehrere Antwortmöglichkeiten gibt. Hierbei ist muss nur eine der 4 Richtig sein ",
-                                               QuizType.TrueFalse => "True/False - bedeutet, dass es 2 Antwortmöglichkeiten gibt(Wahr und Falsch). Eines der beiden kann hierbei nur Richitg sein ",
-                                               _ => throw new ArgumentException("Invalid quiz type")
-                                           };
-                                       })) +
-                                       $"Fragen bestehen und soll {config.NumberQuestions} Frage/n lang sein.";
+                string systemPrompt =
+                    $"Von jetzt an versetzt du dich in die Rolle eines proffesionellem Quizersteller mit besonderer Expertise in dem Bereich Nachhaltigkeit im genauen bei {story.Topic}." +
+                    "Deine Aufgabe ist, ein Quiz zu erstellen, welcher auf der zuvor generierten Geschichte basiert." +
+                    "Die Fragen sollen sich ausschließlich auf die in der Geschichte thematisierten Nachhaltigkeitsaspekte konzentrieren, und im genauerem dem ausgewählten Pfad vom User folgen. " +
+                    "Wichtig ist es das du den ganzen Quiz, das beduetet die Fragen und die Antorten in  einer Response ausgibst. " +
+                    $"Formatierungsrichtlinien: {targetGroupString} " +
+                    "{'Title': 'Der Titel des ganzen Quizes'," +
+                    "'NumberQuestions': 'Anzahl an Questions'," +
+                    "'Questions': {'Text': 'Der Titel der jeweiligen Frage'," +
+                    //"'IsMultipleResponse': 'Besagt ob die Frage eine MultipleRespose Frage ist - bei ja wird True gesetzt bei nein False '" + 
+                    "'Number': 'Die Nummer der Frage', " +
+                    "'Choices': [{'Number': 'Die Nummer der Auswahlmöglichkeit'," +
+                    "'Text': 'Der Text zur jeweiligen Auswahlmöglichkeit', " +
+                    "'IsCorrect': 'Ein Wahrheitswert, der angibt, ob die Auswahl korrekt ist'}]}} " +
+                    $"Das Quiz soll aus ausschließlich aus." +
+                    string.Join(", ", config.Types.Select(t =>
+                    {
+                        return t switch
+                        {
+                            QuizType.MultipleResponse =>
+                                "Multiple Response - bedeutet, dass es mehrere Antwortmöglichkeiten gibt. Hierbei müssen meherere Richtig sein. überprüfe das von 2-4 Auswahlmöglichkeiten  mindestens 2 richtig",
+                            QuizType.SingleResponse =>
+                                "Single response - bedeutet,  dass es mehrere Antwortmöglichkeiten gibt. Hierbei ist muss nur eine der 4 Richtig sein ",
+                            QuizType.TrueFalse =>
+                                "True/False - bedeutet, dass es 2 Antwortmöglichkeiten gibt(Wahr und Falsch). Eines der beiden kann hierbei nur Richitg sein ",
+                            _ => throw new ArgumentException("Invalid quiz type")
+                        };
+                    })) +
+                    $"Fragen bestehen und soll {config.NumberQuestions} Frage/n lang sein.";
                 ;
-                string userPrompt = $"Alle Fragen sollen zum Gebiet {story.Topic} passen. Generiere das Quiz auf Basis der durchlebten Story.";
+                string userPrompt =
+                    $"Alle Fragen sollen zum Gebiet {story.Topic} passen. Generiere das Quiz auf Basis der durchlebten Story.";
 
                 chatMessages.Add(new ChatMessage { Role = ValidRoles.System, Content = systemPrompt });
                 chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
@@ -851,7 +904,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 throw new AIException("Failed to generate Quiz", e);
             }
-            
+
             return chatMessages;
         }
 
@@ -886,7 +939,8 @@ namespace sustAInableEducation_backend.Repository
             var stringstyle = GetEnumMemberValue(style);
 
             // String imagePrompt = $"Use the {stringstyle}.  The image should be related to the aspect of sustainability that matches the term '{userName}";
-            String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
+            String imagePrompt =
+                $"Generate an image related to the aspect of sustainability that matches the term '{userName}'. Use the {stringstyle}.";
             // String imagePrompt = $"Generate an image related to the aspect of sustainability that matches the term '{userName}Manga – 'Medieval – 'A richly detailed medieval illustration inspired by illuminated manuscripts and old-world paintings. The colors are muted, with ornate patterns, historical clothing, and a sense of ancient storytelling.'";
             //_logger.LogDebug(style.ToString());
             //_logger.LogDebug(imagePrompt);
@@ -913,12 +967,15 @@ namespace sustAInableEducation_backend.Repository
             }
             catch (HttpRequestException e)
             {
-                throw new AIException($"Request for image generation failed with status code {responseImage?.StatusCode}", e);
+                throw new AIException(
+                    $"Request for image generation failed with status code {responseImage?.StatusCode}", e);
             }
+
             string base64String;
             try
             {
-                ImageContent responseObjectImage = JsonSerializer.Deserialize<ImageContent>(responseStringImage) ?? throw new InvalidOperationException("Response object is null");
+                ImageContent responseObjectImage = JsonSerializer.Deserialize<ImageContent>(responseStringImage) ??
+                                                   throw new InvalidOperationException("Response object is null");
                 base64String = responseObjectImage.Images[0];
                 if (base64String.StartsWith("data:image/png;base64,"))
                 {
@@ -933,6 +990,7 @@ namespace sustAInableEducation_backend.Repository
             {
                 throw new AIException("Failed to deserialize response content", e);
             }
+
             string folderName, fileName;
             try
             {
@@ -943,6 +1001,7 @@ namespace sustAInableEducation_backend.Repository
                 {
                     Directory.CreateDirectory(directoryPath);
                 }
+
                 fileName = $"{Guid.NewGuid()}.png";
                 var filePath = Path.Combine(directoryPath, fileName);
                 byte[] imageBytes = Convert.FromBase64String(base64String);
@@ -960,8 +1019,6 @@ namespace sustAInableEducation_backend.Repository
             }
 
             return Path.Combine("/", folderName, fileName).Replace("\\", "/");
-
-
         }
 
 
@@ -977,7 +1034,8 @@ namespace sustAInableEducation_backend.Repository
             QuizContent messageContent;
             try
             {
-                messageContent = JsonSerializer.Deserialize<QuizContent>(assistantContent) ?? throw new InvalidOperationException("Message content is null");
+                messageContent = JsonSerializer.Deserialize<QuizContent>(assistantContent) ??
+                                 throw new InvalidOperationException("Message content is null");
             }
             catch (JsonException e)
             {
@@ -1023,7 +1081,6 @@ namespace sustAInableEducation_backend.Repository
             {
                 try
                 {
-
                     chatMessages = RebuildChatMessagesStory(story);
                     if (story.Result == null) throw new AIException("The result is not set");
                     chatMessages = RebuildChatMessagesResult(story, chatMessages, story.Result.Text);
@@ -1033,6 +1090,7 @@ namespace sustAInableEducation_backend.Repository
                 {
                     throw new ArgumentException("Failed to rebuild chat messages because of error in story object", e);
                 }
+
                 try
                 {
                     string assistantContent = await FetchAssitantContent(chatMessages, 0.8f, 0.9f);
@@ -1045,11 +1103,9 @@ namespace sustAInableEducation_backend.Repository
                     {
                         throw new ArgumentException("Failed to getQuiz", e);
                     }
-
-
                 }
-
             }
+
             ;
             return erg;
             throw new NotImplementedException();
@@ -1111,47 +1167,38 @@ namespace sustAInableEducation_backend.Repository
                 {
                     throw new ArgumentException("Invalid role");
                 }
+
                 _role = value;
             }
         }
 
-        [JsonPropertyName("content")]
-        public string Content { get; set; } = null!;
+        [JsonPropertyName("content")] public string Content { get; set; } = null!;
     }
 
     // Benjamin Edlinger
     public class Response
     {
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = null!;
+        [JsonPropertyName("id")] public string Id { get; set; } = null!;
 
-        [JsonPropertyName("object")]
-        public string Object { get; set; } = null!;
+        [JsonPropertyName("object")] public string Object { get; set; } = null!;
 
-        [JsonPropertyName("created")]
-        public long Created { get; set; }
+        [JsonPropertyName("created")] public long Created { get; set; }
 
-        [JsonPropertyName("model")]
-        public string Model { get; set; } = null!;
+        [JsonPropertyName("model")] public string Model { get; set; } = null!;
 
-        [JsonPropertyName("choices")]
-        public List<Choice> Choices { get; set; } = null!;
+        [JsonPropertyName("choices")] public List<Choice> Choices { get; set; } = null!;
 
-        [JsonPropertyName("usage")]
-        public Usage Usage { get; set; } = null!;
+        [JsonPropertyName("usage")] public Usage Usage { get; set; } = null!;
     }
 
     // Benjamin Edlinger
     public class Choice
     {
-        [JsonPropertyName("index")]
-        public int Index { get; set; }
+        [JsonPropertyName("index")] public int Index { get; set; }
 
-        [JsonPropertyName("message")]
-        public Message Message { get; set; } = null!;
+        [JsonPropertyName("message")] public Message Message { get; set; } = null!;
 
-        [JsonPropertyName("finish_reason")]
-        public string FinishReason { get; set; } = null!;
+        [JsonPropertyName("finish_reason")] public string FinishReason { get; set; } = null!;
     }
 
     // Benjamin Edlinger
@@ -1169,57 +1216,46 @@ namespace sustAInableEducation_backend.Repository
                 {
                     throw new ArgumentException("Invalid role");
                 }
+
                 _role = value;
             }
         }
 
-        [JsonPropertyName("content")]
-        public string Content { get; set; } = null!;
+        [JsonPropertyName("content")] public string Content { get; set; } = null!;
     }
 
     // Benjamin Edlinger
     public class StoryContent
     {
-        [JsonPropertyName("title")]
-        public string Title { get; set; } = null!;
+        [JsonPropertyName("title")] public string Title { get; set; } = null!;
 
-        [JsonPropertyName("intertitle")]
-        public string Intertitle { get; set; } = null!;
+        [JsonPropertyName("intertitle")] public string Intertitle { get; set; } = null!;
 
-        [JsonPropertyName("story")]
-        public string Story { get; set; } = null!;
+        [JsonPropertyName("story")] public string Story { get; set; } = null!;
 
-        [JsonPropertyName("options")]
-        public List<Option> Options { get; set; } = null!;
+        [JsonPropertyName("options")] public List<Option> Options { get; set; } = null!;
     }
 
     // Benjamin Edlinger
     public class Option
     {
-        [JsonPropertyName("impact")]
-        public string ImpactString { get; set; } = null!;
+        [JsonPropertyName("impact")] public string ImpactString { get; set; } = null!;
 
-        [JsonIgnore]
-        public float Impact => float.Parse(ImpactString, CultureInfo.InvariantCulture);
+        [JsonIgnore] public float Impact => float.Parse(ImpactString, CultureInfo.InvariantCulture);
 
-        [JsonPropertyName("text")]
-        public string Text { get; set; } = null!;
+        [JsonPropertyName("text")] public string Text { get; set; } = null!;
     }
 
     // Benjamin Edlinger
     public class AnalysisContent
     {
-        [JsonPropertyName("summary")]
-        public string Summary { get; set; } = null!;
+        [JsonPropertyName("summary")] public string Summary { get; set; } = null!;
 
-        [JsonPropertyName("positive_choices")]
-        public string[] PositiveChoices { get; set; } = null!;
+        [JsonPropertyName("positive_choices")] public string[] PositiveChoices { get; set; } = null!;
 
-        [JsonPropertyName("negative_choices")]
-        public string[] NegativeChoices { get; set; } = null!;
+        [JsonPropertyName("negative_choices")] public string[] NegativeChoices { get; set; } = null!;
 
-        [JsonPropertyName("learnings")]
-        public string[] Learnings { get; set; } = null!;
+        [JsonPropertyName("learnings")] public string[] Learnings { get; set; } = null!;
 
         [JsonPropertyName("discussion_questions")]
         public string[] DiscussionQuestions { get; set; } = null!;
@@ -1228,104 +1264,74 @@ namespace sustAInableEducation_backend.Repository
     // Benjamin Edlinger
     public class ImageContent
     {
-        [JsonPropertyName("request_id")]
-        public string RequestId { get; set; } = null!;
+        [JsonPropertyName("request_id")] public string RequestId { get; set; } = null!;
 
-        [JsonPropertyName("inference_status")]
-        public InferenceStatus InferenceStatus { get; set; } = null!;
+        [JsonPropertyName("inference_status")] public InferenceStatus InferenceStatus { get; set; } = null!;
 
-        [JsonPropertyName("images")]
-        public List<string> Images { get; set; } = null!;
+        [JsonPropertyName("images")] public List<string> Images { get; set; } = null!;
 
         [JsonPropertyName("nsfw_content_detected")]
         public List<bool> NsfwContentDetected { get; set; } = null!;
 
-        [JsonPropertyName("seed")]
-        public long Seed { get; set; }
+        [JsonPropertyName("seed")] public long Seed { get; set; }
     }
 
     // Benjamin Edlinger
     public class InferenceStatus
     {
-        [JsonPropertyName("status")]
-        public string Status { get; set; } = null!;
+        [JsonPropertyName("status")] public string Status { get; set; } = null!;
 
-        [JsonPropertyName("runtime_ms")]
-        public int RuntimeMs { get; set; }
+        [JsonPropertyName("runtime_ms")] public int RuntimeMs { get; set; }
 
-        [JsonPropertyName("cost")]
-        public double Cost { get; set; }
+        [JsonPropertyName("cost")] public double Cost { get; set; }
 
-        [JsonPropertyName("tokens_generated")]
-        public int? TokensGenerated { get; set; }
+        [JsonPropertyName("tokens_generated")] public int? TokensGenerated { get; set; }
 
-        [JsonPropertyName("tokens_input")]
-        public int? TokensInput { get; set; }
+        [JsonPropertyName("tokens_input")] public int? TokensInput { get; set; }
     }
 
     // Benjamin Edlinger
     public class Usage
     {
-        [JsonPropertyName("prompt_tokens")]
-        public int PromptTokens { get; set; }
+        [JsonPropertyName("prompt_tokens")] public int PromptTokens { get; set; }
 
         [JsonPropertyName("completion_tokens")]
         public int CompletionTokens { get; set; }
 
-        [JsonPropertyName("total_tokens")]
-        public int TotalTokens { get; set; }
+        [JsonPropertyName("total_tokens")] public int TotalTokens { get; set; }
 
-        [JsonPropertyName("estimated_cost")]
-        public double EstimatedCost { get; set; }
+        [JsonPropertyName("estimated_cost")] public double EstimatedCost { get; set; }
     }
-
 
 
     // Kacper Bohaczyk
     public class QuizContent
     {
-        [JsonPropertyName("Title")]
-        public string Title { get; set; } = null!;
+        [JsonPropertyName("Title")] public string Title { get; set; } = null!;
 
-        [JsonPropertyName("NumberQuestions")]
-        public uint NumberQuestions { get; set; }
+        [JsonPropertyName("NumberQuestions")] public uint NumberQuestions { get; set; }
 
-        [JsonPropertyName("Questions")]
-        public List<Questions> Questions { get; set; } = null!;
-
+        [JsonPropertyName("Questions")] public List<Questions> Questions { get; set; } = null!;
     }
 
     public class Questions
     {
-        [JsonPropertyName("Text")]
-        public string Text { get; set; } = null!;
+        [JsonPropertyName("Text")] public string Text { get; set; } = null!;
 
-        [JsonPropertyName("Number")]
-        public int Number { get; set; }
+        [JsonPropertyName("Number")] public int Number { get; set; }
 
         [JsonPropertyName("IsMultipleResponse")]
         public Boolean IsMultipleResponse { get; set; }
 
-        [JsonPropertyName("Choices")]
-        public List<Choices> Choices { get; set; } = null!;
-
-
-
-
+        [JsonPropertyName("Choices")] public List<Choices> Choices { get; set; } = null!;
     }
 
     public class Choices
     {
-        [JsonPropertyName("Text")]
-        public string Text { get; set; } = null!;
+        [JsonPropertyName("Text")] public string Text { get; set; } = null!;
 
-        [JsonPropertyName("Number")]
-        public int Number { get; set; }
+        [JsonPropertyName("Number")] public int Number { get; set; }
 
-        [JsonPropertyName("IsCorrect")]
-        public Boolean IsCorrect { get; set; }
-
-
-
+        [JsonPropertyName("IsCorrect")] public Boolean IsCorrect { get; set; }
     }
 }

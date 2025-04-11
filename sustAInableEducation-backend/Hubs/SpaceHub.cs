@@ -50,7 +50,8 @@ namespace sustAInableEducation_backend.Hubs
             }
 
             await Groups.AddToGroupAsync(Context!.ConnectionId, _spaceId.ToString());
-            var participtant = _context.SpaceParticipant.Include(p => p.User).FirstOrDefault(p => p.UserId == _userId && p.SpaceId == _spaceId)!;
+            var participtant = _context.SpaceParticipant.Include(p => p.User)
+                .FirstOrDefault(p => p.UserId == _userId && p.SpaceId == _spaceId)!;
             participtant.IsOnline = true;
             await _context.SaveChangesAsync();
 
@@ -86,12 +87,14 @@ namespace sustAInableEducation_backend.Hubs
             {
                 throw new HubException("Unauthorized");
             }
+
             var space = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!;
             var story = space.Story;
             if (story.Result != null)
             {
                 throw new HubException("Story is already complete");
             }
+
             var lastPart = story.Parts.LastOrDefault();
             if (!story.IsComplete && lastPart != null && lastPart.ChosenNumber == null)
             {
@@ -117,7 +120,7 @@ namespace sustAInableEducation_backend.Hubs
                     story.Parts.Add(await _ai.GenerateNextPart(story));
                 }
             }
-            catch(AIException e)
+            catch (AIException e)
             {
                 await SendMessage(MessageType.AIErrorOccured, e.Message);
                 throw new HubException("AI error");
@@ -153,21 +156,25 @@ namespace sustAInableEducation_backend.Hubs
             {
                 throw new HubException("Unauthorized");
             }
+
             var space = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!;
             if (space.Story.Result != null)
             {
                 throw new HubException("Story is complete");
             }
+
             var part = space.Story.Parts.LastOrDefault();
             if (part == null)
             {
                 throw new HubException("No part")
-;           }
+                    ;
+            }
+
             if (part.IsVotingActive)
             {
                 throw new HubException("Voting is already active");
             }
-            
+
             _context.SpaceParticipant.Where(p => p.SpaceId == _spaceId)
                 .ExecuteUpdate(p => p
                     .SetProperty(x => x.VoteImpact, x => null));
@@ -175,6 +182,7 @@ namespace sustAInableEducation_backend.Hubs
             {
                 choice.NumberVotes = 0;
             }
+
             part.VotingEndAt = DateTime.Now.AddSeconds(space.VotingTimeSeconds);
             await _context.SaveChangesAsync();
             await SendMessage(MessageType.VotingStarted, part.VotingEndAt);
@@ -182,20 +190,24 @@ namespace sustAInableEducation_backend.Hubs
 
         public async Task Vote(uint number)
         {
-            var part = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!.Story.Parts.LastOrDefault();
+            var part = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!.Story.Parts
+                .LastOrDefault();
             if (part == null)
             {
                 throw new HubException("No part");
             }
+
             if (!part.IsVotingActive)
             {
                 throw new HubException("Voting is not active");
             }
+
             var participant = (await _context.SpaceParticipant.FindAsync(_spaceId, _userId))!;
             if (participant.VoteImpact != null)
             {
                 throw new HubException("Already voted");
             }
+
             var choice = part.Choices.First(c => c.Number == number);
             choice.NumberVotes++;
             participant.VoteImpact = choice.Impact;
@@ -209,21 +221,25 @@ namespace sustAInableEducation_backend.Hubs
             {
                 throw new HubException("Unauthorized");
             }
+
             var story = (await _context.SpaceWithStory.FirstOrDefaultAsync(e => e.Id == _spaceId))!.Story;
             var part = story.Parts.LastOrDefault();
             if (part == null)
             {
                 throw new HubException("No part");
             }
+
             if (part.ChosenNumber != null)
             {
                 throw new HubException("Already chosen");
             }
+
             var choice = part.Choices.First(c => c.Number == number);
             if (choice == null)
             {
                 throw new HubException("Invalid choice");
             }
+
             part.ChosenNumber = number;
             story.TotalImpact += choice.Impact;
             _context.SpaceParticipant.Where(p => p.SpaceId == _spaceId && p.VoteImpact != null)
