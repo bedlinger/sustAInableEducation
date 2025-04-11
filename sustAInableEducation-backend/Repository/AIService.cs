@@ -627,7 +627,7 @@ public class AIService : IAIService
             if (story.Length == part.index + 1)
             {
                 userPrompt =
-                    $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\" wurde gewählt. Du hast nun den letzten Entscheidungspunkt erreicht. Bitte schreibe den abschließenden Teil der Geschichte."
+                    $"Die Option {part.value.ChosenNumber} \"{part.value.Choices.First(x => x.Number == part.value.ChosenNumber).Text}\" wurde gewählt. Du hast nun den letzten Entscheidungspunkt erreicht. Bitte schreibe den abschließenden Teil der Geschichte."
                     + "Achte darauf:"
                     + "- Führe die Geschichte konsequent zu einem runden Abschluss, indem du alle vorherigen Ereignisse berücksichtigst."
                     + "- Im letzten Abschnitt soll es keinen weiteren Entscheidungspunkt mehr geben. Daher müssen die Optionen im JSON-Array als leere, aber valide Einträge erscheinen (z. B. leere Strings)."
@@ -649,7 +649,7 @@ public class AIService : IAIService
             else
             {
                 userPrompt =
-                    $"Die Option {part.value.ChosenNumber} \"{part.value.Text}\"  wurde gewählt. Bitte fahre mit dem nächsten Abschnitt der Geschichte fort. Achte darauf:"
+                    $"Die Option {part.value.ChosenNumber} \"{part.value.Choices.First(x => x.Number == part.value.ChosenNumber).Text}\"  wurde gewählt. Bitte fahre mit dem nächsten Abschnitt der Geschichte fort. Achte darauf:"
                     + "- Den bisherigen Kontext und die Konsequenzen der getroffenen Entscheidungen nahtlos einzubauen."
                     + "- Einen neuen Entscheidungspunkt zu integrieren, der wieder vier Optionen enthält (mit den Einflusswerten, deren Summe exakt 0 beträgt)."
                     + "- Den neuen Abschnitt im vorgegebenen JSON-Format auszugeben:"
@@ -732,7 +732,7 @@ public class AIService : IAIService
         chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = userPrompt });
 
         if (story.Result == null) return chatMessages;
-        
+
         AnalysisContent assistentContent = new()
         {
             Summary = story.Result.Summary,
