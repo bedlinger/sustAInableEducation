@@ -81,7 +81,8 @@ namespace sustAInableEducation_backend.Repository
         public async Task<StoryResult> GenerateResult(Story story)
         {
             Thread.Sleep(3000);
-            return new StoryResult {
+            return new StoryResult
+            {
                 Text = "The end",
                 Summary = "Summary",
                 PositiveChoices = new string[] { "Positive choice 1", "Positive choice 2" },
@@ -134,6 +135,7 @@ namespace sustAInableEducation_backend.Repository
                     }
                 });
             }
+
             return quiz;
         }
 
@@ -142,10 +144,9 @@ namespace sustAInableEducation_backend.Repository
             throw new NotImplementedException();
         }
 
-         public Task<string> GenerateProfileImage(string userName, ImageStyle style)
+        public Task<string> GenerateProfileImage(string userName, ImageStyle style)
         {
             throw new NotImplementedException();
         }
-
     }
 }

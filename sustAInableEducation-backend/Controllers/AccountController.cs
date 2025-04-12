@@ -21,7 +21,7 @@ namespace sustAInableEducation_backend.Controllers
 
         private readonly IAIService _ai;
 
-        
+
         public AccountController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IAIService ai)
         {
             _context = context;
@@ -39,7 +39,8 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost("profileImage")]
         public async Task<ApplicationUser> SignUp(ImageRequest imageRequest)
         {
-            _user.ProfileImage = await _ai.GenerateProfileImage(_user.AnonUserName, imageRequest.Style).ConfigureAwait(false);
+            _user.ProfileImage =
+                await _ai.GenerateProfileImage(_user.AnonUserName, imageRequest.Style).ConfigureAwait(false);
             _context.SaveChanges();
             return _user;
         }
@@ -52,30 +53,36 @@ namespace sustAInableEducation_backend.Controllers
         }
 
         [HttpPost("changeEmail")]
-        public async Task<IActionResult> ChangeEmail(ChangeEmailRequest request, UserManager<ApplicationUser> userManager)
+        public async Task<IActionResult> ChangeEmail(ChangeEmailRequest request,
+            UserManager<ApplicationUser> userManager)
         {
             var passwordResult = await userManager.CheckPasswordAsync(_user, request.Password);
             if (!passwordResult)
             {
                 return Unauthorized();
             }
+
             var userNameResult = await userManager.SetUserNameAsync(_user, request.NewEmail);
             var emailResult = await userManager.SetEmailAsync(_user, request.NewEmail);
             if (!userNameResult.Succeeded || !emailResult.Succeeded)
             {
                 return BadRequest(userNameResult.Succeeded ? emailResult.Errors : userNameResult.Errors);
             }
+
             return NoContent();
         }
 
         [HttpPost("changePassword")]
-        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, UserManager<ApplicationUser> userManager)
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request,
+            UserManager<ApplicationUser> userManager)
         {
-            var result = await userManager.ChangePasswordAsync(_user, request.OldPassword, request.NewPassword).ConfigureAwait(false);
+            var result = await userManager.ChangePasswordAsync(_user, request.OldPassword, request.NewPassword)
+                .ConfigureAwait(false);
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);
             }
+
             return NoContent();
         }
     }

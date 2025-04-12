@@ -13,8 +13,8 @@ namespace sustAInableEducation_backend.Models.Validation
             }
 
             var type = value.GetType();
-            
-            if(type.GetInterface(nameof(ICollection<Object>)) != null)
+
+            if (type.GetInterface(nameof(ICollection<Object>)) != null)
             {
                 var collection = (System.Collections.ICollection)value;
                 var genericType = type.GetGenericArguments()[0];
@@ -22,9 +22,11 @@ namespace sustAInableEducation_backend.Models.Validation
                 {
                     if (!(genericType.IsEnum && Enum.IsDefined(genericType, item)))
                     {
-                        return new ValidationResult(ErrorMessage ?? $"{item} is not a valid value for type {genericType.Name}");
+                        return new ValidationResult(ErrorMessage ??
+                                                    $"{item} is not a valid value for type {genericType.Name}");
                     }
                 }
+
                 return ValidationResult.Success!;
             }
 

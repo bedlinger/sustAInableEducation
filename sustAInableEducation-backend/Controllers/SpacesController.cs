@@ -24,7 +24,8 @@ namespace sustAInableEducation_backend.Controllers
         private readonly ApplicationUser _user;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public SpacesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager)
+        public SpacesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -53,6 +54,7 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return NotFound();
             }
+
             if (!await _context.IsParticipant(_userId, id))
             {
                 return Unauthorized();
@@ -64,10 +66,12 @@ namespace sustAInableEducation_backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Space>> PostSpace(SpaceRequest spaceReq)
         {
-            if (!await _context.SettingIsTrue("AllowSpaceCreation") && !await _userManager.IsInRoleAsync(_user, "Admin"))
+            if (!await _context.SettingIsTrue("AllowSpaceCreation") &&
+                !await _userManager.IsInRoleAsync(_user, "Admin"))
             {
                 return Forbid();
             }
+
             var space = new Space()
             {
                 Participants = new List<SpaceParticipant>()
@@ -104,6 +108,7 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return NotFound();
             }
+
             if (!await _context.IsHost(_userId, id))
             {
                 return Unauthorized();
@@ -123,19 +128,23 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return NotFound();
             }
+
             if (!await _context.IsHost(_userId, id))
             {
                 return Unauthorized();
             }
+
             if (space.AccessCode != null)
             {
                 _context.SpaceAccessCode.Remove(space.AccessCode);
             }
+
             string uniqueCode = new Random().Next(0, 1000000).ToString("D6");
             while (await _context.SpaceAccessCode.AnyAsync(p => p.Code == uniqueCode))
             {
                 uniqueCode = new Random().Next(0, 1000000).ToString("D6");
             }
+
             var code = new SpaceAccessCode()
             {
                 SpaceId = id,
@@ -156,10 +165,12 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return NotFound();
             }
+
             if (await _context.IsParticipant(_userId, space.Id))
             {
                 return Conflict();
             }
+
             space.Participants.Add(new SpaceParticipant()
             {
                 UserId = _userId,
@@ -178,15 +189,18 @@ namespace sustAInableEducation_backend.Controllers
             {
                 return NotFound();
             }
+
             if (!await _context.IsParticipant(_userId, id))
             {
                 return Unauthorized();
             }
+
             var participant = space.Participants.FirstOrDefault(p => p.UserId == _userId);
             if (participant == null)
             {
                 return NotFound();
             }
+
             space.Participants.Remove(participant);
             await _context.SaveChangesAsync();
             return NoContent();

@@ -16,7 +16,6 @@ try
     builder.Host.UseSerilog((context, loggerConfiguration) =>
     {
         loggerConfiguration.ReadFrom.Configuration(context.Configuration);
-
     });
 
     // Add services to the container.
@@ -24,19 +23,16 @@ try
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(name: AllowFrontendOrigin,
-                          policy =>
-                          {
-                              policy.WithOrigins(builder.Configuration["FrontendHost"]!)
-                                    .AllowAnyMethod()
-                                    .AllowAnyHeader()
-                                    .AllowCredentials();
-                          });
+            policy =>
+            {
+                policy.WithOrigins(builder.Configuration["FrontendHost"]!)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
     });
     builder.Services.AddControllers();
-    builder.Services.AddSignalR(options =>
-    {
-        options.EnableDetailedErrors = true;
-    });
+    builder.Services.AddSignalR(options => { options.EnableDetailedErrors = true; });
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
@@ -44,28 +40,28 @@ try
         options.AddSignalRSwaggerGen();
     });
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    {
-        var connectionString = string.Format(
-            builder.Configuration.GetConnectionString("ApplicationDatabase")!,
-            builder.Configuration["Db:Host"],
-            builder.Configuration["Db:User"],
-            builder.Configuration["Db:Password"]
-        );
-        options.UseSqlServer(connectionString);
-    }
+        {
+            var connectionString = string.Format(
+                builder.Configuration.GetConnectionString("ApplicationDatabase")!,
+                builder.Configuration["Db:Host"],
+                builder.Configuration["Db:User"],
+                builder.Configuration["Db:Password"]
+            );
+            options.UseSqlServer(connectionString);
+        }
     );
     builder.Services.AddAuthorization();
     builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
-    {
-        options.Password = new PasswordOptions()
         {
-            RequiredLength = 8,
-            RequireDigit = true,
-            RequireLowercase = true,
-            RequireUppercase = true,
-            RequireNonAlphanumeric = true
-        };
-    })
+            options.Password = new PasswordOptions()
+            {
+                RequiredLength = 8,
+                RequireDigit = true,
+                RequireLowercase = true,
+                RequireUppercase = true,
+                RequireNonAlphanumeric = true
+            };
+        })
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
     builder.Services.AddTransient<DataSeeder>();

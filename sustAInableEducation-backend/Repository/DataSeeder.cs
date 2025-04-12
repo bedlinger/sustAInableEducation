@@ -12,11 +12,11 @@ namespace sustAInableEducation_backend.Repository
         private readonly UserManager<ApplicationUser> _userManager;
 
         public DataSeeder(
-            IConfiguration config, 
-            ApplicationDbContext context, 
-            RoleManager<IdentityRole> roleManager, 
+            IConfiguration config,
+            ApplicationDbContext context,
+            RoleManager<IdentityRole> roleManager,
             UserManager<ApplicationUser> userManager
-            )
+        )
         {
             _config = config;
             _context = context;

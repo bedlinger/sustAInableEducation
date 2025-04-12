@@ -6,17 +6,16 @@ namespace sustAInableEducation_backend.Models
     public class Quiz
     {
         public Guid Id { get; set; }
-        [JsonIgnore]
-        public string UserId { get; set; } = null!;
+        [JsonIgnore] public string UserId { get; set; } = null!;
         public Guid SpaceId { get; set; }
 
         public ICollection<QuizQuestion> Questions { get; set; } = new List<QuizQuestion>();
 
-        [MaxLength(256)]
-        public string Title { get; set; } = null!;
+        [MaxLength(256)] public string Title { get; set; } = null!;
         public uint NumberQuestions { get; set; }
 
-        public IEnumerable<IGrouping<int, QuizResult>> Tries => Questions.Select(q => q.Results).SelectMany(r => r).GroupBy(r => r.TryNumber);
+        public IEnumerable<IGrouping<int, QuizResult>> Tries =>
+            Questions.Select(q => q.Results).SelectMany(r => r).GroupBy(r => r.TryNumber);
     }
 
     public enum QuizType
@@ -30,10 +29,8 @@ namespace sustAInableEducation_backend.Models
     {
         public Guid SpaceId { get; set; }
 
-        [Validation.ValidEnum]
-        public ICollection<QuizType> Types { get; set; } = new List<QuizType>();
+        [Validation.ValidEnum] public ICollection<QuizType> Types { get; set; } = new List<QuizType>();
 
-        [Range(1, 20)]
-        public uint NumberQuestions { get; set; }
+        [Range(1, 20)] public uint NumberQuestions { get; set; }
     }
 }
