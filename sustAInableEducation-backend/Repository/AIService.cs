@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
@@ -929,6 +930,7 @@ public class AIService : IAIService
         {
             Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
         };
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         HttpResponseMessage response = null!;
         string responseString;
