@@ -168,7 +168,7 @@ namespace sustAInableEducation_backend.Controllers
 
             if (await _context.IsParticipant(_userId, space.Id))
             {
-                return Conflict();
+                return space;
             }
 
             space.Participants.Add(new SpaceParticipant()

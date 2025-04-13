@@ -69,16 +69,14 @@ namespace sustAInableEducation_backend.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        private async Task SendMessage(string type, object? arg1 = null, object? message2 = null)
+        private async Task SendMessage(string type, object? arg1 = null)
         {
-            if (message2 != null)
-            {
-                await Clients.Group(_spaceId.ToString()).SendAsync(type, arg1, message2);
-            }
-            else
-            {
-                await Clients.Group(_spaceId.ToString()).SendAsync(type, arg1);
-            }
+            await Clients.Group(_spaceId.ToString()).SendAsync(type, arg1);
+        }
+
+        private async Task SendMessage(string type, object? arg1, object? arg2)
+        {
+            await Clients.Group(_spaceId.ToString()).SendAsync(type, arg1, arg2);
         }
 
         public async Task GeneratePart()
