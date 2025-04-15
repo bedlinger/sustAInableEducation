@@ -13,7 +13,7 @@ namespace sustAInableEducation_backend.Repository;
 public class AIService : IAIService
 {
     private const int MaxRetryAttempts = 2;
-    private const string TextGenerationModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
+    private const string TextGenerationModel = "deepseek-ai/DeepSeek-V3-0324";
     private readonly HttpClient _client;
     private readonly ILogger _logger;
 
@@ -565,6 +565,7 @@ public class AIService : IAIService
             + "[Länge und Detailtiefe]"
             + lengthRequirement
             + "[Formatierung]"
+            + "Verwende ausschließlich die validen Unicode-Zeichen für die Umlaute, ansonsten wir niemals jemand deine Geschichte lesen können."
             + "Antworte ausschließlich im folgenden JSON-Format:"
             + "{"
             + "  \"title\": \"Titel der Geschichte\","
@@ -940,6 +941,9 @@ public class AIService : IAIService
             response.EnsureSuccessStatusCode();
             var byteArray = await response.Content.ReadAsByteArrayAsync();
             responseString = Encoding.UTF8.GetString(byteArray, 0, byteArray.Length);
+            _logger.LogInformation("Received response from server: {Response}", responseString);
+            if (responseString.Contains("\\u0"))
+                throw new ArgumentException("Response contains invalid unicode characters");
         }
         catch (HttpRequestException e)
         {
