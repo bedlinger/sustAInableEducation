@@ -14,6 +14,7 @@ public class AIService : IAIService
 {
     private const int MaxRetryAttempts = 2;
     private const string TextGenerationModel = "deepseek-ai/DeepSeek-V3-0324";
+    private const string ImagePromptModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
     private readonly HttpClient _client;
     private readonly ILogger _logger;
 
@@ -299,6 +300,7 @@ public class AIService : IAIService
             _logger.LogInformation("Fetching assistant content for image prompt");
             imagePrompt = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP, false);
             imagePrompt = imagePrompt.Replace("\n", " ");
+            imagePrompt = imagePrompt.Replace("\"", "");
         }
         catch (Exception e)
         {
@@ -921,7 +923,7 @@ public class AIService : IAIService
         else
             requestBody = new
             {
-                model = TextGenerationModel,
+                model = ImagePromptModel,
                 messages = chatMessages,
                 temperature,
                 top_p = topP
@@ -931,7 +933,6 @@ public class AIService : IAIService
         {
             Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
         };
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         HttpResponseMessage response = null!;
         string responseString;
