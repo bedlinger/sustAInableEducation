@@ -73,7 +73,7 @@ public class AIService : IAIService
         while (attempt < MaxRetryAttempts)
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                var assistantContent = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP);
                 var (storyPart, title) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                 _logger.LogInformation("Successfully started story with id: {Id}", story.Id);
                 return (storyPart, title);
@@ -124,7 +124,7 @@ public class AIService : IAIService
         while (attempt < MaxRetryAttempts)
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                var assistantContent = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP);
                 var (storyPart, _) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                 _logger.LogInformation("Successfully generated next part of story with id: {Id}", story.Id);
                 return storyPart;
@@ -176,7 +176,7 @@ public class AIService : IAIService
         while (attempt < MaxRetryAttempts)
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                var assistantContent = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP);
                 var (storyPart, _) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                 end = storyPart.Text;
                 break;
@@ -211,7 +211,7 @@ public class AIService : IAIService
         while (attempt < MaxRetryAttempts)
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                var assistantContent = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP);
                 var result = GetStoryResult(assistantContent, end);
                 _logger.LogInformation("Successfully generated result of story with title {Title}", story.Title);
                 return result;
@@ -297,7 +297,7 @@ public class AIService : IAIService
         try
         {
             _logger.LogInformation("Fetching assistant content for image prompt");
-            imagePrompt = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP, false);
+            imagePrompt = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP, false);
             imagePrompt = imagePrompt.Replace("\n", " ");
         }
         catch (Exception e)
@@ -500,7 +500,7 @@ public class AIService : IAIService
 
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, 0.8f, 0.9f);
+                var assistantContent = await FetchAssistantContent(chatMessages, 0.8f, 0.9f);
                 erg = GetQuiz(assistantContent);
                 break;
             }
@@ -817,7 +817,7 @@ public class AIService : IAIService
 
         try
         {
-            var fixedContent = await FetchAssitantContent(chatMessages, 0.7f, 0.7f);
+            var fixedContent = await FetchAssistantContent(chatMessages, 0.7f, 0.7f);
             messageContent = JsonSerializer.Deserialize<StoryContent>(fixedContent) ??
                              throw new InvalidOperationException("Message content is null");
             storyPart.Text = messageContent.Story;
@@ -898,7 +898,7 @@ public class AIService : IAIService
     /// <exception cref="HttpRequestException">If the request failed</exception>
     /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
     /// <exception cref="JsonException">If the response content could not be deserialized</exception>
-    private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP,
+    private async Task<string> FetchAssistantContent(List<ChatMessage> chatMessages, float temperature, float topP,
         bool isJsonResponse = true)
     {
         ArgumentNullException.ThrowIfNull(_client);
