@@ -2,34 +2,31 @@
 using Microsoft.EntityFrameworkCore;
 using sustAInableEducation_backend.Models;
 
-namespace sustAInableEducation_backend.Repository
+namespace sustAInableEducation_backend.Repository;
+
+public class ApplicationUserValidator : IUserValidator<ApplicationUser>
 {
-    public class ApplicationUserValidator : IUserValidator<ApplicationUser>
+    private readonly ApplicationDbContext _context;
+
+    public ApplicationUserValidator(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public ApplicationUserValidator(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+    public async Task<IdentityResult> ValidateAsync(UserManager<ApplicationUser> manager, ApplicationUser user)
+    {
+        var isRegistrationAllowed = await _context.Setting
+            .Where(s => s.Id == "AllowRegistration")
+            .Select(s => s.Value)
+            .FirstOrDefaultAsync();
 
-        public async Task<IdentityResult> ValidateAsync(UserManager<ApplicationUser> manager, ApplicationUser user)
-        {
-            var isRegistrationAllowed = await _context.Setting
-                .Where(s => s.Id == "AllowRegistration")
-                .Select(s => s.Value)
-                .FirstOrDefaultAsync();
-
-            if (isRegistrationAllowed != "true")
+        if (isRegistrationAllowed != "true")
+            return IdentityResult.Failed(new IdentityError
             {
-                return IdentityResult.Failed(new IdentityError
-                {
-                    Code = "RegistrationNotAllowed",
-                    Description = "Registration is currently not allowed."
-                });
-            }
+                Code = "RegistrationNotAllowed",
+                Description = "Registration is currently not allowed."
+            });
 
-            return IdentityResult.Success;
-        }
+        return IdentityResult.Success;
     }
 }
