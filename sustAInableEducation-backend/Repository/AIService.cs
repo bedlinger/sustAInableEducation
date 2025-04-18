@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-using System.Net.Http.Headers;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json;
@@ -13,7 +11,8 @@ namespace sustAInableEducation_backend.Repository;
 public class AIService : IAIService
 {
     private const int MaxRetryAttempts = 2;
-    private const string TextGenerationModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
+    private const string TextGenerationModel = "deepseek-ai/DeepSeek-V3-0324";
+    private const string ImagePromptModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
     private readonly HttpClient _client;
     private readonly ILogger _logger;
 
@@ -73,7 +72,7 @@ public class AIService : IAIService
         while (attempt < MaxRetryAttempts)
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                var assistantContent = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP);
                 var (storyPart, title) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                 _logger.LogInformation("Successfully started story with id: {Id}", story.Id);
                 return (storyPart, title);
@@ -124,7 +123,7 @@ public class AIService : IAIService
         while (attempt < MaxRetryAttempts)
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                var assistantContent = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP);
                 var (storyPart, _) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                 _logger.LogInformation("Successfully generated next part of story with id: {Id}", story.Id);
                 return storyPart;
@@ -176,7 +175,7 @@ public class AIService : IAIService
         while (attempt < MaxRetryAttempts)
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                var assistantContent = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP);
                 var (storyPart, _) = await GetStoryPart(assistantContent, story.TargetGroup, chatMessages);
                 end = storyPart.Text;
                 break;
@@ -211,7 +210,7 @@ public class AIService : IAIService
         while (attempt < MaxRetryAttempts)
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP);
+                var assistantContent = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP);
                 var result = GetStoryResult(assistantContent, end);
                 _logger.LogInformation("Successfully generated result of story with title {Title}", story.Title);
                 return result;
@@ -297,8 +296,9 @@ public class AIService : IAIService
         try
         {
             _logger.LogInformation("Fetching assistant content for image prompt");
-            imagePrompt = await FetchAssitantContent(chatMessages, story.Temperature, story.TopP, false);
+            imagePrompt = await FetchAssistantContent(chatMessages, story.Temperature, story.TopP, false);
             imagePrompt = imagePrompt.Replace("\n", " ");
+            imagePrompt = imagePrompt.Replace("\"", "");
         }
         catch (Exception e)
         {
@@ -500,7 +500,7 @@ public class AIService : IAIService
 
             try
             {
-                var assistantContent = await FetchAssitantContent(chatMessages, 0.8f, 0.9f);
+                var assistantContent = await FetchAssistantContent(chatMessages, 0.8f, 0.9f);
                 erg = GetQuiz(assistantContent);
                 break;
             }
@@ -565,16 +565,17 @@ public class AIService : IAIService
             + "[Länge und Detailtiefe]"
             + lengthRequirement
             + "[Formatierung]"
+            + "Verwende ausschließlich die validen Unicode-Zeichen für die Umlaute, ansonsten wir niemals jemand deine Geschichte lesen können."
             + "Antworte ausschließlich im folgenden JSON-Format:"
             + "{"
             + "  \"title\": \"Titel der Geschichte\","
             + "  \"intertitle\": \"Zwischentitel des Abschnitts\","
             + "  \"story\": \"Text des aktuellen Abschnitts.\","
             + "  \"options\": ["
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 1\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 2\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 3\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 4\" }"
             + "  ]"
             + "}"
             + "Stelle sicher, dass das JSON fehlerfrei geparst werden kann."
@@ -592,10 +593,10 @@ public class AIService : IAIService
             + "  \"intertitle\": \"Zwischentitel des Abschnitts\","
             + "  \"story\": \"Text des aktuellen Abschnitts.\","
             + "  \"options\": ["
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 1\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 2\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 3\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 4\" }"
             + "  ]"
             + "}"
             + "Bitte beginne jetzt mit dem ersten Abschnitt.";
@@ -615,7 +616,7 @@ public class AIService : IAIService
                 Story = part.value.Text,
                 Options = part.value.Choices.Select(choice => new Option
                 {
-                    ImpactString = choice.Impact.ToString(CultureInfo.InvariantCulture),
+                    Impact = choice.Impact,
                     Text = choice.Text
                 }).ToList()
             };
@@ -638,10 +639,10 @@ public class AIService : IAIService
                     + "  \"intertitle\": \"Zwischentitel des Schlussabschnitts\","
                     + "  \"story\": \"Abschließender Text der Geschichte, der alle Handlungsstränge zusammenführt.\","
                     + "  \"options\": ["
-                    + "    { \"impact\": \"0\", \"text\": \"\" },"
-                    + "    { \"impact\": \"0\", \"text\": \"\" },"
-                    + "    { \"impact\": \"0\", \"text\": \"\" },"
-                    + "    { \"impact\": \"0\", \"text\": \"\" }"
+                    + "    { \"impact\": 0, \"text\": \"\" },"
+                    + "    { \"impact\": 0, \"text\": \"\" },"
+                    + "    { \"impact\": 0, \"text\": \"\" },"
+                    + "    { \"impact\": 0, \"text\": \"\" }"
                     + "  ]"
                     + "}"
                     + "Bitte beende jetzt die Geschichte.";
@@ -659,10 +660,10 @@ public class AIService : IAIService
                     + "  \"intertitle\": \"Zwischentitel des neuen Abschnitts\","
                     + "  \"story\": \"Text des aktuellen Abschnitts, der auf den bisherigen Ereignissen aufbaut.\","
                     + "  \"options\": ["
-                    + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
-                    + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
-                    + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
-                    + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+                    + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 1\" },"
+                    + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 2\" },"
+                    + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 3\" },"
+                    + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 4\" }"
                     + "  ]"
                     + "}"
                     + "Bitte setze die Geschichte an dieser Stelle fort.";
@@ -817,7 +818,7 @@ public class AIService : IAIService
 
         try
         {
-            var fixedContent = await FetchAssitantContent(chatMessages, 0.7f, 0.7f);
+            var fixedContent = await FetchAssistantContent(chatMessages, 0.7f, 0.7f);
             messageContent = JsonSerializer.Deserialize<StoryContent>(fixedContent) ??
                              throw new InvalidOperationException("Message content is null");
             storyPart.Text = messageContent.Story;
@@ -898,7 +899,7 @@ public class AIService : IAIService
     /// <exception cref="HttpRequestException">If the request failed</exception>
     /// <exception cref="InvalidOperationException">If the response object is null or the assistant content is null or empty</exception>
     /// <exception cref="JsonException">If the response content could not be deserialized</exception>
-    private async Task<string> FetchAssitantContent(List<ChatMessage> chatMessages, float temperature, float topP,
+    private async Task<string> FetchAssistantContent(List<ChatMessage> chatMessages, float temperature, float topP,
         bool isJsonResponse = true)
     {
         ArgumentNullException.ThrowIfNull(_client);
@@ -920,7 +921,7 @@ public class AIService : IAIService
         else
             requestBody = new
             {
-                model = TextGenerationModel,
+                model = ImagePromptModel,
                 messages = chatMessages,
                 temperature,
                 top_p = topP
@@ -930,7 +931,6 @@ public class AIService : IAIService
         {
             Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
         };
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         HttpResponseMessage response = null!;
         string responseString;
@@ -940,6 +940,9 @@ public class AIService : IAIService
             response.EnsureSuccessStatusCode();
             var byteArray = await response.Content.ReadAsByteArrayAsync();
             responseString = Encoding.UTF8.GetString(byteArray, 0, byteArray.Length);
+            _logger.LogInformation("Received response from server: {Response}", responseString);
+            if (responseString.Contains("\\u0"))
+                throw new ArgumentException("Response contains invalid unicode characters");
         }
         catch (HttpRequestException e)
         {
@@ -1215,9 +1218,7 @@ public class StoryContent
 // Benjamin Edlinger
 public class Option
 {
-    [JsonPropertyName("impact")] public string ImpactString { get; set; } = null!;
-
-    [JsonIgnore] public float Impact => float.Parse(ImpactString, CultureInfo.InvariantCulture);
+    [JsonPropertyName("impact")] public float Impact { get; set; }
 
     [JsonPropertyName("text")] public string Text { get; set; } = null!;
 }

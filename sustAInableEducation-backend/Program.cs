@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using sustAInableEducation_backend.Repository;
-using sustAInableEducation_backend.Hubs;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Identity;
-using sustAInableEducation_backend.Models;
 using Serilog;
+using sustAInableEducation_backend.Hubs;
+using sustAInableEducation_backend.Models;
+using sustAInableEducation_backend.Repository;
 
 var AllowFrontendOrigin = "_allowFrontendOrigin";
 
@@ -22,7 +22,7 @@ try
 
     builder.Services.AddCors(options =>
     {
-        options.AddPolicy(name: AllowFrontendOrigin,
+        options.AddPolicy(AllowFrontendOrigin,
             policy =>
             {
                 policy.WithOrigins(builder.Configuration["FrontendHost"]!)
@@ -53,7 +53,7 @@ try
     builder.Services.AddAuthorization();
     builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
         {
-            options.Password = new PasswordOptions()
+            options.Password = new PasswordOptions
             {
                 RequiredLength = 8,
                 RequireDigit = true,
