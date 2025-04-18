@@ -573,10 +573,10 @@ public class AIService : IAIService
             + "  \"intertitle\": \"Zwischentitel des Abschnitts\","
             + "  \"story\": \"Text des aktuellen Abschnitts.\","
             + "  \"options\": ["
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 1\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 2\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 3\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 4\" }"
             + "  ]"
             + "}"
             + "Stelle sicher, dass das JSON fehlerfrei geparst werden kann."
@@ -594,10 +594,10 @@ public class AIService : IAIService
             + "  \"intertitle\": \"Zwischentitel des Abschnitts\","
             + "  \"story\": \"Text des aktuellen Abschnitts.\","
             + "  \"options\": ["
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
-            + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 1\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 2\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 3\" },"
+            + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 4\" }"
             + "  ]"
             + "}"
             + "Bitte beginne jetzt mit dem ersten Abschnitt.";
@@ -617,7 +617,7 @@ public class AIService : IAIService
                 Story = part.value.Text,
                 Options = part.value.Choices.Select(choice => new Option
                 {
-                    ImpactString = choice.Impact.ToString(CultureInfo.InvariantCulture),
+                    Impact = choice.Impact,
                     Text = choice.Text
                 }).ToList()
             };
@@ -640,10 +640,10 @@ public class AIService : IAIService
                     + "  \"intertitle\": \"Zwischentitel des Schlussabschnitts\","
                     + "  \"story\": \"Abschließender Text der Geschichte, der alle Handlungsstränge zusammenführt.\","
                     + "  \"options\": ["
-                    + "    { \"impact\": \"0\", \"text\": \"\" },"
-                    + "    { \"impact\": \"0\", \"text\": \"\" },"
-                    + "    { \"impact\": \"0\", \"text\": \"\" },"
-                    + "    { \"impact\": \"0\", \"text\": \"\" }"
+                    + "    { \"impact\": 0, \"text\": \"\" },"
+                    + "    { \"impact\": 0, \"text\": \"\" },"
+                    + "    { \"impact\": 0, \"text\": \"\" },"
+                    + "    { \"impact\": 0, \"text\": \"\" }"
                     + "  ]"
                     + "}"
                     + "Bitte beende jetzt die Geschichte.";
@@ -661,10 +661,10 @@ public class AIService : IAIService
                     + "  \"intertitle\": \"Zwischentitel des neuen Abschnitts\","
                     + "  \"story\": \"Text des aktuellen Abschnitts, der auf den bisherigen Ereignissen aufbaut.\","
                     + "  \"options\": ["
-                    + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 1\" },"
-                    + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 2\" },"
-                    + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 3\" },"
-                    + "    { \"impact\": \"Wert zwischen -1 und 1\", \"text\": \"Beschreibung der Option 4\" }"
+                    + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 1\" },"
+                    + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 2\" },"
+                    + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 3\" },"
+                    + "    { \"impact\": Wert zwischen -1 und 1, \"text\": \"Beschreibung der Option 4\" }"
                     + "  ]"
                     + "}"
                     + "Bitte setze die Geschichte an dieser Stelle fort.";
@@ -1219,9 +1219,7 @@ public class StoryContent
 // Benjamin Edlinger
 public class Option
 {
-    [JsonPropertyName("impact")] public string ImpactString { get; set; } = null!;
-
-    [JsonIgnore] public float Impact => float.Parse(ImpactString, CultureInfo.InvariantCulture);
+    [JsonPropertyName("impact")] public float Impact { get; set; }
 
     [JsonPropertyName("text")] public string Text { get; set; } = null!;
 }
