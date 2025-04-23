@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Unicode;
 using SkiaSharp;
 using sustAInableEducation_backend.Models;
 
@@ -11,8 +13,13 @@ namespace sustAInableEducation_backend.Repository;
 public class AIService : IAIService
 {
     private const int MaxRetryAttempts = 2;
-    private const string TextGenerationModel = "deepseek-ai/DeepSeek-V3-0324";
+    private const string TextGenerationModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
     private const string ImagePromptModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
+    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+    {
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Latin1Supplement),
+    };
+
     private readonly HttpClient _client;
     private readonly ILogger _logger;
 
@@ -565,7 +572,6 @@ public class AIService : IAIService
             + "[Länge und Detailtiefe]"
             + lengthRequirement
             + "[Formatierung]"
-            + "Verwende ausschließlich die validen Unicode-Zeichen für die Umlaute, ansonsten wir niemals jemand deine Geschichte lesen können."
             + "Antworte ausschließlich im folgenden JSON-Format:"
             + "{"
             + "  \"title\": \"Titel der Geschichte\","
@@ -621,7 +627,7 @@ public class AIService : IAIService
                 }).ToList()
             };
             chatMessages.Add(new ChatMessage
-                { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assistantContent) });
+                { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assistantContent, JsonOptions) });
 
             if (!part.value.ChosenNumber.HasValue || part.value.ChosenNumber < 1 || part.value.ChosenNumber > 4)
                 throw new ArgumentException($"Story part with id {part.value.Id} has invalid choice number");
@@ -744,7 +750,7 @@ public class AIService : IAIService
             DiscussionQuestions = story.Result.DiscussionQuestions
         };
         chatMessages.Add(new ChatMessage
-            { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assistentContent) });
+            { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(assistentContent, JsonOptions) });
 
         return chatMessages;
     }
@@ -813,7 +819,7 @@ public class AIService : IAIService
         _logger.LogWarning("Story part with id {Id} for {TargetGroup} has invalid word count: {WordCount}",
             storyPart.Id, targetGroup, wordCount);
         chatMessages.Add(new ChatMessage
-            { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(storyPart) });
+            { Role = ValidRoles.Assistant, Content = JsonSerializer.Serialize(storyPart, JsonOptions) });
         chatMessages.Add(new ChatMessage { Role = ValidRoles.User, Content = prompt });
 
         try
@@ -914,7 +920,6 @@ public class AIService : IAIService
             {
                 model = TextGenerationModel,
                 messages = chatMessages,
-                response_format = new { type = "json_object" },
                 temperature,
                 top_p = topP
             };
@@ -929,7 +934,7 @@ public class AIService : IAIService
 
         HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
         {
-            Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(requestBody, JsonOptions), Encoding.UTF8, "application/json")
         };
 
         HttpResponseMessage response = null!;
@@ -941,8 +946,6 @@ public class AIService : IAIService
             var byteArray = await response.Content.ReadAsByteArrayAsync();
             responseString = Encoding.UTF8.GetString(byteArray, 0, byteArray.Length);
             _logger.LogInformation("Received response from server: {Response}", responseString);
-            if (responseString.Contains("\\u0"))
-                throw new ArgumentException("Response contains invalid unicode characters");
         }
         catch (HttpRequestException e)
         {
