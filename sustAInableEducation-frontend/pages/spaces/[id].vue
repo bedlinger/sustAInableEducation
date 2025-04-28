@@ -29,7 +29,7 @@
                 <div class="content h-full mt-4 mx-4 overflow-y-scroll overflow-x-hidden" ref="contentDiv">
                     <div v-for="part, index in space?.story.parts" class="px-4 pb-4 pt-0" ref="partsRef">
 
-                        <h2 @click="console.log(part.choices)" class="font-bold mb-2" :ref="index === space!.story.parts.length - 1 ? 'lastPart' : ''">{{
+                        <h2 class="font-bold mb-2" :ref="index === space!.story.parts.length - 1 ? 'lastPart' : ''">{{
                             `${index + 1}:
                             ${part.intertitle}` }}</h2>
                         <p class="mb-4">{{ part.text }}</p>
@@ -308,7 +308,6 @@ async function generatePart() {
     try {
         await connection.invoke("GeneratePart")
     } catch (err) {
-        console.log("ALARM GENERATE" + err)
         isLoading.value = false
         showReloadButton.value = true
     }
@@ -413,7 +412,6 @@ connection.on("UserJoined", (user: Participant) => {
 })
 
 connection.on("UserLeft", (userId: string) => {
-    console.log("triggered")
     const selectedUser = space.value!.participants.find((participant) => participant.userId === userId)
     selectedUser!.isOnline = false
 })
@@ -421,7 +419,6 @@ connection.on("UserLeft", (userId: string) => {
 async function startConnection() {
     try {
         await connection.start();
-        console.log("SignalR Connected.");
     } catch (err) {
         router.push('/login?redirect=' + route.fullPath)
     }
@@ -490,13 +487,11 @@ async function getSpace() {
         headers: useRequestHeaders(['cookie']),
         onResponse: (response) => {
             if (response.response.ok) {
-                console.log(response.response._data)
                 space.value = response.response._data
                 if (parts.value.length > 0) {
                     enableStart.value = false
                 }
             } else {
-                console.log("ERROR")
             }
         },
     })
@@ -517,7 +512,6 @@ async function getSpace() {
                     }
                 }
             } else {
-                console.log("ERROR")
             }
         },
     })
@@ -533,7 +527,6 @@ async function getJoinCode() {
                 joinCode.value = response.response._data.code
                 joinExpirationDate.value = response.response._data.expiresAt
             } else {
-                console.log("ERROR")
             }
         },
     })
