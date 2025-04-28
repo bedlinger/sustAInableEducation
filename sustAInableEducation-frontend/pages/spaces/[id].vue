@@ -381,6 +381,7 @@ connection.on("ResultGenerated", async (result: Result) => {
 })
 
 connection.on("VotingStarted", async (expirationStr: string) => {
+    resetTimer()
     hasVoted.value = false
     isVoting.value = true
     showPercentages.value = true
