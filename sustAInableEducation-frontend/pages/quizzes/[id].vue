@@ -93,7 +93,6 @@ async function handleButtonClick(index: number) {
 }
 
 async function getResult () {
-  console.log(`${runtimeConfig.public.apiUrl}/quizzes/${route.params.id}/try`)
   console.table(selectedAnswers.value)
   await $fetch<{isCorrect: boolean}[]>(`${runtimeConfig.public.apiUrl}/quizzes/${route.params.id}/try`, {
     method: 'POST',
