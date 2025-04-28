@@ -70,7 +70,6 @@ function copyJoinCode() {
 
 function setCodeTimer() {
     clearInterval(interval.value)
-    console.log(`EXPIRATION: ${props.expirationDate}`)
     let expirationDate = Date.parse(props.expirationDate)
 
     interval.value = setInterval(function () {
