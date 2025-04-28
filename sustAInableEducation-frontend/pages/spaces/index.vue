@@ -137,7 +137,7 @@
                                         </MeterGroup>
                                     </div>
                                     <Fieldset legend="Teilnehmer" class="max-h-64 overflow-scroll sm:hidden">
-                                        <div class="bg-blue-500 !max-w-full">
+                                        <div class="!max-w-full">
                                             <DataTable :value="selectedSpace.participants"
                                                 class="!bg-green-300 !flex !max-w-">
                                                 <Column field="userName" header="Benutzername">
