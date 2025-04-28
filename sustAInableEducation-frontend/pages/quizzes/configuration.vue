@@ -125,18 +125,6 @@ if (error.value && error.value.statusCode === 401) {
   navigateTo(`/login?redirect=${route.fullPath}`)
 }
 
-if (data.value) {
-  console.log("PRE")
-  /* spaces.value = data.value.filter(space => {
-    if (space.story) {
-      return space.story.result !== null
-    }
-    return false
-  }) */
-  console.log("POST2")
-}
-
-
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: '2-digit' })
 }
