@@ -70,7 +70,6 @@ function joinEcoSpace(code: string) {
                 navigateTo('/spaces/' + response.response._data.id)
             } else {
                 loading.value = false;
-                console.log(loading.value)
                 toast.add({
                     severity: 'error',
                     summary: 'Fehler',
