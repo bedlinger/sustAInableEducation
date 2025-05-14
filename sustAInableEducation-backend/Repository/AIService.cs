@@ -720,7 +720,7 @@ public class AIService : IAIService
             + "- Analysiere, wie die Entscheidungen und Handlungen der Charaktere den Verlauf der Geschichte beeinflusst haben."
             + "[Positive und negative Entscheidungen]"
             + "- Erstelle eine Liste der positiven Entscheidungen, die in der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind."
-            + "- Erstelle eine Liste der negativen Entscheidungen. Beschreibe jeweils, welche negativen Konsequenzen daraus resultierten und wie sie den Verlauf der Geschichte beeinflusst haben."
+            + "- Erstelle eine Liste der negativen Entscheidungen, wenn negative Entscheidungen getroffen wurden, ansonsten ist die Liste leer. Beschreibe jeweils, welche negativen Konsequenzen daraus resultierten und wie sie den Verlauf der Geschichte beeinflusst haben."
             + "[Praktische Lehren]"
             + "- Ziehe konkrete Lehren aus der Geschichte und übertrage diese Erkenntnisse auf die reale Welt. Zeige auf, wie diese praktischen Erkenntnisse im Alltag oder in spezifischen Situationen angewendet werden können."
             + "[Diskussionsfragen]"
