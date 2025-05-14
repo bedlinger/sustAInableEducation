@@ -15,6 +15,7 @@ public class AIService : IAIService
     private const int MaxRetryAttempts = 2;
     private const string TextGenerationModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
     private const string ImagePromptModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
+
     private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
     {
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Latin1Supplement),
@@ -921,7 +922,8 @@ public class AIService : IAIService
                 model = TextGenerationModel,
                 messages = chatMessages,
                 temperature,
-                top_p = topP
+                top_p = topP,
+                response_format = new { type = "json_object" }
             };
         else
             requestBody = new
@@ -934,7 +936,8 @@ public class AIService : IAIService
 
         HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
         {
-            Content = new StringContent(JsonSerializer.Serialize(requestBody, JsonOptions), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(requestBody, JsonOptions), Encoding.UTF8,
+                "application/json")
         };
 
         HttpResponseMessage response = null!;
