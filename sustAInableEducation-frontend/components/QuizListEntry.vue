@@ -18,7 +18,6 @@
               </template>
           </Menu>
       </div>
-      <span>Versuche: {{ quiz.tries.length }}</span>
   </div>
 </template>
 
