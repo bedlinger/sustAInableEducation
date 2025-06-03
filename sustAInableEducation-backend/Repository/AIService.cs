@@ -15,6 +15,7 @@ public class AIService : IAIService
     private const int MaxRetryAttempts = 2;
     private const string TextGenerationModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
     private const string ImagePromptModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
+
     private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
     {
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Latin1Supplement),
@@ -719,7 +720,7 @@ public class AIService : IAIService
             + "- Analysiere, wie die Entscheidungen und Handlungen der Charaktere den Verlauf der Geschichte beeinflusst haben."
             + "[Positive und negative Entscheidungen]"
             + "- Erstelle eine Liste der positiven Entscheidungen, die in der Geschichte getroffen wurden. Erkläre zu jeder Entscheidung, warum sie sich positiv ausgewirkt hat und welche konkreten Vorteile daraus entstanden sind."
-            + "- Erstelle eine Liste der negativen Entscheidungen. Beschreibe jeweils, welche negativen Konsequenzen daraus resultierten und wie sie den Verlauf der Geschichte beeinflusst haben."
+            + "- Erstelle eine Liste der negativen Entscheidungen, wenn negative Entscheidungen getroffen wurden, ansonsten ist die Liste leer. Beschreibe jeweils, welche negativen Konsequenzen daraus resultierten und wie sie den Verlauf der Geschichte beeinflusst haben."
             + "[Praktische Lehren]"
             + "- Ziehe konkrete Lehren aus der Geschichte und übertrage diese Erkenntnisse auf die reale Welt. Zeige auf, wie diese praktischen Erkenntnisse im Alltag oder in spezifischen Situationen angewendet werden können."
             + "[Diskussionsfragen]"
@@ -921,7 +922,8 @@ public class AIService : IAIService
                 model = TextGenerationModel,
                 messages = chatMessages,
                 temperature,
-                top_p = topP
+                top_p = topP,
+                response_format = new { type = "json_object" }
             };
         else
             requestBody = new
@@ -934,7 +936,8 @@ public class AIService : IAIService
 
         HttpRequestMessage request = new(HttpMethod.Post, "/v1/openai/chat/completions")
         {
-            Content = new StringContent(JsonSerializer.Serialize(requestBody, JsonOptions), Encoding.UTF8, "application/json")
+            Content = new StringContent(JsonSerializer.Serialize(requestBody, JsonOptions), Encoding.UTF8,
+                "application/json")
         };
 
         HttpResponseMessage response = null!;
